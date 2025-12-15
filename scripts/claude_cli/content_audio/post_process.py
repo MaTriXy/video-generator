@@ -19,6 +19,7 @@ from scripts.claude_cli.base_post_process import BasePostProcess
 from scripts.controllers.utils.decorators.try_catch import try_catch
 from scripts.utility.elevenlabs_tts import generate_audio as elevenlabs_generate
 from scripts.enums import AssetType
+from scripts.utility.config import ELEVENLABS_VOICE_ID, ELEVENLABS_MODEL_ID, ELEVENLABS_SPEED, ELEVENLABS_STABILITY, ELEVENLABS_SIMILARITY, ELEVEN_LABS_DICTIONARY
 
 class PostProcessAudio(BasePostProcess):
     def __init__(self, topic: str):
@@ -31,13 +32,13 @@ class PostProcessAudio(BasePostProcess):
 
         # ElevenLabs configuration
         self.config = {
-            "voice_id": os.getenv('ELEVENLABS_VOICE_ID', "QzyAJCjnDHxLPazR6j3v"),
-            "model_id": os.getenv('ELEVENLABS_MODEL_ID', "eleven_multilingual_v2"),
-            "speed": float(os.getenv('ELEVENLABS_SPEED', "1.1")),
-            "stability": float(os.getenv('ELEVENLABS_STABILITY', "0.8")),
-            "similarity": float(os.getenv('ELEVENLABS_SIMILARITY', "0.65"))
+            "voice_id": ELEVENLABS_VOICE_ID,
+            "model_id": ELEVENLABS_MODEL_ID,
+            "speed": ELEVENLABS_SPEED,
+            "stability": ELEVENLABS_STABILITY,
+            "similarity": ELEVENLABS_SIMILARITY
         }
-        self.phonetics_dict_id = os.getenv('ELEVEN_LABS_DICTIONARY', '')
+        self.phonetics_dict_id = ELEVEN_LABS_DICTIONARY
 
         self.logger.info("AudioContentPostProcess initialized")
 
