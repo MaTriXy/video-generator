@@ -1,0 +1,35 @@
+<svg viewBox="-30 0 260 260" xmlns="http://www.w3.org/2000/svg">
+  <!-- Pink Circle Character -->
+
+  <!-- Left Arm -->
+  <rect x="-10" y="110" width="75" height="12" fill="#F5B8D0" rx="6" transform="rotate(-35 60 132)"/>
+
+  <!-- Right Arm -->
+  <rect x="135" y="110" width="75" height="12" fill="#F5B8D0" rx="6" transform="rotate(35 140 132)"/>
+
+  <!-- Left Leg -->
+  <rect x="55" y="180" width="18" height="70" fill="#F5B8D0"/>
+
+  <!-- Right Leg -->
+  <rect x="127" y="180" width="18" height="70" fill="#F5B8D0"/>
+
+  <!-- Body (Larger Circle) -->
+  <circle cx="100" cy="110" r="85" fill="#F5B8D0"/>
+
+  <!-- Hat/Bow on top -->
+  <path d="M85 28 Q100 16 115 28" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+  <circle cx="100" cy="18" r="6" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+
+  <!-- Eyes -->
+  <ellipse cx="75" cy="105" rx="12" ry="14" fill="white"/>
+  <ellipse cx="125" cy="105" rx="12" ry="14" fill="white"/>
+  <circle cx="78" cy="108" r="6" fill="#1a1a1a"/>
+  <circle cx="128" cy="108" r="6" fill="#1a1a1a"/>
+
+  <!-- Green cheeks -->
+  <circle cx="55" cy="125" r="6" fill="#4CAF50"/>
+  <circle cx="145" cy="125" r="6" fill="#4CAF50"/>
+
+  <!-- Smile -->
+  <path d="M80 140 Q100 155 120 140" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>

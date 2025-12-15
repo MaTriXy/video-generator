@@ -1,0 +1,59 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Eye blink animation clipPaths -->
+    <clipPath id="leftEyeClip">
+      <ellipse cx="70" cy="95" rx="12" ry="10">
+        <animate attributeName="ry" values="10;10;0;0;10;10" keyTimes="0;0.47;0.49;0.51;0.53;1" dur="2s" repeatCount="indefinite"/>
+      </ellipse>
+    </clipPath>
+    <clipPath id="rightEyeClip">
+      <ellipse cx="130" cy="95" rx="12" ry="10">
+        <animate attributeName="ry" values="10;10;0;0;10;10" keyTimes="0;0.47;0.49;0.51;0.53;1" dur="2s" repeatCount="indefinite"/>
+      </ellipse>
+    </clipPath>
+  </defs>
+
+  <!-- Brain Body - organic brain shape in pink/coral color -->
+  <path d="M100 25
+           C60 25 35 50 35 80
+           C30 85 25 100 30 115
+           C25 125 30 145 45 155
+           C50 170 70 180 100 180
+           C130 180 150 170 155 155
+           C170 145 175 125 170 115
+           C175 100 170 85 165 80
+           C165 50 140 25 100 25Z"
+        fill="#FF6B9D"/>
+
+  <!-- Brain wrinkles/folds -->
+  <path d="M55 70 Q70 60 85 75" stroke="#E84A7F" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M115 75 Q130 60 145 70" stroke="#E84A7F" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M65 130 Q80 120 95 135" stroke="#E84A7F" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M105 135 Q120 120 135 130" stroke="#E84A7F" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M85 100 Q100 90 115 100" stroke="#E84A7F" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Irritated eyebrows - angled inward (V-shape but less extreme than angry) -->
+  <path d="M52 78 L82 85" stroke="#1a1a1a" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M148 78 L118 85" stroke="#1a1a1a" stroke-width="3.5" stroke-linecap="round"/>
+
+  <!-- Squinting eyes with blink animation -->
+  <ellipse cx="70" cy="95" rx="12" ry="10" fill="white">
+    <animate attributeName="ry" values="10;10;0;0;10;10" keyTimes="0;0.47;0.49;0.51;0.53;1" dur="2s" repeatCount="indefinite"/>
+  </ellipse>
+  <circle cx="73" cy="97" r="5" fill="#1a1a1a" clip-path="url(#leftEyeClip)"/>
+
+  <ellipse cx="130" cy="95" rx="12" ry="10" fill="white">
+    <animate attributeName="ry" values="10;10;0;0;10;10" keyTimes="0;0.47;0.49;0.51;0.53;1" dur="2s" repeatCount="indefinite"/>
+  </ellipse>
+  <circle cx="127" cy="97" r="5" fill="#1a1a1a" clip-path="url(#rightEyeClip)"/>
+
+  <!-- Irritated cheeks - reddish -->
+  <circle cx="50" cy="115" r="7" fill="#FF4444" opacity="0.6"/>
+  <circle cx="150" cy="115" r="7" fill="#FF4444" opacity="0.6"/>
+
+  <!-- Irritated mouth - tight wavy line -->
+  <path d="M75 145 Q85 140 100 145 Q115 150 125 145" stroke="#1a1a1a" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+  <!-- Vein/stress mark on forehead -->
+  <path d="M145 45 L150 55 L145 50 L155 55" stroke="#E84A7F" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

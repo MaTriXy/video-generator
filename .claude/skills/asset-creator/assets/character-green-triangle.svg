@@ -1,0 +1,39 @@
+<svg viewBox="-30 0 260 260" xmlns="http://www.w3.org/2000/svg">
+  <!-- Green Triangle Character -->
+
+  <!-- Left Arm -->
+  <rect x="-5" y="130" width="65" height="12" fill="#2ECC71" rx="6" transform="rotate(-35 55 152)"/>
+
+  <!-- Right Arm -->
+  <rect x="140" y="130" width="65" height="12" fill="#2ECC71" rx="6" transform="rotate(35 145 152)"/>
+
+  <!-- Left Leg -->
+  <rect x="65" y="190" width="16" height="60" fill="#2ECC71"/>
+
+  <!-- Right Leg -->
+  <rect x="119" y="190" width="16" height="60" fill="#2ECC71"/>
+
+  <!-- Body (Equilateral Triangle - base 130, height 112.6) -->
+  <polygon points="100,77 165,190 35,190" fill="#2ECC71"/>
+
+  <!-- Flower on top -->
+  <circle cx="100" cy="72" r="5" fill="white"/>
+  <circle cx="94" cy="66" r="4" fill="white"/>
+  <circle cx="106" cy="66" r="4" fill="white"/>
+  <circle cx="94" cy="60" r="4" fill="white"/>
+  <circle cx="106" cy="60" r="4" fill="white"/>
+  <circle cx="100" cy="64" r="3" fill="#2ECC71"/>
+
+  <!-- Eyes -->
+  <ellipse cx="80" cy="130" rx="12" ry="14" fill="white"/>
+  <ellipse cx="120" cy="130" rx="12" ry="14" fill="white"/>
+  <circle cx="83" cy="133" r="6" fill="#1a1a1a"/>
+  <circle cx="123" cy="133" r="6" fill="#1a1a1a"/>
+
+  <!-- Pink cheeks -->
+  <circle cx="60" cy="155" r="6" fill="#FFB6C1"/>
+  <circle cx="140" cy="155" r="6" fill="#FFB6C1"/>
+
+  <!-- Smile -->
+  <path d="M85 165 Q100 180 115 165" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>

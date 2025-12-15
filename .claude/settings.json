@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "mcp__course-tools-mcp__search_icon",
+      "mcp__course-tools-mcp__search_web",
+      "mcp__course-tools-mcp__get_documentation",
+      "Skill(asset-creator)",
+      "Skill(video-coder)",
+      "Skill(video-creator)",
+      "Write(Outputs/Scripts/script-v1.md)",
+      "Skill(video-designer)",
+      "Skill(video-director)",
+      "Write(Outputs/**)",
+      "Write(Outputs/full-video-tasks.json)",
+      "Update(Outputs/full-video-tasks.json)",
+      "Read(Outputs/full-video-tasks.json)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "enabledMcpjsonServers": [
+    "course-tools-mcp"
+  ],
+  "hooks": {
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/claude_cli/hooks/subagent-stop-hook.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

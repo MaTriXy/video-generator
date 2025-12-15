@@ -1,0 +1,23 @@
+{
+  "topic": "",
+  "steps": {
+    "user-input": {
+      "status": "pending"
+    },
+    "audio": {
+      "status": "pending"
+    },
+    "direction": {
+      "status": "pending"
+    },
+    "asset-generator": {
+      "status": "pending"
+    },
+    "design": {
+      "status": "pending"
+    },
+    "coding": {
+      "status": "pending"
+    }
+  }
+}

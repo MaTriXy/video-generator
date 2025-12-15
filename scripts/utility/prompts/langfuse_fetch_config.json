@@ -1,0 +1,36 @@
+{
+  "output_directory": "prompts",
+  "file_format": "md",
+  "include_metadata_header": true,
+  "create_readme": true,
+  "create_config_file": true,
+  "folder_structure": {
+    "type": "hierarchical",
+    "separator": "/",
+    "description": "Creates folders based on prompt name hierarchy using forward slashes"
+  },
+  "file_naming": {
+    "sanitize_filenames": true,
+    "max_filename_length": 200,
+    "invalid_chars": "<>:\"/\\|?*"
+  },
+  "content_format": {
+    "include_prompt_name": true,
+    "include_version": true,
+    "include_labels": true,
+    "include_timestamps": true,
+    "include_config": true,
+    "include_type": true,
+    "metadata_comment_prefix": "#"
+  },
+  "langfuse_settings": {
+    "fetch_all_versions": false,
+    "include_inactive": false,
+    "batch_size": 100
+  },
+  "logging": {
+    "level": "INFO",
+    "log_to_file": false,
+    "log_file_path": "langfuse_fetch.log"
+  }
+}

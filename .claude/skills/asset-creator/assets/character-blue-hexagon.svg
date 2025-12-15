@@ -1,0 +1,35 @@
+<svg viewBox="-30 0 260 260" xmlns="http://www.w3.org/2000/svg">
+  <!-- Blue Hexagon Character -->
+
+  <!-- Left Arm -->
+  <rect x="-15" y="105" width="70" height="14" fill="#2979FF" rx="7" transform="rotate(-35 55 127)"/>
+
+  <!-- Right Arm -->
+  <rect x="145" y="105" width="70" height="14" fill="#2979FF" rx="7" transform="rotate(35 145 127)"/>
+
+  <!-- Left Leg (reaching up into hexagon) -->
+  <rect x="60" y="165" width="16" height="85" fill="#2979FF"/>
+
+  <!-- Right Leg -->
+  <rect x="124" y="165" width="16" height="85" fill="#2979FF"/>
+
+  <!-- Body (Original Hexagon shape) -->
+  <polygon points="100,30 165,65 165,155 100,190 35,155 35,65" fill="#2979FF"/>
+
+  <!-- Crown on top -->
+  <path d="M75 35 L75 15 L85 25 L100 10 L115 25 L125 15 L125 35"
+        stroke="#1a1a1a" stroke-width="2" fill="none"/>
+
+  <!-- Eyes -->
+  <ellipse cx="80" cy="100" rx="12" ry="14" fill="white"/>
+  <ellipse cx="120" cy="100" rx="12" ry="14" fill="white"/>
+  <circle cx="83" cy="103" r="6" fill="#1a1a1a"/>
+  <circle cx="123" cy="103" r="6" fill="#1a1a1a"/>
+
+  <!-- Orange/Red cheeks -->
+  <circle cx="60" cy="125" r="6" fill="#FF5722"/>
+  <circle cx="140" cy="125" r="6" fill="#FF5722"/>
+
+  <!-- Smile -->
+  <path d="M85 135 Q100 150 115 135" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>
