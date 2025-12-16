@@ -147,53 +147,6 @@ if %errorlevel% neq 0 (
     echo [WARNING] Some packages may not have installed correctly
 )
 
-echo.
-echo ============================================================
-echo   Installing Playwright browsers...
-echo ============================================================
-echo.
-
-%PYTHON_CMD% -m playwright install
-
-if %errorlevel% neq 0 (
-    echo [WARNING] Playwright browsers may not have installed correctly
-)
-
-echo.
-echo ============================================================
-echo   Installing FFmpeg...
-echo ============================================================
-echo.
-
-:: Check if FFmpeg is already installed
-where ffmpeg >nul 2>nul
-if %errorlevel% equ 0 (
-    echo [OK] FFmpeg is already installed
-    goto :install_npm
-)
-
-:: Try winget first
-echo Attempting to install FFmpeg via winget...
-winget install Gyan.FFmpeg --accept-package-agreements --accept-source-agreements >nul 2>nul
-if %errorlevel% equ 0 (
-    echo [OK] FFmpeg installed via winget
-    goto :install_npm
-)
-
-:: Try chocolatey
-echo Attempting to install FFmpeg via Chocolatey...
-choco install ffmpeg -y >nul 2>nul
-if %errorlevel% equ 0 (
-    echo [OK] FFmpeg installed via Chocolatey
-    goto :install_npm
-)
-
-echo [WARNING] Could not install FFmpeg automatically
-echo Please install manually:
-echo   Option 1: winget install Gyan.FFmpeg
-echo   Option 2: choco install ffmpeg
-echo   Option 3: Download from https://ffmpeg.org/download.html
-
 :install_npm
 echo.
 echo ============================================================
@@ -244,14 +197,6 @@ if %errorlevel% equ 0 (
     echo [OK] pip is working
 ) else (
     echo [ERROR] pip not working
-)
-
-:: Verify FFmpeg
-where ffmpeg >nul 2>nul
-if %errorlevel% equ 0 (
-    echo [OK] FFmpeg is available
-) else (
-    echo [WARNING] FFmpeg not found in PATH
 )
 
 :: Verify Node

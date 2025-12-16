@@ -254,45 +254,6 @@ install_python_suse() {
     fi
 }
 
-# Install FFmpeg
-install_ffmpeg() {
-    print_step "Installing FFmpeg..."
-
-    if command -v ffmpeg &> /dev/null; then
-        print_ok "FFmpeg is already installed: $(ffmpeg -version 2>&1 | head -1)"
-        return 0
-    fi
-
-    case "$DISTRO" in
-        debian)
-            sudo apt install -y ffmpeg
-            ;;
-        fedora)
-            echo "Note: FFmpeg may require RPM Fusion repository"
-            sudo dnf install -y ffmpeg || print_warning "FFmpeg installation failed. You may need to enable RPM Fusion."
-            ;;
-        arch)
-            sudo pacman -S --noconfirm ffmpeg
-            ;;
-        suse)
-            sudo zypper install -y ffmpeg
-            ;;
-        *)
-            print_warning "Could not install FFmpeg automatically"
-            echo "Please install FFmpeg manually using your package manager"
-            return 1
-            ;;
-    esac
-
-    if command -v ffmpeg &> /dev/null; then
-        print_ok "FFmpeg installed successfully"
-        return 0
-    else
-        print_warning "FFmpeg may not have been installed correctly"
-        return 1
-    fi
-}
-
 # Main installation flow
 main() {
     # Detect distribution
@@ -346,30 +307,6 @@ main() {
         print_error "requirements.txt not found at $PROJECT_ROOT/requirements.txt"
     fi
 
-    # Install Playwright browsers
-    print_step "Installing Playwright browsers..."
-
-    # Install system dependencies for Playwright on Debian
-    if [ "$DISTRO" == "debian" ]; then
-        echo "Installing Playwright system dependencies..."
-        sudo apt install -y libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 \
-            libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 \
-            libxfixes3 libxrandr2 libgbm1 libasound2 2>/dev/null || true
-    fi
-
-    echo "Installing Playwright browsers (this may take several minutes)..."
-    $PYTHON_CMD -m playwright install
-    if [ $? -eq 0 ]; then
-        print_ok "Playwright browsers installed successfully"
-    else
-        print_warning "Playwright browsers may not have installed correctly"
-        echo "Trying with system dependencies..."
-        $PYTHON_CMD -m playwright install --with-deps || true
-    fi
-
-    # Install FFmpeg
-    install_ffmpeg
-
     # Install npm packages
     print_step "Installing npm packages..."
 
@@ -399,12 +336,6 @@ main() {
     echo ""
     $PYTHON_CMD --version && print_ok "Python: $($PYTHON_CMD --version)"
     $PYTHON_CMD -m pip --version > /dev/null && print_ok "pip is working"
-
-    if command -v ffmpeg &> /dev/null; then
-        print_ok "FFmpeg: $(ffmpeg -version 2>&1 | head -1)"
-    else
-        print_warning "FFmpeg not found in PATH"
-    fi
 
     if command -v node &> /dev/null; then
         print_ok "Node.js: $(node --version)"

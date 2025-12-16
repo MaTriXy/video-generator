@@ -208,27 +208,6 @@ install_python() {
     return 0
 }
 
-# Install FFmpeg
-install_ffmpeg() {
-    print_step "Installing FFmpeg..."
-
-    if command -v ffmpeg &> /dev/null; then
-        print_ok "FFmpeg is already installed: $(ffmpeg -version 2>&1 | head -1)"
-        return 0
-    fi
-
-    echo "Running: brew install ffmpeg"
-    brew install ffmpeg
-
-    if command -v ffmpeg &> /dev/null; then
-        print_ok "FFmpeg installed successfully"
-        return 0
-    else
-        print_warning "FFmpeg may not have been installed correctly"
-        return 1
-    fi
-}
-
 # Main installation flow
 main() {
     # Check for Homebrew
@@ -263,20 +242,6 @@ main() {
         print_error "requirements.txt not found at $PROJECT_ROOT/requirements.txt"
     fi
 
-    # Install Playwright browsers
-    print_step "Installing Playwright browsers..."
-
-    echo "Installing Playwright browsers (this may take several minutes)..."
-    $PYTHON_CMD -m playwright install
-    if [ $? -eq 0 ]; then
-        print_ok "Playwright browsers installed successfully"
-    else
-        print_warning "Playwright browsers may not have installed correctly"
-    fi
-
-    # Install FFmpeg
-    install_ffmpeg
-
     # Install npm packages
     print_step "Installing npm packages..."
 
@@ -307,12 +272,6 @@ main() {
     echo ""
     $PYTHON_CMD --version && print_ok "Python: $($PYTHON_CMD --version)"
     $PYTHON_CMD -m pip --version > /dev/null && print_ok "pip is working"
-
-    if command -v ffmpeg &> /dev/null; then
-        print_ok "FFmpeg: $(ffmpeg -version 2>&1 | head -1)"
-    else
-        print_warning "FFmpeg not found in PATH"
-    fi
 
     if command -v node &> /dev/null; then
         print_ok "Node.js: $(node --version)"
