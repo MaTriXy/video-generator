@@ -2,6 +2,10 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
+PROMPT_TAG = "production"
+MANIFEST_FILE="Outputs/{topic}/manifest.json"
+WEBSITE_URL="https://outscal.com"
+
 ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID","N69ME3CXdq0F9L9czkig")
 ELEVENLABS_MODEL_ID = os.getenv("ELEVENLABS_MODEL_ID","eleven_turbo_v2_5")
 ELEVENLABS_SPEED = os.getenv("ELEVENLABS_SPEED","1.1")
@@ -15,8 +19,6 @@ LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
 LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
 LANGFUSE_HOST = os.getenv("LANGFUSE_HOST", "https://langfuse.outscal.com")
 
-WEBSITE_URL="https://outscal.com"
-
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_REGION = os.getenv("AWS_REGION","ap-south-1")
@@ -25,8 +27,6 @@ AWS_REGION = os.getenv("AWS_REGION","ap-south-1")
 PAYLOAD_API_BASE_URL = os.getenv("PAYLOAD_API_BASE_URL","https://admin-v2.outscal.com")
 PAYLOAD_AUTH_TOKEN = os.getenv("PAYLOAD_AUTH_TOKEN")
 
-PROMPT_TAG = "production"
-MANIFEST_FILE="Outputs/{topic}/manifest.json"
 
 DIRECTION_PROMPT_TAG = os.getenv("DIRECTION_PROMPT_TAG", PROMPT_TAG)
 ASSETS_PROMPT_TAG = os.getenv("ASSETS_PROMPT_TAG", PROMPT_TAG)
