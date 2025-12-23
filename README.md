@@ -4,33 +4,15 @@ An AI-powered video generation tool that creates animated educational videos fro
 
 ## Prerequisites
 
-- **Claude Code CLI** installed and configured
+- **Claude Code CLI** installed and configured. see [Claude Code Quickstart](https://code.claude.com/docs/en/quickstart)
 
 ## Quick Start
 
-### 1. Environment Setup
+### 1. Clone and Setup
 
-Copy the `.env.template` file to create your `.env` file:
-
-```bash
-cp .env.template .env
-```
-
-Edit the `.env` file and fill in your API keys:
-
-| Variable | Description |
-|----------|-------------|
-| `LANGFUSE_PUBLIC_KEY` | Langfuse public key for observability |
-| `LANGFUSE_SECRET_KEY` | Langfuse secret key for observability |
-| `PAYLOAD_AUTH_TOKEN` | Payload CMS authentication token |
-| `ELEVENLABS_API_KEY` | ElevenLabs API key for text-to-speech |
-| `ELEVENLABS_VOICE_ID` | Voice ID to use for narration |
-| `ELEVENLABS_MODEL_ID` | ElevenLabs model ID |
-| `ELEVENLABS_SPEED` | Speech speed setting |
-| `ELEVENLABS_STABILITY` | Voice stability setting |
-| `ELEVENLABS_SIMILARITY` | Voice similarity setting |
-| `AWS_ACCESS_KEY_ID` | AWS access key for S3 storage |
-| `AWS_SECRET_ACCESS_KEY` | AWS secret key for S3 storage |
+1. **Get the repository**: Either clone the repository or download it as a ZIP file and extract it.
+   
+2. **Open Claude Code** in the repository directory to ensure all commands work properly.
 
 ### 2. Install Dependencies
 
@@ -40,18 +22,43 @@ Run the initialization command in Claude Code:
 /tools:init
 ```
 
-This will automatically:
-- Install Python 3.13 if not already installed
-- Install all pip packages from `requirements.txt`
-- Run `npm install` in the visualise_video directory
+This command will automatically:
 
-### 3. Create Your Video
+- install the requirements needed to start generating video
+- will direct you to setup the api key and will tell you how.
+
+**Note:** This command only needs to be run once during initial setup.
+
+### 3. API Key Setup (Required)
+
+After installation completes, you need to set up your API key (this will be instructed after the `/tools:init` comand as well):
+
+1. **Get your API key**: Visit [https://production2.outscal.com/v2/get-video-generation-api-key](https://production2.outscal.com/v2/get-video-generation-api-key)
+2. **Register or login** to get your API key
+3. **Create a `.env` file** in the project root directory (if it doesn't exist)
+4. **Add your API key** to the `.env` file:
+   ```
+   OUTSCAL_API_KEY="your_api_key_here"
+   ```
+   Replace `your_api_key_here` with the actual API key you received.
+
+### 4. Optional Environment Variables
+
+The following environment variable is **optional** and only needed if you want to use a custom voice:
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `ELEVENLABS_VOICE_ID` | Voice ID from ElevenLabs. You can pick different voice IDs from your ElevenLabs account if you want to change the voice. | No |
+
+### 5. Create Your Video
 
 Run the video creation command:
 
 ```
 /create-video
 ```
+
+**Note:** Run this command every time you want to create a new video.
 
 ## Video Creation Workflow
 
@@ -63,11 +70,11 @@ When you run `/create-video`, the tool will:
 4. **Create Direction** - Generate scene-by-scene video direction
 5. **Generate Assets** - Create SVG assets for the video
 6. **Design Scenes** - Generate detailed design specifications
-7. **Video** - Create Video
+7. **Video** - Create and deploy video (displays deployed URL)
 
+**Tip:** After videos are created and deployed, use `/tools:list-videos` to view all deployed video URLs.
 
 ## Video Art Styles
-
 When creating a video, you'll be asked to choose from three distinct visual styles:
 
 ### Pencil
@@ -79,17 +86,20 @@ Clean, modern, and professional style with bold colors, geometric shapes, and da
 ### Neon
 Vibrant, futuristic style with glowing effects, dark backgrounds, and bright accent colors. Features electric highlights and cyberpunk-inspired visuals. Perfect for tech topics, gaming content, or when you want a high-energy, modern look.
 
-## Commands Reference
+## Commands Reference (FYI)
 
 | Command | Description |
 |---------|-------------|
-| `/create-video` | Start the full video creation workflow |
 | `/tools:init` | Install all project dependencies |
+| `/tools:list-videos` | List all deployed video URLs for the project |
+| `/create-video` | Start the full video creation workflow |
 | `/gen:audio --topic "topic-name"` | Generate audio only |
 | `/gen:director --topic "topic-name"` | Generate video direction only |
 | `/gen:assets --topic "topic-name"` | Generate SVG assets only |
 | `/gen:design --topic "topic-name"` | Generate design specifications only |
 | `/gen:video --topic "topic-name"` | Generate video components only |
+
+**Important:** If you run individual `gen:` commands instead of `/create-video`, you must run all subsequent commands in the workflow sequence for your changes to take effect. For example, if you run `/gen:director`, you'll need to manually run `/gen:assets`, `/gen:design`, and `/gen:video` afterwards.
 
 ## Project Structure
 
