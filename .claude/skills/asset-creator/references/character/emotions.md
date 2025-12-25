@@ -1,8 +1,10 @@
 # Character Emotions
 
+<overview>
 Characters can express **any emotion** the scene demands. Create new emotions as needed using these patterns.
+</overview>
 
-## Changeable Components
+<changeable-components>
 
 | Component | How It Changes |
 |-----------|----------------|
@@ -12,10 +14,11 @@ Characters can express **any emotion** the scene demands. Create new emotions as
 | **Cheeks** | Color shifts (red=angry, pale=sad, pink=surprised) |
 | **Extras** | Tears, zzz, eye shine, bags under eyes |
 
+</changeable-components>
+
 ---
 
-## Eyebrows
-
+<eyebrows>
 **Note:** All coordinates below assume a 250×250 viewBox with character centered.
 
 ```svg
@@ -32,9 +35,11 @@ Characters can express **any emotion** the scene demands. Create new emotions as
 <path d="M140 90 Q155 85 170 90" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
 ```
 
+</eyebrows>
+
 ---
 
-## Eye Variations
+<eye-variations>
 
 ```svg
 <!-- Normal -->
@@ -60,9 +65,11 @@ Characters can express **any emotion** the scene demands. Create new emotions as
 <circle cx="95" cy="125" r="6" fill="#1a1a1a"/>
 ```
 
+</eye-variations>
+
 ---
 
-## Mouth Variations
+<mouth-variations>
 
 ```svg
 <!-- Big smile (happy) -->
@@ -84,7 +91,9 @@ Characters can express **any emotion** the scene demands. Create new emotions as
 <line x1="140" y1="150" x2="140" y2="165" stroke="white" stroke-width="2"/>
 ```
 
-## Extra Elements
+</mouth-variations>
+
+<extra-elements>
 
 ```svg
 <!-- Tear drop (sad) -->
@@ -99,10 +108,13 @@ Characters can express **any emotion** the scene demands. Create new emotions as
 <text x="193" y="47" font-family="Arial" font-size="10" fill="#1a1a1a" font-weight="bold">Z</text>
 ```
 
+</extra-elements>
+
 ---
 
-## Eye Blink Animation
+<eye-blink-animation>
 
+<blink-technique>
 Use **clipPath** so pupils are clipped (not squished) and never overflow:
 
 ```svg
@@ -131,9 +143,18 @@ Use **clipPath** so pupils are clipped (not squished) and never overflow:
 </ellipse>
 <circle cx="152" cy="115" r="7" fill="#1a1a1a" clip-path="url(#rightEyeClip)"/>
 ```
+</blink-technique>
 
+<blink-explanation>
 **How it works:** Eye white animates `ry` from full → 0 → full. ClipPath contains same animated ellipse to clip the pupil. Pupil doesn't animate - it's masked by clipPath. Eyes close completely, pupil never overflows.
+</blink-explanation>
 
+<blink-timing>
 **Timing** (`keyTimes`): 0→0.47 open | 0.47→0.49 closing | 0.49→0.51 closed | 0.51→0.53 opening | 0.53→1 open
+</blink-timing>
 
+<blink-duration>
 **Duration by emotion:** Happy: 3s | Sad: 5s (slower) | Angry: 2s (intense) | Surprised: 6s (wide-eyed) | Sleepy: custom with heavy lids
+</blink-duration>
+
+</eye-blink-animation>

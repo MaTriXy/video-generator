@@ -1,16 +1,21 @@
 # Path Drawing Animation
 
-**Prerequisite:** Read [path-creation.md](./references/path-creation.md) to generate path `d` attributes.
+<prerequisite>
+**Prerequisite:** Read [path-creation.md](../path-creation.md) to generate path `d` attributes.
+</prerequisite>
 
+<overview>
 Animates the drawing of a path itself (line appearing on screen).
+</overview>
 
-## Technique
-
+<technique>
 Uses `stroke-dasharray` and `stroke-dashoffset` to progressively reveal a path:
 - Set both to the path's total length (hides entire path)
 - Animate `stroke-dashoffset` from full length to 0 (reveals path)
 
-## Basic Pattern
+</technique>
+
+<basic-pattern>
 
 ```svg
 <path d="M 100 400 Q 400 200 700 400"
@@ -28,7 +33,9 @@ Uses `stroke-dasharray` and `stroke-dashoffset` to progressively reveal a path:
 </path>
 ```
 
-## With Object Following
+</basic-pattern>
+
+<with-object-following>
 
 ```svg
 <svg viewBox="0 0 800 500">
@@ -51,12 +58,18 @@ Uses `stroke-dasharray` and `stroke-dashoffset` to progressively reveal a path:
 </svg>
 ```
 
-## Key Points
+</with-object-following>
+
+<key-points>
 - Path needs `fill="none"` and visible `stroke`
 - Estimate dash length larger than actual path length (works fine)
 - Use `stroke-linecap="round"` for smoother ends
 - `fill="freeze"` keeps path visible after animation
 
-## Related
-- [path-creation.md](./references/path-creation.md) - Generate paths
-- [path-following.md](./references/animations/path-following.md) - Animate objects along paths
+</key-points>
+
+<related-references>
+- [path-creation.md](../path-creation.md) - Generate paths
+- [path-following.md](./path-following.md) - Animate objects along paths
+
+</related-references>

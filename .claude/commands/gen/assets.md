@@ -1,32 +1,18 @@
 ---
-description: generate SVG assets from Direction requirements by following the instructions given below.
-allowed-tools: Task, SlashCommand
-model: sonnet
+description: Generate SVG assets from Direction requirements by invoking the video-creator skill.
+allowed-tools: Skill
+model: inherit
 argument-hint: --topic "topic-name"
 ---
 
-# Asset Generation Workflow
+# Asset Generation
 
-Generate SVG assets using the three-part workflow that separates deterministic operations from LLM generation.
+Invoke the video-creator skill:
 
-## Implementation Steps
+```
+Skill: video-creator
 
-Step 1: **Execute Pre-Processing**
-   - Run the command below to extract required_assets from Direction and generate prompt
-   ```bash
-   python scripts/claude_cli/asset_generator/pre_process.py --topic "{topic}"
-   ```
-
-Step 2: **Execute Asset Generator Agent**
-   - Use the Task tool to invoke the asset_generator sub-agent with --topic "{topic}"
-
-Step 3: **Execute Post-Processing**
-   - Run the command to version SVG assets and generate manifest
-   ```bash
-   python scripts/claude_cli/asset_generator/post_process.py --topic "{topic}"
-   ```
-
-## Error Handling
-- If pre-processing fails: Display error indicating Direction must be generated first
-- If asset generation fails: Display error and abort workflow
-- If post-processing fails: Display error but keep generated SVGs for debugging
+Execute Mode : Single Step Execution
+- Step: asset-generator
+- Topic: {topic}
+```

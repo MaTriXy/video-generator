@@ -13,6 +13,7 @@ if project_root not in sys.path:
 from scripts.enums import AssetType
 from scripts.claude_cli.base_pre_process import BasePreProcess
 from scripts.controllers.utils.decorators.try_catch import try_catch
+from scripts.controllers.video_step_metadata_controller import VideoStepMetadataController
 
 
 class AssetGeneratorPreProcess(BasePreProcess):
@@ -26,7 +27,7 @@ class AssetGeneratorPreProcess(BasePreProcess):
             gen_prompt=True,
         )
 
-        self.asset_meta_data_path = self.claude_cli_config.get_metadata_path(self.asset_type)
+        self.metadata_controller = VideoStepMetadataController()
 
     @try_catch
     def extract_required_assets(self) -> List[Dict[str, str]]:
@@ -87,7 +88,7 @@ class AssetGeneratorPreProcess(BasePreProcess):
             "total_assets": len(required_assets),
             "asset_names": asset_names
         }
-        self.file_io.write_json(self.asset_meta_data_path, output)
+        self.metadata_controller.write(self.asset_type, output)
 
 
 if __name__ == "__main__":

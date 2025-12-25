@@ -252,18 +252,18 @@ main() {
     else
         print_ok "Node.js is installed: $(node --version)"
 
-        if [ -d "$PROJECT_ROOT/visualise_video" ] && [ -f "$PROJECT_ROOT/visualise_video/package.json" ]; then
-            echo "Running npm install in visualise_video..."
-            cd "$PROJECT_ROOT/visualise_video"
+        # Install npm packages in root directory
+        if [ -f "$PROJECT_ROOT/package.json" ]; then
+            echo "Running npm install in root directory..."
+            cd "$PROJECT_ROOT"
             npm install
             if [ $? -eq 0 ]; then
-                print_ok "npm packages installed successfully"
+                print_ok "Root npm packages installed successfully"
             else
-                print_warning "npm install may have failed"
+                print_warning "Root npm install may have failed"
             fi
-        else
-            print_warning "visualise_video/package.json not found"
         fi
+
     fi
 
     # Verification
@@ -280,12 +280,6 @@ main() {
     fi
 
     print_step "Setup Complete!"
-
-    echo "To start the video player:"
-    echo "  cd visualise_video && npm run dev"
-    echo ""
-    echo "Or use: /tools:run-player"
-    echo ""
 }
 
 # Run main

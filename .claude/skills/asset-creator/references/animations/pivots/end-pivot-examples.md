@@ -1,12 +1,13 @@
 # End/Edge Pivot Examples
 
+<overview>
 Objects rotating from one fixed endpoint or anchor point.
+</overview>
 
 ---
 
-## 1. Clock (End Pivot)
-
-Multiple hands rotating from the center point. Each hand has its own rotation speed.
+<example-clock>
+**1. Clock (End Pivot)** - Multiple hands rotating from the center point. Each hand has its own rotation speed.
 
 ```svg
 <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -60,13 +61,16 @@ Multiple hands rotating from the center point. Each hand has its own rotation sp
 </svg>
 ```
 
+<key-point-clock>
 **Key point:** All hands share the same pivot point (100, 100) but have different durations.
+</key-point-clock>
+
+</example-clock>
 
 ---
 
-## 2. Speedometer (End Pivot)
-
-Needle oscillates between min and max values using the `values` attribute.
+<example-speedometer>
+**2. Speedometer (End Pivot)** - Needle oscillates between min and max values using the `values` attribute.
 
 ```svg
 <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -104,13 +108,16 @@ Needle oscillates between min and max values using the `values` attribute.
 </svg>
 ```
 
+<key-point-speedometer>
 **Key point:** Uses `values` for oscillating motion between -60° and 60°.
+</key-point-speedometer>
+
+</example-speedometer>
 
 ---
 
-## 3. Pendulum (End Pivot)
-
-Swings from top anchor point. Both rod and bob need the same animation.
+<example-pendulum>
+**3. Pendulum (End Pivot)** - Swings from top anchor point. Both rod and bob need the same animation.
 
 ```svg
 <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -142,4 +149,8 @@ Swings from top anchor point. Both rod and bob need the same animation.
 </svg>
 ```
 
+<key-point-pendulum>
 **Key point:** Pivot is at the TOP (100, 50) where the pendulum hangs from. Both rod and bob share identical animation.
+</key-point-pendulum>
+
+</example-pendulum>

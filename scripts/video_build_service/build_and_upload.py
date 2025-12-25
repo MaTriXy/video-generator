@@ -9,12 +9,12 @@ from typing import Dict, Any, Optional, List
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from scripts.utility.config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, PAYLOAD_API_BASE_URL, PAYLOAD_AUTH_TOKEN, WEBSITE_URL
 from scripts.video_build_service.s3_manager import S3Manager, S3Config, UploadFileParams
 from scripts.video_build_service.react_build_manager import ReactBuildManager
 from scripts.controllers.manifest_controller import ManifestController
 from scripts.claude_cli.claude_cli_config import ClaudeCliConfig
 from scripts.enums import AssetType
+from scripts.utility.config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, PAYLOAD_API_BASE_URL, PAYLOAD_AUTH_TOKEN, WEBSITE_URL
 
 # Setup logging
 logging.basicConfig(
@@ -101,10 +101,10 @@ class BuildAndUploadService:
         return build_manager.build_component(tsx_path)
 
     @staticmethod
-    def create_slug(title: str) -> str:
+    def create_slug(title: str, version: int) -> str:
         slug = title.lower().replace(' ', '-').replace('_', '-')
         slug = ''.join(c for c in slug if c.isalnum() or c == '-')
-        return slug
+        return slug + f"_v{version}"
 
     def _initialize_s3(self) -> Optional[str]:
         if self.aws_access_key and self.aws_secret_key:
@@ -179,7 +179,7 @@ class BuildAndUploadService:
             errors.append("S3Manager not initialized. Please initialize with credentials first.")
             return {'success': False, 'urls': {}, 'errors': errors}
 
-        slug = self.create_slug(title)
+        slug = self.create_slug(title, video_version)
         version_folder = f"v{video_version}"
 
         # Upload video JS file
@@ -255,24 +255,21 @@ class BuildAndUploadService:
         if not video_path:
             return {
                 'success': False,
-                'urls': {},
-                'errors': ["Video path not found in manifest"]
+                'error': "Video path not found in manifest"
             }
 
         if not video_version:
             return {
                 'success': False,
-                'urls': {},
-                'errors': ["Video version not found in manifest"]
+                'error': "Video version not found in manifest"
             }
 
         video_dir = Path(video_path)
 
         if not video_dir.exists():
             return {
-                'success': False,
-                'urls': {},
-                'errors': [f"Video path does not exist: {video_path}"]
+                'success': False,   
+                'error': f"Video path does not exist: {video_path}"
             }
 
         # Find main video file
@@ -280,8 +277,7 @@ class BuildAndUploadService:
         if not main_tsx:
             return {
                 'success': False,
-                'urls': {},
-                'errors': [f"No main video TSX file found in: {video_path}"]
+                'error': f"No main video TSX file found in: {video_path}"
             }
 
         self.logger.info(f"Found main video file: {main_tsx}")
@@ -320,7 +316,11 @@ class BuildAndUploadService:
             title=title,
             video_version=video_version
         )
-        url = self.create_video_entry(slug=self.create_slug(title), audio_url=upload_result['urls']['audio_url'], transcript_url=upload_result['urls']['transcript_url'], visualizer_url=upload_result['urls']['video_url'])
+        url = self.create_video_entry(slug=self.create_slug(title,video_version),
+         audio_url=upload_result['urls']['audio_url'],
+         transcript_url=upload_result['urls']['transcript_url'],
+         visualizer_url=upload_result['urls']['video_url'])
+        ManifestController().update_deployed_videos(url)
         return {
             'success': True,
             'url': url,

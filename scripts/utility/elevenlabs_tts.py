@@ -1,8 +1,3 @@
-"""
-ElevenLabs Text-to-Speech service implementation.
-Generates audio with word-level timestamps using character alignment data.
-"""
-
 import json
 import base64
 import requests
@@ -12,87 +7,79 @@ from scripts.logging_config import get_utility_logger
 
 logger = get_utility_logger('elevenlabs_tts')
 
-# Validation thresholds
-CONSECUTIVE_IDENTICAL_THRESHOLD = 5  # Max consecutive non-punctuation words with same timestamp
-
-
 class ElevenLabsTimingError(Exception):
     pass
 
 
-def _validate_transcript_timing(words: List[Dict]) -> Tuple[bool, Optional[str]]:
+def _validate_transcript_timing(words: List[Dict]) -> Tuple[bool, Optional[str], int]:
     if not words:
-        return False, "Empty transcript"
+        return False, "Empty transcript", 0
 
     punct = set([".", ",", ";", ":", "!", "?", "(", ")", "[", "]", "{", "}", "'", "\"", "—", "–", "-"])
 
-    # Check for consecutive words with identical timestamps
-    consecutive_identical = 0
-    last_timestamp = None
-    problematic_sections = []
-    section_start_idx = 0
-
+    filtered_words = []
     for i, word_data in enumerate(words):
         word = word_data.get("word", "")
-        start_ms = word_data.get("start_ms")
-        end_ms = word_data.get("end_ms")
-
-        # Skip punctuation for consecutive check
         if word in punct or len(word) <= 1:
             continue
+        filtered_words.append({
+            "index": i,
+            "word": word,
+            "start_ms": word_data.get("start_ms"),
+            "end_ms": word_data.get("end_ms")
+        })
 
-        # Check for identical timestamps (start == end for the same timestamp value)
-        current_timestamp = (start_ms, end_ms)
+    if not filtered_words:
+        return True, None, 0
 
-        if last_timestamp is not None and current_timestamp == last_timestamp and start_ms == end_ms:
-            consecutive_identical += 1
-            if consecutive_identical >= CONSECUTIVE_IDENTICAL_THRESHOLD:
-                # Find the range of affected words
-                section_end_idx = i
-                affected_words = [words[j]["word"] for j in range(section_start_idx, min(section_end_idx + 1, len(words)))]
-                problematic_sections.append({
-                    "start_idx": section_start_idx,
-                    "end_idx": section_end_idx,
-                    "timestamp_ms": start_ms,
-                    "word_count": consecutive_identical + 1,
-                    "sample_words": affected_words[:5]  # First 5 words as sample
-                })
-        else:
-            consecutive_identical = 0
-            section_start_idx = i
+    zero_duration_words = [w for w in filtered_words if w["start_ms"] == w["end_ms"]]
+    if zero_duration_words:
+        affected_count = len(zero_duration_words)
+        sample_words = [w["word"] for w in zero_duration_words[:5]]
+        error_msg = f"ElevenLabs timing data corrupted: {affected_count} word(s) with zero duration. Sample words: {sample_words}"
+        return False, error_msg, affected_count
 
-        last_timestamp = current_timestamp
+    for i in range(1, len(filtered_words)):
+        curr = filtered_words[i]
+        prev = filtered_words[i - 1]
 
-    if problematic_sections:
-        total_affected = sum(s["word_count"] for s in problematic_sections)
-        error_msg = (
-            f"ElevenLabs timing data corrupted: {len(problematic_sections)} section(s) with identical timestamps. "
-            f"Total {total_affected} words affected. "
-            f"First problematic section at {problematic_sections[0]['timestamp_ms']}ms: "
-            f"words {problematic_sections[0]['sample_words']}"
-        )
-        return False, error_msg
+        if curr["start_ms"] == prev["start_ms"]:
+            error_msg = f"ElevenLabs timing data corrupted: words '{prev['word']}' and '{curr['word']}' both start at {curr['start_ms']}ms"
+            return False, error_msg, 2
 
-    return True, None
+        if curr["end_ms"] == prev["end_ms"]:
+            error_msg = f"ElevenLabs timing data corrupted: words '{prev['word']}' and '{curr['word']}' both end at {curr['end_ms']}ms"
+            return False, error_msg, 2
 
-def _fetch_audio_and_timestamps(text: str, api_key: str, config: Dict, phonetics_dict_id: str):
+        if curr["start_ms"] < prev["end_ms"]:
+            error_msg = f"ElevenLabs timing data corrupted: '{curr['word']}' starts at {curr['start_ms']}ms but '{prev['word']}' ends at {prev['end_ms']}ms"
+            return False, error_msg, 2
+
+        if curr["end_ms"] < prev["end_ms"]:
+            error_msg = f"ElevenLabs timing data corrupted: '{curr['word']}' ends at {curr['end_ms']}ms but '{prev['word']}' ends at {prev['end_ms']}ms"
+            return False, error_msg, 2
+
+    return True, None, 0
+
+
+def _fetch_audio_and_timestamps(text: str, api_key: str, config: Dict, phonetics_dict_id: str, model_override: str = None):
     try:
-        """Calls the ElevenLabs API to get audio and timestamp data."""
-        voice_id = config.get("voice_id", "QzyAJCjnDHxLPazR6j3v")  # Default voice
-        model_id = config.get("model_id", "eleven_multilingual_v2")
+        voice_id = config.get("voice_id", "QzyAJCjnDHxLPazR6j3v")
+        model_id = model_override if model_override else config.get("model_id", "eleven_multilingual_v2")
         speed = config.get("speed", 1.1)
-        stability = config.get("stability", 0.8)
+        stability = config.get("stability", 1.0)
         similarity = config.get("similarity", 0.65)
-        logger.info(f"Fetching audio and timestamps with phonetics dictionary ID: {phonetics_dict_id}")
+
+        logger.info(f"Fetching audio with model: {model_id}")
+        logger.info(f"Phonetics dictionary ID: {phonetics_dict_id}")
+
         url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}/with-timestamps"
         headers = {"xi-api-key": api_key, "Content-Type": "application/json"}
         payload = {
             "text": text,
             "model_id": model_id,
-            "voice_settings": {"speed": speed, "stability": stability, "similarity": similarity},
-            "pronunciation_dictionary_locators": [{
-                "pronunciation_dictionary_id":phonetics_dict_id
-            }]
+            "voice_settings": {"speed": speed, "stability": stability, "similarity_boost": similarity},
+            "pronunciation_dictionary_locators": [{"pronunciation_dictionary_id": phonetics_dict_id}]
         }
         logger.debug(f"Sending payload to ElevenLabs: {json.dumps(payload, indent=2)}")
         response = requests.post(url, headers=headers, json=payload)
@@ -101,7 +88,7 @@ def _fetch_audio_and_timestamps(text: str, api_key: str, config: Dict, phonetics
     except Exception as e:
         logger.error(f"Error fetching audio and timestamps: {e}")
         return None
-        raise
+
 
 def _create_word_transcript(alignment_data: Dict, transcript_path: str) -> List[Dict]:
     chars = alignment_data["characters"]
@@ -109,7 +96,6 @@ def _create_word_transcript(alignment_data: Dict, transcript_path: str) -> List[
     ends = alignment_data["character_end_times_seconds"]
 
     words, word, w_start = [], "", None
-    # Correctly defined set of punctuation
     punct = set([".", ",", ";", ":", "!", "?", "(", ")", "[", "]", "{", "}", "'", "\"", "—", "–", "-"])
     prev_end = 0
 
@@ -142,43 +128,72 @@ def _create_word_transcript(alignment_data: Dict, transcript_path: str) -> List[
 
     return words
 
+
 def _save_audio_file(audio_base64: str, audio_path: str):
-    """Saves the base64 encoded audio to a file."""
     with open(audio_path, 'wb') as f:
         f.write(base64.b64decode(audio_base64))
     logger.info(f"Audio successfully saved to {audio_path}")
 
-def generate_audio(text: str, audio_output_path: str, transcript_output_path: str, config: Dict, phonetics_dict_id: str):
+
+def validate_transcript_file(transcript_path: str) -> Tuple[bool, Optional[str], int, int]:
+    try:
+        with open(transcript_path, 'r', encoding='utf-8') as f:
+            words = json.load(f)
+
+        total_words = len(words)
+        is_valid, error_msg, affected_count = _validate_transcript_timing(words)
+
+        if is_valid:
+            logger.info(f"Transcript validation passed: {transcript_path}")
+            return True, None, 0, total_words
+        else:
+            logger.warning(f"Transcript validation failed: {error_msg}")
+            return False, error_msg, affected_count, total_words
+
+    except Exception as e:
+        logger.error(f"Error validating transcript: {e}")
+        return False, str(e), 0, 0
+
+
+def _save_raw_alignment(alignment_data: Dict, transcript_path: str, model_id: str):
+    """Save raw character-level alignment data from ElevenLabs before processing."""
+    raw_path = transcript_path.replace(".json", f"_raw_{model_id}.json")
+    with open(raw_path, "w", encoding="utf-8") as f:
+        json.dump(alignment_data, f, indent=2, ensure_ascii=False)
+    logger.info(f"Raw character alignment saved to {raw_path}")
+
+
+def generate_audio(
+    text: str,
+    audio_output_path: str,
+    transcript_output_path: str,
+    config: Dict,
+    phonetics_dict_id: str,
+    model_override: str = None
+) -> Tuple[bool, Optional[str], int, int]:
     logger.info("Generating audio with ElevenLabs...")
 
-    # Check API key
-    api_key = ELEVENLABS_API_KEY or config.get('elevenlabs', {}).get('api_key')
+    api_key = ELEVENLABS_API_KEY
     if not api_key:
         logger.error("ElevenLabs API key not found. Set ELEVENLABS_API_KEY environment variable.")
-        raise ValueError("ElevenLabs API key not found. Set ELEVENLABS_API_KEY environment variable.")
+        return False, "ElevenLabs API key not found", 0, 0
 
-    el_config = config.get('elevenlabs', config)
-
-    # Fetch audio and timestamps from ElevenLabs
-    api_data = _fetch_audio_and_timestamps(text, api_key, el_config, phonetics_dict_id)
+    model_id = model_override if model_override else config.get("model_id", "eleven_multilingual_v2")
+    api_data = _fetch_audio_and_timestamps(text, api_key, config, phonetics_dict_id, model_override)
 
     if not api_data:
-        raise Exception("ElevenLabs API returned no data")
+        return False, "ElevenLabs API returned no data", 0, 0
 
-    # Save audio file
     _save_audio_file(api_data["audio_base64"], audio_output_path)
-
-    # Create transcript and get words for validation
+    _save_raw_alignment(api_data["alignment"], transcript_output_path, model_id)
     words = _create_word_transcript(api_data["alignment"], transcript_output_path)
+    total_words = len(words)
 
-    # Validate timing data
-    is_valid, error_msg = _validate_transcript_timing(words)
+    is_valid, error_msg, affected_count = _validate_transcript_timing(words)
 
     if is_valid:
         logger.info("ElevenLabs audio generation completed successfully")
-        return
+        return True, None, 0, total_words
     else:
-        raise ElevenLabsTimingError(
-            f"ERROR: ElevenLabs timing data corrupted: {error_msg}\n\n"
-            f"Please try:\n change eleven labs model to 2.5 instead of 3.0"
-        )
+        logger.warning(f"Timing validation failed: {error_msg}")
+        return False, error_msg, affected_count, total_words

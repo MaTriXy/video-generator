@@ -88,9 +88,16 @@ def split_word_into_parts(word: str) -> list:
 
 
 def match_word_parts_in_transcript(word_parts: list, transcript: list, start_search_index: int) -> tuple:
+    """
+    Match multi-part words (e.g., "It's" -> ["It", "'", "s"]) in transcript.
+
+    Returns:
+        tuple: (found, first_matched_index, last_matched_index, parts_matched)
+    """
     search_index = start_search_index
     search_limit = min(start_search_index + 100, len(transcript))
     parts_matched = 0
+    first_matched_index = None
     for part in word_parts:
         normalized_part = normalize_for_matching(part)
         if not normalized_part:
@@ -101,14 +108,16 @@ def match_word_parts_in_transcript(word_parts: list, transcript: list, start_sea
             transcript_word = transcript[temp_search_index]['word']
             normalized_transcript = normalize_for_matching(transcript_word)
             if normalized_part == normalized_transcript:
+                if first_matched_index is None:
+                    first_matched_index = temp_search_index
                 search_index = temp_search_index + 1
                 parts_matched += 1
                 found_part = True
                 break
             temp_search_index += 1
         if not found_part:
-            return False, start_search_index, 0
-    return True, search_index - 1, parts_matched
+            return False, None, start_search_index, 0
+    return True, first_matched_index, search_index - 1, parts_matched
 
 
 def match_narration_to_transcript(narration: str, transcript: list, start_index: int = 0) -> tuple:
@@ -130,13 +139,13 @@ def match_narration_to_transcript(narration: str, transcript: list, start_index:
         search_limit = min(transcript_index + 100, len(transcript))
         search_index = transcript_index
         if has_multiple_parts:
-            parts_found, last_matched_index, parts_matched = match_word_parts_in_transcript(
+            parts_found, first_matched_index, last_matched_index, parts_matched = match_word_parts_in_transcript(
                 word_parts, transcript, transcript_index
             )
-            if parts_found and last_matched_index >= transcript_index:
+            if parts_found and first_matched_index is not None:
                 if start_ms is None:
-                    start_ms = transcript[transcript_index]['start_ms']
-                    search_start_index = transcript_index
+                    start_ms = transcript[first_matched_index]['start_ms']
+                    search_start_index = first_matched_index
                 end_ms = transcript[last_matched_index]['end_ms']
                 transcript_index = last_matched_index + 1
                 matched_count += parts_matched

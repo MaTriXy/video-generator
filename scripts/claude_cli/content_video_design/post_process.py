@@ -16,6 +16,7 @@ if project_root not in sys.path:
 from scripts.claude_cli.base_post_process import BasePostProcess
 from scripts.claude_cli.claude_cli_config import ClaudeCliConfig, AssetType
 from scripts.controllers.utils.decorators.try_catch import try_catch
+from scripts.controllers.video_step_metadata_controller import VideoStepMetadataController
 from scripts.logging_config import set_console_logging
 
 
@@ -32,20 +33,13 @@ class VideoDesignPostProcessing(BasePostProcess):
             topic=topic,
             asset_type=AssetType.DESIGN,
         )
-
-    @try_catch
-    def _get_total_scenes(self) -> int:
-        """Read total scenes from metadata file."""
-        metadata_path = self.claude_cli_config.get_metadata_path(self.asset_type)
-        metadata = self.file_io.read_json(metadata_path)
-        return metadata.get('total_scenes', 0)
+        self.metadata_controller = VideoStepMetadataController()
 
     @try_catch
     def process_output(self) -> Tuple[Optional[str], Optional[int]]:
-        """Process all scene design files and save to versioned folder."""
         self.logger.info("Processing video design output")
 
-        total_scenes = self._get_total_scenes()
+        total_scenes = self.metadata_controller.get_total_scenes(self.asset_type)
         if not total_scenes:
             self.logger.error("Could not determine total scenes from metadata")
             return None, None

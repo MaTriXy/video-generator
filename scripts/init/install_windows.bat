@@ -162,18 +162,16 @@ if %errorlevel% neq 0 (
     goto :verify
 )
 
-:: Install npm packages
-cd /d "%PROJECT_ROOT%\visualise_video"
+:: Install npm packages in root directory
+cd /d "%PROJECT_ROOT%"
 if exist "package.json" (
-    echo Running npm install in visualise_video...
+    echo Running npm install in root directory...
     call npm install
     if %errorlevel% equ 0 (
-        echo [OK] npm packages installed
+        echo [OK] Root npm packages installed
     ) else (
-        echo [WARNING] npm install may have failed
+        echo [WARNING] Root npm install may have failed
     )
-) else (
-    echo [WARNING] package.json not found in visualise_video
 )
 
 :verify
@@ -211,11 +209,6 @@ echo.
 echo ============================================================
 echo   Setup Complete!
 echo ============================================================
-echo.
-echo To start the video player:
-echo   cd visualise_video ^&^& npm run dev
-echo.
-echo Or use: /tools:run-player
 echo.
 
 endlocal

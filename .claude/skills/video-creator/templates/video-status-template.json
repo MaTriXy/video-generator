@@ -10,13 +10,13 @@
     "direction": {
       "status": "pending"
     },
-    "asset-generator": {
+    "assets": {
       "status": "pending"
     },
     "design": {
       "status": "pending"
     },
-    "coding": {
+    "code": {
       "status": "pending"
     }
   }

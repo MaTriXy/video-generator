@@ -1,27 +1,26 @@
 {
+  "alwaysThinkingEnabled": true,
   "permissions": {
     "allow": [
       "Bash(python:*)",
-      "mcp__course-tools-mcp__search_icon",
-      "mcp__course-tools-mcp__search_web",
-      "mcp__course-tools-mcp__get_documentation",
+      "Read(.claude/skills/)",
+      "mcp__video_gen_tools__get_icon",
+      "mcp__video_gen_tools__search_icons",
       "Skill(asset-creator)",
       "Skill(video-coder)",
       "Skill(video-creator)",
-      "Write(Outputs/Scripts/script-v1.md)",
       "Skill(video-designer)",
       "Skill(video-director)",
       "Write(Outputs/**)",
-      "Write(Outputs/full-video-tasks.json)",
-      "Update(Outputs/full-video-tasks.json)",
-      "Read(Outputs/full-video-tasks.json)"
+      "Edit(Outputs/*/Direction/**)",
+      "Edit(Outputs/*/Design/**)",
+      "Edit(Outputs/*/Video/**)",
+      "Edit(Outputs/*/Assets/**)"
     ],
-    "deny": [],
+    "deny": ["Write(*)"],
     "ask": []
   },
-  "enabledMcpjsonServers": [
-    "course-tools-mcp"
-  ],
+  "enabledMcpjsonServers": ["video_gen_tools"],
   "hooks": {
     "SubagentStop": [
       {

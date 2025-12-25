@@ -66,21 +66,48 @@ def create_elliptical_path(
 def create_sine_wave_path(
     start_x: float,
     start_y: float,
-    wavelength: float,
+    end_x: float,
+    end_y: float,
     amplitude: float,
     cycles: int
 ) -> str:
-    # Simplified smooth sine-like wave using quadratic curves
+    """
+    Create sine wave from start to end point.
+    Direction is determined by the start→end vector.
+    Amplitude is perpendicular to the direction of travel.
+    """
+    # Calculate direction vector
+    dx = end_x - start_x
+    dy = end_y - start_y
+    length = math.sqrt(dx * dx + dy * dy)
+
+    if length == 0:
+        return f"M {start_x} {start_y}"
+
+    # Unit vectors: forward (along path) and perpendicular (for amplitude)
+    fx, fy = dx / length, dy / length  # forward unit vector
+    px, py = -fy, fx  # perpendicular unit vector (90° counter-clockwise)
+
+    # Wavelength derived from total length and cycles
+    wavelength = length / cycles
+
     d = [f"M {start_x} {start_y}"]
-    x = start_x
     direction = 1.0
 
-    for _ in range(cycles):
-        mid_x = x + wavelength / 2.0
-        end_x = x + wavelength
-        control_y = start_y + direction * amplitude
-        d.append(f"Q {mid_x} {control_y} {end_x} {start_y}")
-        x = end_x
+    for i in range(cycles):
+        # Progress along the path
+        t_mid = (i + 0.5) / cycles
+        t_end = (i + 1) / cycles
+
+        # Mid point (control point for quadratic curve)
+        mid_x = start_x + dx * t_mid + px * amplitude * direction
+        mid_y = start_y + dy * t_mid + py * amplitude * direction
+
+        # End point of this cycle segment
+        seg_end_x = start_x + dx * t_end
+        seg_end_y = start_y + dy * t_end
+
+        d.append(f"Q {mid_x} {mid_y} {seg_end_x} {seg_end_y}")
         direction *= -1.0
 
     return " ".join(d)
@@ -163,18 +190,41 @@ def create_bezier_path(
 def create_zigzag_path(
     start_x: float,
     start_y: float,
-    segment_length: float,
+    end_x: float,
+    end_y: float,
     amplitude: float,
     segments: int
 ) -> str:
+    """
+    Create zigzag path from start to end point.
+    Direction is determined by the start→end vector.
+    Amplitude is perpendicular to the direction of travel.
+    """
+    # Calculate direction vector
+    dx = end_x - start_x
+    dy = end_y - start_y
+    length = math.sqrt(dx * dx + dy * dy)
+
+    if length == 0:
+        return f"M {start_x} {start_y}"
+
+    # Perpendicular unit vector (for amplitude)
+    px, py = -dy / length, dx / length
+
     d = [f"M {start_x} {start_y}"]
-    x = start_x
     direction = 1.0
+
     for i in range(segments):
-        x += segment_length
-        y = start_y + direction * amplitude
+        # Progress along the path
+        t = (i + 1) / segments
+
+        # Point along the main direction + perpendicular offset
+        x = start_x + dx * t + px * amplitude * direction
+        y = start_y + dy * t + py * amplitude * direction
+
         d.append(f"L {x} {y}")
         direction *= -1.0
+
     return " ".join(d)
 
 
@@ -251,13 +301,13 @@ def get_path(equation: str, **params: Any) -> str:
         - PARABOLIC: start_x, start_y, end_x, end_y, arc_height
         - CIRCULAR: center_x, center_y, radius
         - ELLIPTICAL: center_x, center_y, radius_x, radius_y
-        - SINE_WAVE: start_x, start_y, wavelength, amplitude, cycles
+        - SINE_WAVE: start_x, start_y, end_x, end_y, amplitude, cycles
         - SPIRAL: center_x, center_y, max_radius, revolutions, [points]
         - S_CURVE: start_x, start_y, end_x, end_y, [curvature]
         - LINEAR: start_x, start_y, end_x, end_y
         - ARC: start_x, start_y, end_x, end_y, radius, [sweep], [large_arc]
         - BEZIER: start_x, start_y, cp1_x, cp1_y, cp2_x, cp2_y, end_x, end_y
-        - ZIGZAG: start_x, start_y, segment_length, amplitude, segments
+        - ZIGZAG: start_x, start_y, end_x, end_y, amplitude, segments
         - BOUNCE: start_x, start_y, end_x, ground_y, initial_height, bounces, [decay]
         - SPLINE: points (array of [x,y] pairs), [tension]
 
@@ -297,10 +347,11 @@ def get_path(equation: str, **params: Any) -> str:
             params["radius_x"], params["radius_y"]
         )
     elif eq_enum == PathEquation.SINE_WAVE:
-        require_params(["start_x", "start_y", "wavelength", "amplitude", "cycles"])
+        require_params(["start_x", "start_y", "end_x", "end_y", "amplitude", "cycles"])
         return create_sine_wave_path(
             params["start_x"], params["start_y"],
-            params["wavelength"], params["amplitude"], params["cycles"]
+            params["end_x"], params["end_y"],
+            params["amplitude"], int(params["cycles"])
         )
     elif eq_enum == PathEquation.SPIRAL:
         require_params(["center_x", "center_y", "max_radius", "revolutions"])
@@ -340,10 +391,11 @@ def get_path(equation: str, **params: Any) -> str:
             params["end_x"], params["end_y"]
         )
     elif eq_enum == PathEquation.ZIGZAG:
-        require_params(["start_x", "start_y", "segment_length", "amplitude", "segments"])
+        require_params(["start_x", "start_y", "end_x", "end_y", "amplitude", "segments"])
         return create_zigzag_path(
             params["start_x"], params["start_y"],
-            params["segment_length"], params["amplitude"], params["segments"]
+            params["end_x"], params["end_y"],
+            params["amplitude"], int(params["segments"])
         )
     elif eq_enum == PathEquation.BOUNCE:
         require_params(["start_x", "start_y", "end_x", "ground_y", "initial_height", "bounces"])
@@ -398,7 +450,7 @@ def path_equation_to_svg(
         - ELLIPTICAL:
             center_x, center_y, radius_x, radius_y
         - SINE_WAVE:
-            start_x, start_y, wavelength, amplitude, cycles
+            start_x, start_y, end_x, end_y, amplitude, cycles
         - SPIRAL:
             center_x, center_y, max_radius, revolutions, (optional) points
         - S_CURVE:
@@ -442,19 +494,19 @@ Examples:
 
   python svg-path.py circular --params '{"center_x": 200, "center_y": 200, "radius": 150}'
 
-  python svg-path.py sine_wave --params '{"start_x": 50, "start_y": 100, "wavelength": 100, "amplitude": 50, "cycles": 5}'
+  python svg-path.py sine_wave --params '{"start_x": 50, "start_y": 100, "end_x": 550, "end_y": 100, "amplitude": 50, "cycles": 5}'
 
 Path types and required params:
   PARABOLIC:  start_x, start_y, end_x, end_y, arc_height
   CIRCULAR:   center_x, center_y, radius
   ELLIPTICAL: center_x, center_y, radius_x, radius_y
-  SINE_WAVE:  start_x, start_y, wavelength, amplitude, cycles
+  SINE_WAVE:  start_x, start_y, end_x, end_y, amplitude, cycles
   SPIRAL:     center_x, center_y, max_radius, revolutions, [points=100]
   S_CURVE:    start_x, start_y, end_x, end_y, [curvature=0.5]
   LINEAR:     start_x, start_y, end_x, end_y
   ARC:        start_x, start_y, end_x, end_y, radius, [sweep=1], [large_arc=0]
   BEZIER:     start_x, start_y, cp1_x, cp1_y, cp2_x, cp2_y, end_x, end_y
-  ZIGZAG:     start_x, start_y, segment_length, amplitude, segments
+  ZIGZAG:     start_x, start_y, end_x, end_y, amplitude, segments
   BOUNCE:     start_x, start_y, end_x, ground_y, initial_height, bounces, [decay=0.6]
   SPLINE:     points (array of [x,y]), [tension=0.3]
         """

@@ -54,7 +54,6 @@ def main():
 
     args = parser.parse_args()
 
-    # Create validator instance
     validator = SceneValidateProcess(
         lesson_index=args.lesson,
         material_index=args.material,

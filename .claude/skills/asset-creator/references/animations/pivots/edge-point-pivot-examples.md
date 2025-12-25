@@ -1,12 +1,13 @@
 # Edge Point Pivot Examples
 
+<overview>
 Objects rotating around a point on their perimeter (not center, not corner).
+</overview>
 
 ---
 
-## 1. Polygon Rolling on Edge (Edge Point Pivot)
-
-Hexagon rotates around a point on its edge, creating a rolling effect.
+<example-polygon-rolling>
+**1. Polygon Rolling on Edge (Edge Point Pivot)** - Hexagon rotates around a point on its edge, creating a rolling effect.
 
 ```svg
 <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -32,13 +33,16 @@ Hexagon rotates around a point on its edge, creating a rolling effect.
 </svg>
 ```
 
+<key-point-polygon>
 **Key point:** The pivot point (100, 100) is on the edge of the polygon, not at its center.
+</key-point-polygon>
+
+</example-polygon-rolling>
 
 ---
 
-## 2. Door Hinge (Edge Point Pivot)
-
-Door rotates from its hinge side.
+<example-door-hinge>
+**2. Door Hinge (Edge Point Pivot)** - Door rotates from its hinge side.
 
 ```svg
 <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -73,13 +77,16 @@ Door rotates from its hinge side.
 </svg>
 ```
 
+<key-point-door>
 **Key point:** Pivot is on the hinge edge (x=50), not the center. Handle needs same animation to stay attached.
+</key-point-door>
+
+</example-door-hinge>
 
 ---
 
-## 3. Lever Arm (Edge Point Pivot)
-
-Lever rotates from its fulcrum point on one end.
+<example-lever-arm>
+**3. Lever Arm (Edge Point Pivot)** - Lever rotates from its fulcrum point on one end.
 
 ```svg
 <svg width="200" height="150" xmlns="http://www.w3.org/2000/svg">
@@ -113,4 +120,8 @@ Lever rotates from its fulcrum point on one end.
 </svg>
 ```
 
+<key-point-lever>
 **Key point:** The pivot is at the fulcrum point on the left edge of the lever. Objects on the lever share the same animation.
+</key-point-lever>
+
+</example-lever-arm>

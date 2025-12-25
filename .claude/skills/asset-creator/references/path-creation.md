@@ -1,5 +1,6 @@
 # Path Creation
 
+<overview>
 Generate SVG path `d` attributes using the Python script:
 
 Use the bash tool to call the python script below.
@@ -7,87 +8,109 @@ Use the bash tool to call the python script below.
 ```bash
 python ".claude/skills/asset-creator/scripts/svg-path.py" <equation> --params '<json_params>'
 ```
+</overview>
 
-## Path Types
+<path-types>
+To understand the different path types - Read [paths_guidelines.md](./paths_guidelines.md)
 
-| Path Type | Use Case | Details |
-|-----------|----------|---------|
-| `parabolic` | Projectiles, jumps, throws | [parabolic.md](./references/paths/parabolic.md) |
-| `circular` | Orbits, spinning | [circular.md](./references/paths/circular.md) |
-| `elliptical` | Oval orbits | [elliptical.md](./references/paths/elliptical.md) |
-| `sine_wave` | Waves, snake movement | [sine_wave.md](./references/paths/sine_wave.md) |
-| `spiral` | Tornado, galaxy, swirls | [spiral.md](./references/paths/spiral.md) |
-| `s_curve` | Smooth transitions | [s_curve.md](./references/paths/s_curve.md) |
-| `linear` | Straight line A→B | [linear.md](./references/paths/linear.md) |
-| `arc` | Single arc segment | [arc.md](./references/paths/arc.md) |
-| `bezier` | Custom cubic bezier | [bezier.md](./references/paths/bezier.md) |
-| `zigzag` | Sharp angular back-and-forth | [zigzag.md](./references/paths/zigzag.md) |
-| `bounce` | Bouncing ball trajectory | [bounce.md](./references/paths/bounce.md) |
-| `spline` | Smooth curve through N points | [spline.md](./references/paths/spline.md) |
+</path-types>
 
 ---
 
-## Merging Paths
-
+<merging-paths>
 Use `merge-paths.py` to combine multiple path strings into a single continuous path:
 
 ```bash
 python ./scripts/merge-paths.py --paths '["M 50 400 L 150 100", "M 150 100 Q 250 400 350 250", "M 350 250 L 500 250"]'
 ```
+
+<merge-output>
 **Output:**
 ```
 M 50 400 L 150 100 Q 250 400 350 250 L 500 250
 ```
+</merge-output>
 
+<merge-tip>
 **Tip:** Ensure each segment's start point matches the previous segment's end point.
+</merge-tip>
 
-## Path Styles
+</merging-paths>
 
-### Dashed Path
-Use `stroke-dasharray` with two values: dash length and gap length.
+<path-styles>
+
+<dashed-path>
+**Dashed Path:** Use `stroke-dasharray` with two values: dash length and gap length.
 ```svg
 <path d="M 100 200 L 700 200" fill="none" stroke="#333" stroke-width="3" stroke-dasharray="20 10"/>
 ```
 
-### Dotted Path
-Use `stroke-dasharray` with small equal values and `stroke-linecap="round"`.
+</dashed-path>
+
+<dotted-path>
+**Dotted Path:** Use `stroke-dasharray` with small equal values and `stroke-linecap="round"`.
 ```svg
 <path d="M 100 200 L 700 200" fill="none" stroke="#333" stroke-width="3" stroke-dasharray="1 10" stroke-linecap="round"/>
 ```
 
+</dotted-path>
+
+</path-styles>
+
 ---
 
-## Show/Hide Path
-
+<show-hide-path>
 Use `opacity` to show or hide a path with animation.
 
-### Hide Path (visible → invisible)
+<hide-path>
+**Hide Path (visible → invisible)**
 ```svg
 <path d="M 100 300 Q 400 100 700 300" fill="none" stroke="#333" stroke-width="3" opacity="1">
   <animate attributeName="opacity" from="1" to="0" dur="1s" fill="freeze"/>
 </path>
 ```
 
-### Show Path (invisible → visible)
+</hide-path>
+
+<show-path>
+**Show Path (invisible → visible)**
 ```svg
 <path d="M 100 300 Q 400 100 700 300" fill="none" stroke="#333" stroke-width="3" opacity="0">
   <animate attributeName="opacity" from="0" to="1" dur="1s" fill="freeze"/>
 </path>
 ```
 
-## Coordinate System
+</show-path>
 
+</show-hide-path>
+
+<coordinate-system>
 - Origin (0,0) at top-left of the svg
 - X increases right, Y increases down
 - Plan parameters within your viewBox dimensions
 
-## Boundary Constraints
+</coordinate-system>
 
+<viewbox-for-video>
+**CRITICAL**: When creating SVG paths for video scenes, the viewBox must match the viewport size:
+
+- **Portrait (9:16)**: `viewBox="0 0 1080 1920"`
+- **Landscape (16:9)**: `viewBox="0 0 1920 1080"`
+
+Path coordinates are absolute screen positions, so the viewBox must match the canvas dimensions exactly.
+
+</viewbox-for-video>
+
+<boundary-constraints>
 **All path points must stay within valid bounds:**
 - No coordinate value should be negative (minimum is 0)
-- X coordinates must not exceed the element's width
-- Y coordinates must not exceed the element's height
+- X coordinates must not exceed the screen's width
+- Y coordinates must not exceed the screen's height
 
-## Other References
-Use the generated path to make an object follow it: See [path-following.md](./references/animations/path-following.md)
-Use the path drawing animations: See [path-drawing.md](./references/animations/path-drawing.md)
+</boundary-constraints>
+
+<related-references>
+Use the generated path to make an object follow it: See [path-following.md](./animations/path-following.md)
+Use the path drawing animations: See [path-drawing.md](./animations/path-drawing.md)
+
+</related-references>

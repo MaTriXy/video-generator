@@ -69,6 +69,10 @@ def read_jsonl(filepath: str) -> Optional[list]:
 def write_json(filepath: str, data: Dict[str, Any]) -> bool:
     """Write JSON data to a file."""
     try:
+        # Ensure the directory exists before writing
+        directory = os.path.dirname(filepath)
+        if directory:
+            ensure_directory(directory)
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         return True
@@ -121,10 +125,11 @@ class BaseHook(ABC):
         agents:List[str] = [],
     ):
         self.hook_name = hook_name
-        self.logs_dir = Path(logs_dir)
+        self.logs_dir = logs_dir
         self.hook_data = input_data
         self.agents = agents
         self.log_file_path = f"{self.hook_name}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"
+        self.log_file_path = os.path.join(self.logs_dir, self.log_file_path)
         ensure_directory(str(self.logs_dir))
 
     def error_log(self, error_message: str, error_traceback: str) -> None:
@@ -459,7 +464,7 @@ class BaseHook(ABC):
 
     def save_log(self, data: Dict[str, Any], suffix: str = "") -> str:
         try:
-            output_file_path = os.path.join(self.logs_dir, self.log_file_path)
+            output_file_path = self.log_file_path
             write_json(output_file_path, data)
             return output_file_path
         except Exception as e:
@@ -493,17 +498,15 @@ class BaseHook(ABC):
             return {}
 
     @abstractmethod
-    def was_prompt_file_read(self) -> bool:
+    def set_log_path(self) -> None:
+        """Set the log file path. Must be implemented by subclasses."""
         pass
 
     def run(self) -> None:
         try:
-            # date_string = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            # path_name = f"initial_hook_data_{date_string}.log"
-            # info_log(self.hook_data,path_name)
             self.hook_data = self.process_hook_data(self.hook_data)
             self.hook_data = self.prepare_output_data(self.hook_data)
-            self.was_prompt_file_read()
+            self.set_log_path()
             self.save_log(self.hook_data)
             return self.should_run_hook()
         except Exception as e:

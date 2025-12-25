@@ -2,7 +2,6 @@ import os
 import sys
 import json
 from typing import Dict, Any, Optional, Tuple
-from pydantic import ValidationError
 
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if project_root not in sys.path:
@@ -81,11 +80,9 @@ class BaseValidateProcess:
                 self.logger.info(f"Validated data type: {type(validated_data).__name__}")
                 return True
 
-            except ValidationError as e:
+            except Exception as e:
                 self.logger.error(f"Schema validation failed:")
-                for error in e.errors():
-                    field = " -> ".join(str(loc) for loc in error['loc'])
-                    self.logger.error(f"  Field '{field}': {error['msg']} (type: {error['type']})")
+                self.logger.error(f"  Error: {str(e)}")
                 return False
 
         except json.JSONDecodeError as e:

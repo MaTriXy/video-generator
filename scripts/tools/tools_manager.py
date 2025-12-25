@@ -1,10 +1,7 @@
 from typing import Dict, Any, List, Optional
-from pydantic_ai import Tool
 
 from scripts.controllers.utils.decorators.try_catch import try_catch
 from scripts.controllers.utils.session_manager import SessionManager
-from scripts.tools.web_search_tool import web_search_tool
-from scripts.tools.documentation_tool import documentation_tool
 from scripts.logging_config import get_utility_logger
 from scripts.controllers.utils.singleton import SingletonMeta
 logger = get_utility_logger('tools.manager')
@@ -16,10 +13,8 @@ class ToolsManager(metaclass=SingletonMeta):
 
         logger.info(f"[TOOLS_MANAGER] Initialized with {len(self.tool_instances)} tools")
 
-    def _initialize_tools(self) -> Dict[str, Tool]:
+    def _initialize_tools(self) -> Dict[str, Any]:
         tool_instances = {
-            "web_search": Tool(web_search_tool, takes_ctx=True, name="web_search"),
-            "get_documentation": Tool(documentation_tool, takes_ctx=True, name="get_documentation")
         }
 
         logger.info(f"[TOOLS_MANAGER] Initialized {len(tool_instances)} tool instances")

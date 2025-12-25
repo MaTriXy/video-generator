@@ -22,7 +22,7 @@ class PathManager:
         self.manifest_controller = ManifestController()
         self.manifest_controller.set_topic(topic)
 
-    def get_path(self, asset_type: str, scene_index: Optional[int] = None, subpath: Optional[str] = None) -> str:
+    def get_path(self, asset_type: str, scene_index: Optional[int] = None, subpath: Optional[str] = None, asset_name: Optional[str] = None) -> str:
 
         asset = AssetType(asset_type)
 
@@ -30,11 +30,15 @@ class PathManager:
             path = ClaudeCliConfig.get_latest_path(asset)
             if scene_index is not None:
                 path = path.replace('{scene_index}', str(scene_index))
+            if asset_name is not None:
+                path = path.replace('{asset_name}', asset_name)
             return path
         elif subpath == 'prompt':
             path = ClaudeCliConfig.get_prompt_path(asset)
             if scene_index is not None:
                 path = path.replace('{scene_index}', str(scene_index))
+            if asset_name is not None:
+                path = path.replace('{asset_name}', asset_name)
             return path
         elif subpath == 'metadata':
             return ClaudeCliConfig.get_metadata_path(asset)
@@ -44,46 +48,12 @@ class PathManager:
             return f"Outputs/{self.topic}/full-video-tasks.json"
         elif subpath == 'script-file':
             return ClaudeCliConfig.get_final_path(asset)
+        elif subpath == 'variant':
+            return ClaudeCliConfig.get_variant_path(asset)
         else:
             return f"Outputs/{self.topic}/{asset.value}"
 
-    def list_directory_files(self, asset_type: str, scene_index: Optional[int] = None, pattern: Optional[str] = None) -> List[str]:
-
-        try:
-            dir_path = Path(self.get_path(asset_type, scene_index))
-
-            if dir_path.is_file():
-                dir_path = dir_path.parent
-
-            if not dir_path.exists() or not dir_path.is_dir():
-                return []
-
-            if pattern:
-                files = list(dir_path.glob(pattern))
-            else:
-                files = [f for f in dir_path.iterdir() if f.is_file()]
-
-            return [str(f.absolute()) for f in sorted(files)]
-
-        except Exception as e:
-            print(f"Error: {e}", file=sys.stderr)
-            return []
-
-    def print_path_info(self, paths: List[str], message: str, quiet: bool = False):
-
-        if not quiet:
-            print(f"\n{'='*60}", file=sys.stderr)
-            print(f"  {message}", file=sys.stderr)
-            print(f"{'='*60}", file=sys.stderr)
-
-            if not paths:
-                print("  No paths found.", file=sys.stderr)
-            else:
-                for path in paths:
-                    print(f"  - {path}", file=sys.stderr)
-
-            print(f"{'='*60}\n", file=sys.stderr)
-
+    def print_path_info(self, paths: List[str], message: str, quiet: bool = True):
         for path in paths:
             print(path)
 
@@ -96,35 +66,24 @@ def main():
     parser.add_argument("--asset-type", type=str, required=True)
     parser.add_argument("--scene-index", type=int)
     parser.add_argument("--subpath", type=str, default='latest')
-    parser.add_argument("--list-files", action="store_true")
-    parser.add_argument("--pattern", type=str)
-    parser.add_argument("--quiet", action="store_true")
+    parser.add_argument("--asset-name", type=str)
 
     args = parser.parse_args()
 
     try:
         manager = PathManager(topic=args.topic)
 
-        if args.list_files:
-            paths = manager.list_directory_files(args.asset_type, args.scene_index, args.pattern)
+        path = manager.get_path(args.asset_type, args.scene_index, args.subpath, args.asset_name)
 
-            message = f"Files in {args.asset_type} for topic '{args.topic}'"
-            if args.scene_index is not None:
-                message += f" (scene {args.scene_index})"
-            if args.pattern:
-                message += f" matching '{args.pattern}'"
+        message = f"Path for {args.asset_type} (topic: {args.topic})"
+        if args.scene_index is not None:
+            message += f" [scene {args.scene_index}]"
+        if args.subpath:
+            message += f" [{args.subpath}]"
+        if args.asset_name:
+            message += f" [asset: {args.asset_name}]"
 
-            manager.print_path_info(paths, message, args.quiet)
-        else:
-            path = manager.get_path(args.asset_type, args.scene_index, args.subpath)
-
-            message = f"Path for {args.asset_type} (topic: {args.topic})"
-            if args.scene_index is not None:
-                message += f" [scene {args.scene_index}]"
-            if args.subpath:
-                message += f" [{args.subpath}]"
-
-            manager.print_path_info([path], message, args.quiet)
+        manager.print_path_info([path], message)
 
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)

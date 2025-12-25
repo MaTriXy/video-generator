@@ -37,7 +37,8 @@ class GenMetadataController(metaclass=SingletonMeta):
                 manifest_data[asset_type.value] = manifest_data[asset_type.value].get('path',"")
 
         for asset_type in delete_from_manifest[self.asset_type.value]:
-            del manifest_data[asset_type]
+            if asset_type in manifest_data:
+                del manifest_data[asset_type]
         self._metadata['manifest'] = manifest_data
         self._metadata['generated']['asset_type'] = self.asset_type.value
         self._metadata['generated']['version'] = version

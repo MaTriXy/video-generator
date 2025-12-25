@@ -1,17 +1,24 @@
 # Fetching Icons with MCP Tool
 
-## Overview
-Use the `mcp__course-tools-mcp__list_icons` tool to fetch the list of icon names.
-Use the `mcp__course-tools-mcp__search_icon` tool to fetch SVG content for icons returned by list_icons.
+<overview>
+Use the `mcp__video_gen_tools__search_icons` tool to fetch the list of icon names.
+Use the `mcp__video_gen_tools__get_icon` tool to fetch SVG content for icons returned by search_icons.
+
+</overview>
 
 ---
-## The List Tool
 
-### Parameters
+<search-tool>
+
+<search-parameters>
+Parameters:
 - `library` (optional): Library symbol prefix in lowercase (e.g., `bs`, `fa`, `gi`)
 - `name_query` (required): Keyword to filter icon names (case-insensitive)
 
-### Return Format
+</search-parameters>
+
+<search-return-format>
+Return Format:
 ```json
 {
   "result": "IconName1\nIconName2\nIconName3..."
@@ -20,16 +27,26 @@ Use the `mcp__course-tools-mcp__search_icon` tool to fetch SVG content for icons
 
 Returns newline-separated list of matching icon names.
 
-### Usage
+</search-return-format>
+
+<search-usage>
 Use this tool first to discover available icons before fetching specific SVG content.
 
----
-## The Search Tool
+</search-usage>
 
-### Parameters
+</search-tool>
+
+---
+
+<get-tool>
+
+<get-parameters>
+Parameters:
 - `icon_name` (required): The exact name of the icon from the list fetched above.
 
-### Return Format
+</get-parameters>
+
+<get-return-format>
 Returns the SVG content as a string:
 ```json
 {
@@ -37,7 +54,12 @@ Returns the SVG content as a string:
 }
 ```
 
-## Icon Libraries
+</get-return-format>
+
+</get-tool>
+
+<icon-libraries>
+Icon Libraries:
 
 | Prefix | Library
 | ------ | -----------------
@@ -46,21 +68,27 @@ Returns the SVG content as a string:
 | `Fa6`  | Font Awesome 6
 | `Gi`   | Game Icons
 
+</icon-libraries>
+
 ---
 
-## Search Process
+<search-process>
 
-1. **Get icons list** use a relevant keyword to fetch for icons from a relevant library with `mcp__course-tools-mcp__list_icons`.
-2. **Search** use the appropriate icon name from the list and get the icons svg using `mcp__course-tools-mcp__search_icon`
+<search-steps>
+1. **Get icons list** use a relevant keyword to fetch for icons from a relevant library with `mcp__video_gen_tools__search_icons`.
+2. **Search** use the appropriate icon name from the list and get the icons svg using `mcp__video_gen_tools__get_icon`
 3. **Receive SVG** and analyze and understand the structure.
+</search-steps>
+
+</search-process>
 
 ---
 
-## Analyzing Icon Geometry
-
+<analyzing-icon-geometry>
 After fetching an icon, analyze its structure to determine key positions for alignment:
 
-### 1. Identify the ViewBox
+<identify-viewbox>
+**1. Identify the ViewBox**
 
 ```svg
 <svg viewBox="0 0 512 512">  <!-- This is a 512x512 icon -->
@@ -71,7 +99,10 @@ Common viewBox sizes:
 - Font Awesome: 512x512
 - Game Icons: 512x512
 
-### 2. Find Attachment Points in Path Data
+</identify-viewbox>
+
+<find-attachment-points>
+**2. Find Attachment Points in Path Data**
 
 Examine path commands to identify key coordinates:
 
@@ -87,11 +118,19 @@ Examine path commands to identify key coordinates:
 
 See [viewbox-positioning.md](./references/viewbox-positioning.md) → "Aligning Elements to Icon Attachment Points" for how to transform these coordinates.
 
+</find-attachment-points>
+
+</analyzing-icon-geometry>
+
 ---
 
-## Handling Failed Searches
+<handling-failed-searches>
 
+<fallback-strategies>
 1. Try alternative keyword to fetch the icon list.
 2. Try different library.
+</fallback-strategies>
+
+</handling-failed-searches>
 
 ---

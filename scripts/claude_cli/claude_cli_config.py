@@ -1,10 +1,6 @@
 import os
 from scripts.enums import AssetType
 from scripts.utility.config import (
-    RESEARCH_PROMPT_TAG,
-    SCRIPT_PROMPT_TAG,
-    TRANSCRIPT_PROMPT_TAG,
-    AUDIO_PROMPT_TAG,
     DIRECTION_PROMPT_TAG,
     ASSETS_PROMPT_TAG,
     DESIGN_PROMPT_TAG,
@@ -16,6 +12,7 @@ class ClaudeCliConfig:
     TOPIC = None
     BASE_OUTPUT_PATH = "Outputs"
     METADATA_PATH = "Outputs/{topic}/{type}/v{version}/metadata_log.json"
+    VIDEO_URL_PATH = "Outputs/video_url.json"
     STYLE_MAPPING = {
         "Cartoon": "kurzgesagt",
         "Pencil": "what-if",
@@ -30,20 +27,17 @@ class ClaudeCliConfig:
     ASSET_PATHS = {
         AssetType.RESEARCH: {
             "latest_file": "Outputs/{topic}/Research/latest.json",
-            "prompt_tag": RESEARCH_PROMPT_TAG,
         },
         AssetType.SCRIPT: {
             "latest_file": "Outputs/{topic}/Scripts/latest.json",
-            "final_path":"Outputs/{topic}/Scripts/script-v1.md",
-            "prompt_tag": SCRIPT_PROMPT_TAG,
+            "final_path": "Outputs/{topic}/Scripts/script-v1.md",
+            "variant_path": "Outputs/{topic}/Scripts/script-v1-with-emotions.md",
         },
         AssetType.TRANSCRIPT: {
             "latest_file": "Outputs/{topic}/Transcript/latest.json",
-            "prompt_tag": TRANSCRIPT_PROMPT_TAG,
         },
         AssetType.AUDIO: {
             "latest_file": "Outputs/{topic}/Audio/latest.mp3",
-            "prompt_tag": AUDIO_PROMPT_TAG,
         },
         AssetType.DIRECTION: {
             "prompt_file": "Outputs/{topic}/Direction/Prompts/prompt.md",
@@ -97,6 +91,10 @@ class ClaudeCliConfig:
     @classmethod
     def get_final_path(cls, asset_type: AssetType) -> str:
         return cls.ASSET_PATHS[asset_type]["final_path"].format(topic=cls.TOPIC)
+
+    @classmethod
+    def get_variant_path(cls, asset_type: AssetType) -> str:
+        return cls.ASSET_PATHS[asset_type]["variant_path"].format(topic=cls.TOPIC)
 
     @classmethod
     def get_prompt_tag(cls, asset_type: AssetType) -> str:

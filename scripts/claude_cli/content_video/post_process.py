@@ -5,17 +5,20 @@ from typing import Dict, Any, Optional, Tuple, List
 from pathlib import Path
 
 
+
 # Add project root to Python path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
-
+from scripts.utility.config import AWS_ACCESS_KEY_ID
+from scripts.logging_config import set_console_logging
 from scripts.video_build_service.build_and_upload import BuildAndUploadService
 from scripts.claude_cli.claude_cli_config import ClaudeCliConfig
 from scripts.enums import AssetType
 from scripts.claude_cli.base_post_process import BasePostProcess
 from scripts.controllers.utils.decorators.try_catch import try_catch
-from scripts.logging_config import set_console_logging
+from scripts.controllers.video_step_metadata_controller import VideoStepMetadataController
+
 
 BASE_IMPORTS = """import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -33,6 +36,37 @@ const fontStyles = `
     font-family: 'TextFontFamily', sans-serif !important;
   }
 `;
+
+/**
+ * Path Following Utilities
+ * Shared across all scenes for animating elements along SVG paths
+ */
+const getPathPoint = (
+  pathD: string,
+  progress: number,
+  elementOrientation: number
+): { x: number; y: number; rotation: number } => {
+  if (typeof document === 'undefined') {
+    return { x: 0, y: 0, rotation: 0 };
+  }
+
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', pathD);
+  const totalLength = path.getTotalLength();
+  const point = path.getPointAtLength(totalLength * Math.min(progress, 1));
+
+  // Calculate path direction from tangent
+  // Using atan2(dx, -dy) gives 0°=UP directly (positive=clockwise)
+  const delta = 1;
+  const point1 = path.getPointAtLength(Math.max(0, totalLength * progress - delta));
+  const point2 = path.getPointAtLength(Math.min(totalLength, totalLength * progress + delta));
+  const pathAngle = Math.atan2(point2.x - point1.x, point1.y - point2.y) * (180 / Math.PI);
+
+  // Calculate rotation needed to align element with path
+  const rotation = pathAngle - elementOrientation;
+
+  return { x: point.x, y: point.y, rotation };
+};
 """
 
 SCENE_IMPORT_TEMPLATE = "import Scene{scene_index} from './scene_{scene_index}.tsx';"
@@ -82,7 +116,10 @@ VIDEO_PLAYER_FUNCTION_END = """  ];
       <style dangerouslySetInnerHTML={{ __html: fontStyles }} />
       {/* Render only the currently active scene */}
       {currentSceneIndex >= 0 && currentSceneIndex < scenes.length && (
-        <SceneComponent currentTime={currentTime} />
+        <SceneComponent
+          currentTime={currentTime}
+          getPathPoint={getPathPoint}
+        />
       )}
     </div>
   );
@@ -106,7 +143,7 @@ class VideoContentPostProcessing(BasePostProcess):
         )
         self.deployService = BuildAndUploadService(topic=topic)
         self.claude_cli_scene_output_path = self.claude_cli_config.get_latest_path(self.asset_type)
-        self.video_meta_data_path = self.claude_cli_config.get_metadata_path(self.asset_type)
+        self.metadata_controller = VideoStepMetadataController()
 
 
     @try_catch
@@ -378,7 +415,7 @@ class VideoContentPostProcessing(BasePostProcess):
         self.logger.info("Generating VideoPlayer from direction file")
 
         direction_data = self.output_controller.read_output(AssetType.DIRECTION)
-        max_scenes = self.file_io.read_json(self.video_meta_data_path).get('total_scenes', 0)
+        max_scenes = self.metadata_controller.get_total_scenes(self.asset_type)
         if not direction_data:
             self.logger.error("Could not read direction file")
             return None
@@ -485,13 +522,7 @@ class VideoContentPostProcessing(BasePostProcess):
     def validate_output(self) -> bool:
         self.logger.info("Validating video output...")
 
-        # Read metadata to get total scenes
-        metadata = self.file_io.read_json(self.video_meta_data_path)
-        if not metadata:
-            self.logger.error(f"Could not read metadata from {self.video_meta_data_path}")
-            return False
-
-        total_scenes = metadata.get('total_scenes', 0)
+        total_scenes = self.metadata_controller.get_total_scenes(self.asset_type)
         if total_scenes == 0:
             self.logger.error("No scenes found in metadata (total_scenes is 0)")
             return False
@@ -549,7 +580,7 @@ class VideoContentPostProcessing(BasePostProcess):
                 self.force_logging(f"Video deployed successfully")
                 self.force_logging(f"Video URL: {deployedData['url']}")
         except Exception as e:
-            self.logger.info(f"Failed to deploy video: {str(e)}")
+            self.logger.error(f"Failed to deploy video: {str(e)}")
         self.gen_metadata_controller.save_metadata()
         return result
 

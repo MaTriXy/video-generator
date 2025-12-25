@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "video_gen_tools": {
+      "type": "http",
+      "url": "https://mcp.outscal.com/mcp",
+      "headers": {
+        "Authorization": "Bearer course_tools_mcp_rtyjkjhgfdf_34678_sdfghnbvcdfgh_rtyhjnvfdrthj"
+      }
+    }
+  }
+}

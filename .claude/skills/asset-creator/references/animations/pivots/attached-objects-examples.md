@@ -1,14 +1,15 @@
 # Center Pivot with Attached Objects Examples
 
+<overview>
 Complex systems where a parent object rotates from its center and child objects stay attached.
 
 **Critical concept:** Each attached object needs its own `animateTransform` with a pivot point calculated relative to the parent's pivot.
+</overview>
 
 ---
 
-## 1. Seesaw (Center Pivot with Attached Objects)
-
-Plank rotates from center, people on ends stay attached.
+<example-seesaw>
+**1. Seesaw (Center Pivot with Attached Objects)** - Plank rotates from center, people on ends stay attached.
 
 ```svg
 <svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -75,18 +76,21 @@ Plank rotates from center, people on ends stay attached.
 </svg>
 ```
 
+<pivot-calculation-seesaw>
 **Pivot calculation for attached objects:**
 ```
 Child pivot = Parent pivot - Child position
 Left person:  (150, 120) - (70, 115)  = (80, 5)
 Right person: (150, 120) - (230, 115) = (-80, 5)
 ```
+</pivot-calculation-seesaw>
+
+</example-seesaw>
 
 ---
 
-## 2. Balance Scale (Center Pivot with Attached Objects)
-
-Beam rotates from center, pans on ends stay attached and level.
+<example-balance-scale>
+**2. Balance Scale (Center Pivot with Attached Objects)** - Beam rotates from center, pans on ends stay attached and level.
 
 ```svg
 <svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -173,17 +177,20 @@ Beam rotates from center, pans on ends stay attached and level.
 </svg>
 ```
 
+<pivot-calculation-scale>
 **Pivot calculation for attached objects:**
 ```
 Child pivot = Parent pivot - Child position
 Left pan:  (150, 80) - (80, 80)  = (70, 0)
 Right pan: (150, 80) - (220, 80) = (-70, 0)
 ```
+</pivot-calculation-scale>
+
+</example-balance-scale>
 
 ---
 
-## Key Formula for Attached Objects
-
+<key-formula>
 When an object is placed using `transform="translate(x, y)"`, calculate its animation pivot as:
 
 ```
@@ -191,7 +198,11 @@ animationPivotX = parentPivotX - translateX
 animationPivotY = parentPivotY - translateY
 ```
 
+<attached-requirements>
 All attached elements must have:
 - Same rotation angles as parent
 - Same duration as parent
 - Pivot point calculated using the formula above
+</attached-requirements>
+
+</key-formula>

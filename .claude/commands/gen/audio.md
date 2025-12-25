@@ -1,14 +1,18 @@
 ---
-description: generate audio from video script using ElevenLabs
-allowed-tools: Bash
+description: Generate audio from video script by invoking the video-creator skill.
+allowed-tools: Skill
 model: haiku
 argument-hint: --topic "topic-name"
 ---
 
-## Audio Generation
+# Audio Generation
 
-Run the audio content post-processor to generate audio from the video script:
+Invoke the video-creator skill:
 
-```bash
-python scripts/claude_cli/content_audio/post_process.py --topic "{topic}"
+```
+Skill: video-creator
+
+Execute Mode: Single Step Execution
+- Step: audio
+- Topic: {topic}
 ```

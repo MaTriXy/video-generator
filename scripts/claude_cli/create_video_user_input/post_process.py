@@ -1,6 +1,5 @@
 import os
 import sys
-import json
 from typing import Optional, Tuple
 from pathlib import Path
 
@@ -88,9 +87,11 @@ def main():
 
     processor = PostProcessCreateVideoUserInput(topic=args.topic, video_style=args.video_style)
     success, result = processor.run()
-    print(json.dumps(result, indent=2))
 
-    if not success:
+    if success:
+        print(f"VALIDATION_PASSED\nTopic: {args.topic}\nVideo Style: {result['video_style']}")
+    else:
+        print(f"ERROR: {result['error']}")
         sys.exit(1)
 
 

@@ -14,6 +14,7 @@ if project_root not in sys.path:
 from scripts.claude_cli.base_post_process import BasePostProcess
 from scripts.claude_cli.claude_cli_config import ClaudeCliConfig, AssetType
 from scripts.controllers.utils.decorators.try_catch import try_catch
+from scripts.controllers.video_step_metadata_controller import VideoStepMetadataController
 from scripts.logging_config import set_console_logging
 
 
@@ -26,14 +27,30 @@ class AssetGeneratorPostProcess(BasePostProcess):
             topic=topic,
             asset_type=AssetType.ASSETS,
         )
-        self.asset_meta_data_path = self.claude_cli_config.get_metadata_path(self.asset_type)
+        self.metadata_controller = VideoStepMetadataController()
 
     @try_catch
-    def _get_asset_metadata(self) -> tuple:
-        metadata = self.file_io.read_json(self.asset_meta_data_path)
-        total_assets = metadata.get('total_assets', 0)
-        asset_names = metadata.get('asset_names', [])
-        return total_assets, asset_names
+    def _extract_base_orientation(self, svg_path: Path) -> int:
+        """
+        Extract base_orientation from SVG comment.
+        Looks for pattern: <!-- ORIENTATION: <degrees> -->
+        Returns orientation in degrees (positive=clockwise, negative=counter-clockwise).
+        """
+        import re
+        try:
+            content = svg_path.read_text(encoding='utf-8')
+
+            # Look for <!-- ORIENTATION: <number> --> pattern (supports negative for counter-clockwise)
+            match = re.search(r'<!--\s*ORIENTATION:\s*(-?\d+)\s*-->', content, re.IGNORECASE)
+            if match:
+                return int(match.group(1))  # Preserve negative values for counter-clockwise
+
+            # Default to 0 if no orientation comment found
+            self.logger.warning(f"No orientation comment found in {svg_path.name}, defaulting to 0")
+            return 0
+        except Exception as e:
+            self.logger.error(f"Error reading SVG file {svg_path}: {str(e)}")
+            return 0  # Default on error
 
     @try_catch
     def copy_asset_files_to_version_dir(self, version_dir: Path, asset_names: list) -> Tuple[bool, list]:
@@ -55,9 +72,14 @@ class AssetGeneratorPostProcess(BasePostProcess):
                 dest_file.write_text(source_file.read_text(encoding='utf-8'), encoding='utf-8')
                 self.logger.info(f"Copied {asset_name}.svg to version directory")
 
+                # Extract base_orientation from SVG
+                base_orientation = self._extract_base_orientation(dest_file)
+                self.logger.info(f"Extracted base_orientation for {asset_name}: {base_orientation}°")
+
                 copied_assets.append({
                     "name": asset_name,
-                    "path": str(version_dir / f"{asset_name}.svg").replace("\\", "/")
+                    "path": str(version_dir / f"{asset_name}.svg").replace("\\", "/"),
+                    "base_orientation": base_orientation
                 })
             except Exception as e:
                 self.logger.error(f"Failed to copy asset {asset_name}: {str(e)}")
@@ -85,7 +107,9 @@ class AssetGeneratorPostProcess(BasePostProcess):
     def process_output(self) -> Tuple[Optional[str], Optional[str]]:
         self.logger.info("Processing asset generator output")
 
-        total_assets, asset_names = self._get_asset_metadata()
+        metadata = self.metadata_controller.read(self.asset_type)
+        total_assets = metadata.get('total_assets', 0)
+        asset_names = metadata.get('asset_names', [])
         if not total_assets or not asset_names:
             self.logger.error("Could not determine asset metadata")
             return None, None

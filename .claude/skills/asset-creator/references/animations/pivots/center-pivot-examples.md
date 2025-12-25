@@ -1,10 +1,11 @@
 # Center Pivot Examples
 
+<overview>
 Objects rotating around their geometric center point.
+</overview>
 
-## 1. Fan (Center Pivot)
-
-Multiple blades rotating continuously from the center hub.
+<example-fan>
+**1. Fan (Center Pivot)** - Multiple blades rotating continuously from the center hub.
 
 ```svg
 <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -32,13 +33,16 @@ Multiple blades rotating continuously from the center hub.
 </svg>
 ```
 
+<key-point-fan>
 **Key point:** Wrap all rotating elements in a `<g>` group and apply animation to the group.
+</key-point-fan>
+
+</example-fan>
 
 ---
 
-## 2. Wheel (Center Pivot)
-
-Simple wheel with spokes rotating continuously.
+<example-wheel>
+**2. Wheel (Center Pivot)** - Simple wheel with spokes rotating continuously.
 
 ```svg
 <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -68,13 +72,16 @@ Simple wheel with spokes rotating continuously.
 </svg>
 ```
 
+<key-point-wheel>
 **Key point:** The hub can be drawn outside the rotating group to remain stationary.
+</key-point-wheel>
+
+</example-wheel>
 
 ---
 
-## 3. Gear (Center Pivot)
-
-Gear with teeth rotating from center.
+<example-gear>
+**3. Gear (Center Pivot)** - Gear with teeth rotating from center.
 
 ```svg
 <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -108,4 +115,8 @@ Gear with teeth rotating from center.
 </svg>
 ```
 
+<key-point-gear>
 **Key point:** All teeth are pre-positioned using static `transform="rotate()"` and the whole group animates together.
+</key-point-gear>
+
+</example-gear>

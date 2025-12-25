@@ -116,26 +116,14 @@ class BasePreProcess(ABC):
     @try_catch
     def delete_existing_outputs(self):
         path_template = self.claude_cli_config.get_latest_path(self.asset_type)
-
-        format_kwargs = {}
-        if '{scene_index}' in path_template:
-            format_kwargs['scene_index'] = '*'
-        if '{asset_name}' in path_template:
-            format_kwargs['asset_name'] = '*'
-
-        if not format_kwargs:
-            self.logger.info("No placeholders in path template, skipping deletion")
-            return
-
-        pattern = path_template.format(**format_kwargs)
-        # Normalize path for cross-platform compatibility
+        pattern = path_template.format(scene_index='*', asset_name='*')
+         # Normalize path for cross-platform compatibility
         pattern = str(Path(pattern))
-
         matching_files = glob(pattern)
+
         self.logger.info(f"Pattern: {pattern}, Matching files: {matching_files}")
         if matching_files:
             self.logger.info(f"Found {len(matching_files)} existing files to delete")
-
             for file_path in matching_files:
                 try:
                     self.file_io.delete_file(file_path)

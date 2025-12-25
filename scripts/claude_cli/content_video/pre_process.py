@@ -16,6 +16,7 @@ if project_root not in sys.path:
 from scripts.enums import AssetType
 from scripts.claude_cli.base_pre_process import BasePreProcess
 from scripts.controllers.utils.decorators.try_catch import try_catch
+from scripts.controllers.video_step_metadata_controller import VideoStepMetadataController
 
 
 class VideoScenePreProcess(BasePreProcess):
@@ -29,8 +30,7 @@ class VideoScenePreProcess(BasePreProcess):
             gen_prompt=gen_prompt,
         )
 
-        # Additional attributes specific to VideoScenePreProcess
-        self.video_meta_data_path = self.claude_cli_config.get_metadata_path(self.asset_type)
+        self.metadata_controller = VideoStepMetadataController()
         self.video_direction = {}
         self.video_design = {}
         self.asset_manifest = {}
@@ -107,7 +107,7 @@ class VideoScenePreProcess(BasePreProcess):
             self.save_prompt_to_file(prompt, scene_index)
             self.logger.info(f" Saved video scene prompt to: {file_path.format(scene_index=scene_index)}")
 
-        self.file_io.write_json(self.video_meta_data_path, output)
+        self.metadata_controller.write(self.asset_type, output)
 
     @try_catch
     def get_scene_direction(self, scene_index: int) -> Dict[str, Any]:
@@ -171,16 +171,12 @@ if __name__ == "__main__":
     parser.add_argument('--gen_prompt', type=lambda x: x.lower() == 'true', default=True, help='Generate prompts (default: true)')
     args = parser.parse_args()
 
-    # Create instance
     pre_process = VideoScenePreProcess(topic=args.topic, max_scenes=args.max_scenes, gen_prompt=args.gen_prompt)
     pre_process.run()
 
-    # Read and display the metadata to confirm scene count
-    video_meta_data_path = pre_process.video_meta_data_path
-    metadata = pre_process.file_io.read_json(video_meta_data_path)
+    metadata = pre_process.metadata_controller.read(AssetType.VIDEO)
 
     pre_process.logger.info("=" * 80)
     pre_process.logger.info("Pre-processing completed successfully")
     pre_process.logger.info(f"Total scene videos to generate: {metadata['total_scenes']}")
-    pre_process.logger.info(f"Video metadata saved to: {video_meta_data_path}")
     pre_process.logger.info("=" * 80)

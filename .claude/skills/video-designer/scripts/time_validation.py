@@ -108,11 +108,10 @@ def validate_all_animations(scene_index: int = None, file_path: str = None) -> T
 
     for element in elements:
         element_id = element.get('id', 'unknown')
-        timing = element.get('timing', {})
         animation = element.get('animation', {})
 
-        enter_time = timing.get('enterOn', 0)
-        exit_time = timing.get('exitOn', scene_end_time)
+        enter_time = element.get('enterOn', 0)
+        exit_time = element.get('exitOn', scene_end_time)
 
         # Check entrance animation
         entrance = animation.get('entrance', {})
@@ -160,7 +159,7 @@ def validate_all_animations(scene_index: int = None, file_path: str = None) -> T
                     'element_id': element_id,
                     'error_type': 'action_exceeds_scene',
                     'animation_type': f'action[{i}]',
-                    'target_property': action.get('targetProperty', 'unknown'),
+                    'target_property': action.get('targetProperty') or action.get('type', 'unknown'),
                     'start_time': action_start,
                     'duration': action_duration,
                     'end_time': action_end,
