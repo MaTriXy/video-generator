@@ -92,7 +92,7 @@ When you run `/create-video`, the tool will guide you through this pipeline:
 
 ```
 ┌─────────┐   ┌─────────┐   ┌───────────┐   ┌───────────┐   ┌────────┐   ┌────────┐   ┌───────┐
-│  Style  │ → │ Script  │ → │   Audio   │ → │ Direction │ → │ Assets │ → │ Design │ → │ Video │
+│  Style  │ → │ Script  │ → │ Direction │ → │   Audio   │ → │ Assets │ → │ Design │ → │ Video │
 └─────────┘   └─────────┘   └───────────┘   └───────────┘   └────────┘   └────────┘   └───────┘
 ```
 
@@ -100,8 +100,8 @@ When you run `/create-video`, the tool will guide you through this pipeline:
 |------|--------------|
 | 🎨 **Style** | Choose from available art styles |
 | 📝 **Script** | Provide your narration script (max 2000 characters) |
-| 🔊 **Audio** | Convert script to speech using ElevenLabs |
 | 🎬 **Direction** | Generate scene-by-scene video direction |
+| 🔊 **Audio** | Convert script to speech using ElevenLabs |
 | 🖼️ **Assets** | Create SVG assets for the video |
 | ✏️ **Design** | Generate detailed design specifications |
 | 🎥 **Video** | Create and deploy video (displays deployed URL) |
@@ -142,4 +142,3 @@ Vibrant, futuristic style with glowing effects, dark backgrounds, and bright acc
 
 > [!IMPORTANT]
 > If you run individual `gen:` commands instead of `/create-video`, you must run all subsequent commands in the workflow sequence for your changes to take effect. For example, if you run `/gen:director`, you'll need to manually run `/gen:assets`, `/gen:design`, and `/gen:video` afterwards.
-
