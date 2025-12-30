@@ -148,8 +148,8 @@ class PromptManager(metaclass=SingletonMeta):
                     sub_prompt_data=self.fetch_and_build_prompt(
                         prompt_name=value,
                         tag=tag
-                    );
-                    prompt_vars[f"prompt_{key}"]=(sub_prompt_data["system_prompt"] or "") +" "+sub_prompt_data["prompt"]
+                    )
+                    prompt_vars[f"prompt_{key}"]=self._prompt_processor.get_prompt_content(sub_prompt_data)
             return prompt_vars
         else:
             return {}

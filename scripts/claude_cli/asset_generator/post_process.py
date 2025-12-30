@@ -1,10 +1,11 @@
 """
-Asset Generator Post-Process - Versions SVG assets.
+Asset Generator Post-Process - Extracts SVGs from single file and versions them.
 """
 
+import re
 import sys
 import os
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List, Dict
 from pathlib import Path
 
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -30,115 +31,88 @@ class AssetGeneratorPostProcess(BasePostProcess):
         self.metadata_controller = VideoStepMetadataController()
 
     @try_catch
-    def _extract_base_orientation(self, svg_path: Path) -> int:
+    def _extract_composition(self, svg_content: str, asset_name: str = "") -> str:
         """
-        Extract base_orientation from SVG comment.
-        Looks for pattern: <!-- ORIENTATION: <degrees> -->
-        Returns orientation in degrees (positive=clockwise, negative=counter-clockwise).
+        Extract composition description from SVG comment.
+        Looks for pattern: <!-- COMPOSITION: <description> -->
+        Returns the composition string or empty string if not found.
         """
-        import re
-        try:
-            content = svg_path.read_text(encoding='utf-8')
-
-            # Look for <!-- ORIENTATION: <number> --> pattern (supports negative for counter-clockwise)
-            match = re.search(r'<!--\s*ORIENTATION:\s*(-?\d+)\s*-->', content, re.IGNORECASE)
-            if match:
-                return int(match.group(1))  # Preserve negative values for counter-clockwise
-
-            # Default to 0 if no orientation comment found
-            self.logger.warning(f"No orientation comment found in {svg_path.name}, defaulting to 0")
-            return 0
-        except Exception as e:
-            self.logger.error(f"Error reading SVG file {svg_path}: {str(e)}")
-            return 0  # Default on error
+        match = re.search(r'<!--\s*COMPOSITION:\s*(.+?)\s*-->', svg_content, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+        self.logger.warning(f"No composition comment found in {asset_name}, defaulting to empty")
+        return ""
 
     @try_catch
-    def copy_asset_files_to_version_dir(self, version_dir: Path, asset_names: list) -> Tuple[bool, list]:
-        self.logger.info(f"Copying asset files to {version_dir}")
+    def extract_svgs_from_file(self, file_path: Path) -> List[Dict[str, str]]:
+        content = file_path.read_text(encoding='utf-8')
+        pattern = r'<!--\s*ASSET:\s*(\S+)\s*-->\s*((?:<!--\s*COMPOSITION:[^>]+-->\s*)?<svg[\s\S]*?</svg>)'
+        matches = re.findall(pattern, content, re.IGNORECASE)
 
-        latest_path_template = self.claude_cli_config.get_latest_path(self.asset_type)
-        latest_dir = Path(latest_path_template).parent
+        assets = []
+        for asset_name, svg_content in matches:
+            assets.append({'name': asset_name.strip(), 'content': svg_content.strip()})
 
-        copied_assets = []
-        for asset_name in asset_names:
-            source_file = latest_dir / f"latest_{asset_name}.svg"
-            dest_file = version_dir / f"{asset_name}.svg"
+        self.logger.info(f"Extracted {len(assets)} assets from file")
+        return assets
 
-            if not source_file.exists():
-                self.logger.warning(f"Asset file does not exist: {source_file}")
-                continue
+    @try_catch
+    def save_assets_to_dir(self, target_dir: Path, assets: List[Dict[str, str]]) -> List[Dict]:
+        saved_assets = []
+        for asset in assets:
+            asset_name = asset['name']
+            svg_content = asset['content']
+            dest_file = target_dir / f"{asset_name}.svg"
 
             try:
-                dest_file.write_text(source_file.read_text(encoding='utf-8'), encoding='utf-8')
-                self.logger.info(f"Copied {asset_name}.svg to version directory")
-
-                # Extract base_orientation from SVG
-                base_orientation = self._extract_base_orientation(dest_file)
-                self.logger.info(f"Extracted base_orientation for {asset_name}: {base_orientation}°")
-
-                copied_assets.append({
+                dest_file.write_text(svg_content, encoding='utf-8')
+                composition = self._extract_composition(svg_content, asset_name)
+                saved_assets.append({
                     "name": asset_name,
-                    "path": str(version_dir / f"{asset_name}.svg").replace("\\", "/"),
-                    "base_orientation": base_orientation
+                    "path": str(dest_file).replace("\\", "/"),
+                    "composition": composition
                 })
             except Exception as e:
-                self.logger.error(f"Failed to copy asset {asset_name}: {str(e)}")
+                self.logger.error(f"Failed to save {asset_name}: {str(e)}")
 
-        self.logger.info(f"Successfully copied {len(copied_assets)}/{len(asset_names)} asset files")
-        return len(copied_assets) > 0, copied_assets
-
-    @try_catch
-    def generate_asset_manifest(self, copied_assets: list, version_dir: Path, version: int) -> Optional[str]:
-        asset_manifest = {
-            "assets": copied_assets
-        }
-
-        manifest_path = version_dir / f"asset-manifest-v{version}.json"
-
-        try:
-            self.file_io.write_json(str(manifest_path), asset_manifest)
-            self.logger.info(f"Generated asset manifest: {manifest_path}")
-            return str(manifest_path)
-        except Exception as e:
-            self.logger.error(f"Failed to generate asset manifest: {str(e)}")
-            return None
+        return saved_assets
 
     @try_catch
     def process_output(self) -> Tuple[Optional[str], Optional[str]]:
         self.logger.info("Processing asset generator output")
 
-        metadata = self.metadata_controller.read(self.asset_type)
-        total_assets = metadata.get('total_assets', 0)
-        asset_names = metadata.get('asset_names', [])
-        if not total_assets or not asset_names:
-            self.logger.error("Could not determine asset metadata")
+        latest_path = Path(self.claude_cli_config.get_latest_path(self.asset_type))
+        if not latest_path.exists():
+            self.logger.error(f"Combined assets file not found: {latest_path}")
             return None, None
 
-        self.gen_metadata_controller.set_metadata({"total_assets": total_assets})
-        self.logger.info(f"Processing {total_assets} asset files")
-
-        version = self.manifest_controller.get_current_gen_version(self.asset_type)
-        latest_path_template = self.claude_cli_config.get_latest_path(self.asset_type)
-        latest_dir = Path(latest_path_template).parent
-        version_dir = latest_dir.parent / f"v{version}"
-        version_dir.mkdir(parents=True, exist_ok=True)
-
-        success, copied_assets = self.copy_asset_files_to_version_dir(version_dir, asset_names)
-
-        if not success:
-            self.logger.error("Failed to copy asset files")
+        assets = self.extract_svgs_from_file(latest_path)
+        if not assets:
+            self.logger.error("No assets extracted from file")
             return None, None
 
-        manifest_path = self.generate_asset_manifest(copied_assets, version_dir, version)
+        self.gen_metadata_controller.set_metadata({"total_assets": len(assets)})
 
-        if not manifest_path:
-            self.logger.error("Failed to generate asset manifest")
+        latest_dir = latest_path.parent
+        saved_assets = self.save_assets_to_dir(latest_dir, assets)
+        if not saved_assets:
+            self.logger.error("Failed to save any assets")
             return None, None
 
-        self.manifest_controller.update_file(self.asset_type, manifest_path, version)
-        self.logger.info("Asset generator output processed successfully")
+        latest_json = latest_dir / "latest_assets.json"
+        self.file_io.write_json(str(latest_json), {"assets": saved_assets})
 
-        return str(version), manifest_path
+        file_path, version = self.output_controller.save_output(self.asset_type, str(latest_json))
+        if not file_path:
+            return None, None
+
+        version_dir = Path(file_path).parent
+        versioned_assets = self.save_assets_to_dir(version_dir, assets)
+
+        self.file_io.write_json(file_path, {"assets": versioned_assets})
+        self.manifest_controller.update_file(self.asset_type, file_path, version)
+
+        return str(version), file_path
 
     @try_catch
     def process(self) -> Tuple[bool, Optional[str]]:

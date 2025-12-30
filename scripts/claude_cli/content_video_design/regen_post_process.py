@@ -22,7 +22,7 @@ class VideoDesignRegenPostProcessing(VideoDesignPostProcessing):
     def process_output(self) -> Tuple[Optional[str], Optional[int]]:
         self.logger.info(f"Processing regenerated video design output for scenes: {self.scenes}")
 
-        total_scenes = self._get_total_scenes()
+        total_scenes = self.metadata_controller.get_total_scenes(self.asset_type)
         if not total_scenes:
             self.logger.error("Could not determine total scenes from metadata")
             return None, None

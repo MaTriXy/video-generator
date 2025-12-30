@@ -39,8 +39,17 @@ Single curved arc segment.
 | `end_x` | number | Yes | Ending X coordinate (absolute screen position) |
 | `end_y` | number | Yes | Ending Y coordinate (absolute screen position) |
 | `radius` | number | Yes | Arc radius in pixels |
-| `sweep` | number | No | 1 for clockwise, 0 for counter-clockwise (default 1) |
-| `large_arc` | number | No | 1 for arc > 180°, 0 for arc < 180° (default 0) |
+| `sweep` | number | No | Direction arc curves toward. Default 0 (UP) |
+| `large_arc` | number | No | 0 = short arc, 1 = long arc (>180°). Default 0 |
+
+### Sweep Reference
+
+| Value | Direction |
+|-------|-----------|
+| 0 | UP ↑ |
+| 1 | DOWN ↓ |
+| 2 | LEFT ← |
+| 3 | RIGHT → |
 
 ### path_params
 
@@ -52,7 +61,7 @@ Single curved arc segment.
   "end_x": 400,
   "end_y": 300,
   "radius": 200,
-  "sweep": 1,
+  "sweep": 0,
   "large_arc": 0
 }
 ```
@@ -112,7 +121,7 @@ Bouncing trajectory with decreasing height.
 | `start_y` | number | Yes | Starting Y coordinate (absolute screen position) |
 | `end_x` | number | Yes | Ending X coordinate (absolute screen position) |
 | `ground_y` | number | Yes | Y-coordinate of ground/floor (absolute screen position) |
-| `initial_height` | number | Yes | Height of first bounce |
+| `initial_height` | number | Yes | Height of first bounce ABOVE ground_y |
 | `bounces` | number | Yes | Number of bounces |
 | `decay` | number | No | Height reduction factor per bounce (default 0.6) |
 
@@ -338,13 +347,14 @@ Wave going **diagonal**:
 
 ## Spiral Path
 
-Inward or outward spiral pattern.
+Spiral pattern that can expand outward or collapse inward.
 
 ### Use Cases
 - Tornado
 - Galaxy
 - Swirls
-- Draining effect
+- Draining effect (inward)
+- Expanding energy (outward)
 
 ### Parameters
 
@@ -355,6 +365,7 @@ Inward or outward spiral pattern.
 | `max_radius` | number | Yes | Maximum radius at outermost point |
 | `revolutions` | number | Yes | Number of complete rotations |
 | `points` | number | No | Number of points for smoothness (default 100) |
+| `inward` | boolean | No | false (default) = center to edge, true = edge to center |
 
 ### path_params
 

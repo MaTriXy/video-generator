@@ -12,6 +12,7 @@
       "Skill(video-designer)",
       "Skill(video-director)",
       "Write(Outputs/**)",
+      "Write(Outputs/*/Scripts/**)",
       "Edit(Outputs/*/Direction/**)",
       "Edit(Outputs/*/Design/**)",
       "Edit(Outputs/*/Video/**)",

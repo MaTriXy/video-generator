@@ -9,7 +9,8 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from scripts.utility.config import (
-    ELEVENLABS_VOICE_ID,
+    ELEVENLABS_PRIMARY_VOICE_ID,
+    ELEVENLABS_FALLBACK_VOICE_ID,
     ELEVENLABS_PRIMARY_MODEL,
     ELEVENLABS_FALLBACK_MODEL,
     ELEVENLABS_SPEED,
@@ -21,6 +22,7 @@ from scripts.claude_cli.base_post_process import BasePostProcess
 from scripts.controllers.utils.decorators.try_catch import try_catch
 from scripts.utility.elevenlabs_tts import generate_audio as elevenlabs_generate
 from scripts.enums import AssetType
+from scripts.claude_cli.content_video_direction.scene_timestamp_calculator import match_narration_to_transcript
 
 
 class PostProcessAudio(BasePostProcess):
@@ -34,7 +36,7 @@ class PostProcessAudio(BasePostProcess):
 
         self.use_fallback = use_fallback
         self.config = {
-            "voice_id": ELEVENLABS_VOICE_ID,
+            "voice_id": ELEVENLABS_PRIMARY_VOICE_ID if not use_fallback else ELEVENLABS_FALLBACK_VOICE_ID,
             "speed": ELEVENLABS_SPEED,
             "stability": ELEVENLABS_STABILITY,
             "similarity": ELEVENLABS_SIMILARITY
@@ -57,22 +59,17 @@ class PostProcessAudio(BasePostProcess):
         self.write_versioned_output(AssetType.TRANSCRIPT)
 
     @try_catch(return_on_error=(None, None))
-    def read_script_from_manifest(self, use_emotion_tags: bool = True) -> Tuple[Optional[str], Optional[str]]:
-        content_data = self.manifest_controller.get_field(AssetType.SCRIPT)
-        file_path = content_data.get('path') if content_data else None
-
-        if not file_path:
-            self.logger.error("No script path found in manifest")
-            return None, None
-
+    def read_script(self, use_emotion_tags: bool = True) -> Tuple[Optional[str], Optional[str]]:
         if use_emotion_tags:
-            variant_path = self.claude_cli_config.get_variant_path(AssetType.SCRIPT)
+            file_path = self.claude_cli_config.get_variant_path(AssetType.SCRIPT)
+            self.logger.info(f"Using emotion-tagged script: {file_path}")
+        else:
+            file_path = self.claude_cli_config.get_final_path(AssetType.SCRIPT)
+            self.logger.info(f"Using original script (no emotion tags): {file_path}")
 
-            if Path(variant_path).exists():
-                file_path = variant_path
-                self.logger.info(f"Using emotion-tagged script: {file_path}")
-            else:
-                self.logger.warning(f"Emotion-tagged script not found at {variant_path}, using original")
+        if not Path(file_path).exists():
+            self.logger.error(f"Script file not found: {file_path}")
+            return None, None
 
         script_text = self.file_io.read_text(file_path)
         if not script_text:
@@ -81,6 +78,73 @@ class PostProcessAudio(BasePostProcess):
 
         self.logger.info(f"Read script from: {file_path} ({len(script_text)} characters)")
         return script_text.strip(), file_path
+
+    def _validate_direction_file_exists(self) -> bool:
+        direction_file = self.claude_cli_config.get_latest_path(AssetType.DIRECTION)
+        if not self.file_io.exists(direction_file):
+            self.logger.error(f"Direction file not found: {direction_file}")
+            return False
+        return True
+
+    @try_catch
+    def _calculate_timestamps_for_direction(self) -> bool:
+        direction_file = self.claude_cli_config.get_latest_path(AssetType.DIRECTION)
+
+        if not self._validate_direction_file_exists():
+            return False
+
+        direction_data = self.file_io.read_json(direction_file)
+
+        if not direction_data or 'scenes' not in direction_data:
+            self.logger.error("Invalid direction data: missing 'scenes' array")
+            return False
+
+        transcript = self.output_controller.read_output(AssetType.TRANSCRIPT)
+
+        if not transcript:
+            self.logger.error("No transcript found - cannot calculate timestamps")
+            return False
+
+        self.logger.info(f"Transcript loaded: {len(transcript)} words")
+
+        transcript_index = 0
+        total_scenes = len(direction_data['scenes'])
+        computed_timestamps = []
+
+        for scene_idx, scene in enumerate(direction_data['scenes']):
+            narration = scene.get('audioTranscriptPortion', '')
+
+            if not narration:
+                self.logger.warning(f"Scene {scene_idx}: No audioTranscriptPortion found")
+                computed_timestamps.append(None)
+                continue
+
+            start_ms, end_ms, next_index, _, _ = match_narration_to_transcript(
+                narration, transcript, transcript_index
+            )
+
+            if start_ms is None or end_ms is None:
+                self.logger.error(f"Scene {scene_idx}: Failed to match. Narration: '{narration[:50]}...' at transcript_index: {transcript_index}")
+                return False
+
+            computed_timestamps.append((start_ms, end_ms))
+            transcript_index = next_index
+            self.logger.info(f"Scene {scene_idx}: {start_ms}ms - {end_ms}ms")
+
+        for scene_idx, scene in enumerate(direction_data['scenes']):
+            if computed_timestamps[scene_idx] is not None:
+                start_ms, end_ms = computed_timestamps[scene_idx]
+                scene['sceneStartTime'] = start_ms
+                scene['sceneEndTime'] = end_ms
+
+        self.file_io.write_json(direction_file, direction_data)
+
+        direction_manifest = self.manifest_controller.get_field(AssetType.DIRECTION)
+        if direction_manifest and direction_manifest.get('path'):
+            self.file_io.write_json(direction_manifest['path'], direction_data)
+
+        self.logger.info(f"✓ Calculated timestamps for {total_scenes} scenes")
+        return True
 
 
     def _call_elevenlabs_api(self, text: str, model: str, log_prefix: str) -> Tuple[bool, Optional[str], Optional[str], int, int, str]:
@@ -106,7 +170,7 @@ class PostProcessAudio(BasePostProcess):
     @try_catch(return_on_error=(False, None, None, {}))
     def generate_audio(self, text: str, use_fallback: bool = False) -> Tuple[bool, Optional[str], Optional[str], Dict[str, Any]]:
         model = ELEVENLABS_FALLBACK_MODEL if use_fallback else ELEVENLABS_PRIMARY_MODEL
-        log_prefix = "ElevenLabs Turbo v2.5" if use_fallback else "ElevenLabs v3"
+        log_prefix = "ElevenLabs v2" if use_fallback else "ElevenLabs v3"
 
         success, audio_path, transcript_path, affected_count, total_count, error_msg = self._call_elevenlabs_api(
             text, model, log_prefix
@@ -116,10 +180,10 @@ class PostProcessAudio(BasePostProcess):
             return True, audio_path, transcript_path, {}
 
         if use_fallback:
-            print("\033[91m[ERROR] ElevenLabs v2.5 also failed - try again later.\033[0m")
+            print(f"\033[91m[ERROR] {log_prefix} also failed - try again later.\033[0m")
             self.logger.error(f"Fallback model also failed: {error_msg}")
         else:
-            self.logger.warning(f"v3 failed: {error_msg}")
+            self.logger.warning(f"{log_prefix} failed: {error_msg}")
 
         return False, None, None, {
             "affected_count": affected_count,
@@ -130,11 +194,21 @@ class PostProcessAudio(BasePostProcess):
     def _handle_success(self, audio_path: str, model_used: str) -> Tuple[bool, str]:
         self.logger.info("Audio generation completed")
         self._write_versioned_outputs()
+
+        if not self._calculate_timestamps_for_direction():
+            self.logger.error("Failed to calculate timestamps for direction")
+            return False, None
+
         return True, audio_path
 
     @try_catch(return_on_error=(False, None))
     def process(self) -> Tuple[bool, Optional[str]]:
         self.logger.info("Starting audio content post-processing")
+
+        if not self._validate_direction_file_exists():
+            self._output_json_status("error", message="Direction file must exist before audio generation")
+            return False, None
+
         self.gen_metadata_controller.set_metadata({"config": self.config})
 
         use_emotion_tags = not self.use_fallback
@@ -143,11 +217,11 @@ class PostProcessAudio(BasePostProcess):
         log_msg = "Using fallback model v2.5 with original script (no emotion tags)" if self.use_fallback else "Generating audio with v3 using emotion-tagged script"
         self.logger.info(log_msg)
 
-        script_data, script_path = self.read_script_from_manifest(use_emotion_tags=use_emotion_tags)
+        script_data, script_path = self.read_script(use_emotion_tags=use_emotion_tags)
 
         if not script_data:
             self.logger.error("Failed to read script data")
-            self._output_json_status("error", message="Failed to read script from manifest")
+            self._output_json_status("error", message="Failed to read script")
             return False, None
 
         success, audio_path, transcript_path, fallback_info = self.generate_audio(script_data, use_fallback=self.use_fallback)

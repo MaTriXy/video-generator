@@ -97,8 +97,14 @@ python ".claude/skills/asset-creator/scripts/svg-path.py" arc --params '{"start_
 </generate-segments>
 
 <combine-segments>
+**CRITICAL:** Remove the `M` command from subsequent segments to create a continuous path:
 ```typescript
-const PATH_D = "M 100 200 L 300 200 M 300 200 A 100 100 0 0 1 300 400";
+const SEGMENT_1 = "M 100 200 L 300 200";
+const SEGMENT_2 = "M 300 200 A 100 100 0 0 1 300 400";
+
+// Strip "M x y" from segment 2 and concatenate
+const PATH_D = SEGMENT_1 + " " + SEGMENT_2.replace(/^M\s*[\d.-]+\s*[\d.-]+\s*/, "");
+// Result: "M 100 200 L 300 200 A 100 100 0 0 1 300 400"
 ```
 </combine-segments>
 
@@ -127,6 +133,7 @@ const PATH_D = "M 100 200 L 300 200 M 300 200 A 100 100 0 0 1 300 400";
 </basic-path>
 
 <path-with-animation>
+
 Use path-draw animation for progressive drawing:
 
 ```typescript
@@ -137,9 +144,31 @@ Use path-draw animation for progressive drawing:
   fill="none"
   initial={{ pathLength: 0, opacity: 0 }}
   animate={{ pathLength: 1, opacity: 1 }}
-  transition={{ duration: 2, ease: "easeOut" }}
+  transition={{ duration: 2, ease: "easeInOut" }}
 />
 ```
+
+**IMPORTANT - When synchronized with follow-path:**
+- If the design specifies `easing` in BOTH path-draw AND follow-path, you MUST apply easing to BOTH
+- Use the same `applyEasing` function for the path's progress calculation (not just the vehicle)
+- See **[Path Following Reference](./path-following.md)** for the `applyEasing` function
+
+**Example with easing:**
+```typescript
+const pathProgress = useMemo(() => {
+  if (relTime < PATH_START) return 0;
+  const elapsed = relTime - PATH_START;
+  const rawProgress = Math.min(elapsed / PATH_DURATION, 1);
+  return applyEasing(rawProgress, 'easeInOut');  // Apply easing here too!
+}, [Math.floor(relTime / 42)]);
+
+<motion.path
+  d={PATH_D}
+  animate={{ pathLength: pathProgress }}
+  transition={{ duration: 0.1 }}  // Snap to eased value
+/>
+```
+
 </path-with-animation>
 
 <path-with-arrow-marker>

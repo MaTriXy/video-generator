@@ -11,6 +11,13 @@ class ClaudeCliConfig:
 
     TOPIC = None
     BASE_OUTPUT_PATH = "Outputs"
+    EXAMPLE_DIR_PATH = ".claude/skills/video-designer/examples"
+    HOOK_GUIDELINES_PATH = ".claude/skills/video-designer/references/hook-guidelines.md"
+    EXAMPLE_MAP = {
+       "infographicshow": "infographic.md",
+        "4g5g": "neon.md",
+        "what-if": "pencil.md",
+    }
     METADATA_PATH = "Outputs/{topic}/{type}/v{version}/metadata_log.json"
     VIDEO_URL_PATH = "Outputs/video_url.json"
     STYLE_MAPPING = {
@@ -29,9 +36,9 @@ class ClaudeCliConfig:
             "latest_file": "Outputs/{topic}/Research/latest.json",
         },
         AssetType.SCRIPT: {
-            "latest_file": "Outputs/{topic}/Scripts/latest.json",
-            "final_path": "Outputs/{topic}/Scripts/script-v1.md",
-            "variant_path": "Outputs/{topic}/Scripts/script-v1-with-emotions.md",
+            "latest_file": "Outputs/{topic}/Scripts/script-user-input.md",
+            "final_path": "Outputs/{topic}/Scripts/script.md",
+            "variant_path": "Outputs/{topic}/Scripts/script-with-emotions.md",
         },
         AssetType.TRANSCRIPT: {
             "latest_file": "Outputs/{topic}/Transcript/latest.json",
@@ -47,7 +54,7 @@ class ClaudeCliConfig:
         },
         AssetType.ASSETS: {
             "prompt_file": "Outputs/{topic}/Assets/Prompts/prompt.md",
-            "latest_file": "Outputs/{topic}/Assets/Latest/latest_{{asset_name}}.svg",
+            "latest_file": "Outputs/{topic}/Assets/Latest/latest_asset.txt",
             "prompt_name": "Course-Creation/Video/Assets/Asset-Generation-Prompt-Modular",
             "metadata_file": "Outputs/{topic}/Assets/metadata.json",
             "prompt_tag": ASSETS_PROMPT_TAG,

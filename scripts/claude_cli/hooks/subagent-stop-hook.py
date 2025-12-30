@@ -32,15 +32,26 @@ class SubagentStopHook(BaseHook):
     def set_log_path(self) -> None:
         """Set the log file path based on file read from transcript in Outputs folder."""
         try:
+            date_string = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
             query = {
                 "and": [
                     {"eq": {"field": "message.content[*].type", "value": "tool_use"}},
                     {"eq": {"field": "message.content[*].name", "value": "Read"}},
-                    {"contains": {"field": "message.content[*].input.file_path", "value": "Outputs"}}
+                    {"contains": {"field": "message.content[*].input.file_path", "value": "Prompts"}}
                 ]
             }
             matched, entry = self.match_transcript(query)
-            date_string = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+            if not matched:
+                query = {
+                    "and": [
+                        {"eq": {"field": "message.content[*].type", "value": "tool_use"}},
+                        {"eq": {"field": "message.content[*].name", "value": "Read"}},
+                        {"contains": {"field": "message.content[*].input.file_path", "value": "Outputs"}}
+                    ]
+                }
+                matched, entry = self.match_transcript(query)
 
             if matched and entry:
                 file_path = self.extract_value(entry, "message.content[*].input.file_path")
@@ -63,7 +74,8 @@ class SubagentStopHook(BaseHook):
                             manifest_controller = ManifestController()
                             manifest_controller.set_topic(topic_folder_name)
                             asset_type = AssetType(asset_folder_name)
-                            version = manifest_controller.get_current_gen_version(asset_type)
+                            asset_data = manifest_controller.get_field(asset_type)
+                            version = asset_data.get('current_gen_version', 0) if asset_data else 0
                         except Exception:
                             version = 0
 

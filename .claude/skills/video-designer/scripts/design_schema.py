@@ -214,6 +214,7 @@ class AnimationConfigModel(BaseModel):
     """Animation configuration for entrance/exit animations."""
     type: str = Field(..., description="Animation type (handled by video-coder)")
     duration: float = Field(..., ge=0, description="Animation duration in milliseconds (0 for instant transitions like 'cut')")
+    easing: Optional[str] = Field(None, description="Easing function (e.g., 'linear', 'easeInOut'). Must match follow-path easing when syncing path-draw with object movement.")
 
     model_config = ConfigDict(extra='forbid')
 
@@ -530,8 +531,35 @@ class ShapeElementModel(BaseElementModel):
     type: Literal[ElementType.SHAPE, ElementType.ASSET, ElementType.PATTERN]
     width: Optional[float] = Field(None, gt=0, description="Element width")
     height: Optional[float] = Field(None, gt=0, description="Element height")
+    orientation: Optional[float] = Field(None, description="Asset orientation in degrees (required for assets with follow-path)")
+    flipX: Optional[bool] = Field(None, description="Horizontal flip for asymmetric assets")
+    flipY: Optional[bool] = Field(None, description="Vertical flip for asymmetric assets")
 
     model_config = ConfigDict(extra='allow')  # Allow extra fields like assetPath for non-documented types
+
+    @model_validator(mode='after')
+    def validate_asset_follow_path_orientation(self):
+        """Ensure assets with follow-path action have orientation field."""
+        # Only validate for ASSET type
+        if self.type != ElementType.ASSET:
+            return self
+
+        # Check if element has follow-path action
+        has_follow_path = False
+        if self.animation and self.animation.actions:
+            for action in self.animation.actions:
+                if isinstance(action, FollowPathAction):
+                    has_follow_path = True
+                    break
+
+        # If asset has follow-path but no orientation, raise error
+        if has_follow_path and self.orientation is None:
+            raise ValueError(
+                f"Asset '{self.id}' has follow-path action but missing 'orientation' field. "
+                f"Infer orientation from asset composition (0°=UP, 90°=RIGHT, 180°=DOWN, 270°=LEFT)."
+            )
+
+        return self
 
 
 class PathElementModel(BaseElementModel):
@@ -634,4 +662,29 @@ class DesignSceneModel(BaseModel):
         duplicates = [id for id in ids if ids.count(id) > 1]
         if duplicates:
             raise ValueError(f"Duplicate element IDs found: {set(duplicates)}")
+        return self
+
+    @model_validator(mode='after')
+    def validate_follow_path_easing_sync(self):
+        """Ensure follow-path easing matches the referenced path's path-draw easing."""
+        # Build map of path elements with path-draw entrance
+        path_easings = {}
+        for element in self.elements:
+            if element.type == ElementType.PATH:
+                if element.animation and element.animation.entrance:
+                    if element.animation.entrance.type == "path-draw":
+                        path_easings[element.id] = element.animation.entrance.easing
+
+        # Check follow-path actions reference paths with matching easing
+        for element in self.elements:
+            if element.animation and element.animation.actions:
+                for action in element.animation.actions:
+                    if isinstance(action, FollowPathAction):
+                        path_easing = path_easings.get(action.pathId)
+                        if path_easing and action.easing and path_easing != action.easing:
+                            raise ValueError(
+                                f"Element '{element.id}' follow-path easing '{action.easing}' "
+                                f"doesn't match path '{action.pathId}' path-draw easing '{path_easing}'. "
+                                f"Both must use the same easing for synchronized animation."
+                            )
         return self

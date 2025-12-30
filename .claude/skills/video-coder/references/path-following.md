@@ -64,9 +64,14 @@ const SceneName = React.memo(function SceneName({ currentTime, getPathPoint }: S
 4. **Sub-components**: If you create sub-components that need path-following, pass `getPathPoint` to them as props.
 </requirement-sub-components>
 
+<requirement-easing>
+5. **Easing Synchronization**: When the design specifies an `easing` field in the `follow-path` action, you MUST apply that easing to the progress calculation using the `applyEasing` function. The `applyEasing` function uses cubic bezier curves matching framer-motion exactly.
+
+</requirement-easing>
+
 <requirement-element-orientation>
-5. **Determining Element Orientation**: You MUST determine the correct natural orientation of the element:
-   - **For SVG assets from manifest**: Use the asset's `base_orientation` value directly
+6. **Determining Element Orientation**: You MUST determine the correct natural orientation of the element:
+   - **For SVG assets**: Use the `orientation` field from the design spec
    - **For SVG shapes you create**: Analyze the shape's points/geometry:
      - Arrow `points="0,-15 15,0 0,15"` → Tip at (15,0) = points RIGHT → Use `90`
      - Arrow `points="-8,0 0,-20 8,0"` → Tip at (0,-20) = points UP → Use `0`
@@ -74,6 +79,50 @@ const SceneName = React.memo(function SceneName({ currentTime, getPathPoint }: S
    - **Rule**: Find where the "front" or "tip" of the element points in its default position (rotation=0)
    - **Coordinate system**: 0° = UP, positive = clockwise, negative = counter-clockwise
 </requirement-element-orientation>
+
+<requirement-flipx-handling>
+7. **Handling flipX with Path Following**: When an asset has `flipX: true` in the design spec:
+
+   **Transform Order (CRITICAL):**
+   ```tsx
+   // CORRECT: rotate BEFORE scaleX in the string (CSS applies right-to-left)
+   transform: `translate(-50%, -50%) rotate(${pos.rotation}deg) scaleX(-1)`
+
+   // WRONG: old order causes inverted assets
+   transform: `translate(-50%, -50%) scaleX(-1) rotate(${pos.rotation}deg)`
+   ```
+
+   **Orientation Value:** Use negative orientation to represent the flipped state:
+   ```tsx
+   // Design: orientation: 90 (RIGHT), flipX: true
+   // After flip, asset points LEFT, so use -90 (equivalent to 270)
+   const ELEMENT_ORIENTATION = -90;
+   const pos = getPathPoint(PATH_D, progress, ELEMENT_ORIENTATION);
+   ```
+
+   **Complete Example:**
+   ```tsx
+   // Design spec: orientation: 90, flipX: true, follow-path animation
+   const ELEMENT_ORIENTATION = -90;  // Effective orientation after flip
+
+   const vehiclePos = useMemo(() => {
+     if (!isMoving) {
+       return getPathPoint(PATH_D, 0, ELEMENT_ORIENTATION);
+     }
+     const progress = (relTime - START) / DURATION;
+     return getPathPoint(PATH_D, progress, ELEMENT_ORIENTATION);
+   }, [relTime, isMoving]);
+
+   // Render with correct transform order
+   <div style={{
+     left: `${vehiclePos.x}px`,
+     top: `${vehiclePos.y}px`,
+     transform: `translate(-50%, -50%) rotate(${vehiclePos.rotation}deg) scaleX(-1)`
+   }}>
+     <AssetComponent />
+   </div>
+   ```
+</requirement-flipx-handling>
 
 </requirements>
 
@@ -93,6 +142,73 @@ const pos = getPathPoint("M 100 500 Q 500 100 900 500", 0.5, 0);
 const PATH_D = "M 100 500 Q 500 100 900 500";
 const ANIMATION_START = 1000;
 const ANIMATION_DURATION = 3000;
+const PATH_EASING = 'easeInOut';  // From design's follow-path action
+
+// Cubic bezier implementation - matches framer-motion/CSS easing curves exactly
+const cubicBezier = (p1x: number, p1y: number, p2x: number, p2y: number) => {
+  const NEWTON_ITERATIONS = 4;
+  const NEWTON_MIN_SLOPE = 0.001;
+  const SUBDIVISION_PRECISION = 0.0000001;
+  const SUBDIVISION_MAX_ITERATIONS = 10;
+
+  const ax = 3 * p1x - 3 * p2x + 1;
+  const bx = 3 * p2x - 6 * p1x;
+  const cx = 3 * p1x;
+  const ay = 3 * p1y - 3 * p2y + 1;
+  const by = 3 * p2y - 6 * p1y;
+  const cy = 3 * p1y;
+
+  const sampleCurveX = (t: number) => ((ax * t + bx) * t + cx) * t;
+  const sampleCurveY = (t: number) => ((ay * t + by) * t + cy) * t;
+  const sampleCurveDerivativeX = (t: number) => (3 * ax * t + 2 * bx) * t + cx;
+
+  const solveCurveX = (x: number) => {
+    let t2 = x;
+    for (let i = 0; i < NEWTON_ITERATIONS; i++) {
+      const x2 = sampleCurveX(t2) - x;
+      const d2 = sampleCurveDerivativeX(t2);
+      if (Math.abs(x2) < SUBDIVISION_PRECISION) return t2;
+      if (Math.abs(d2) < NEWTON_MIN_SLOPE) break;
+      t2 -= x2 / d2;
+    }
+    let t0 = 0, t1 = 1;
+    t2 = x;
+    for (let i = 0; i < SUBDIVISION_MAX_ITERATIONS; i++) {
+      const x2 = sampleCurveX(t2) - x;
+      if (Math.abs(x2) < SUBDIVISION_PRECISION) return t2;
+      x2 > 0 ? (t1 = t2) : (t0 = t2);
+      t2 = (t1 - t0) / 2 + t0;
+    }
+    return t2;
+  };
+
+  return (t: number) => sampleCurveY(solveCurveX(t));
+};
+
+// Pre-computed easing functions matching framer-motion/CSS exactly
+const easings = {
+  easeIn: cubicBezier(0.42, 0, 1, 1),
+  easeOut: cubicBezier(0, 0, 0.58, 1),
+  easeInOut: cubicBezier(0.42, 0, 0.58, 1),
+};
+
+// Easing function at module level - matches framer-motion curves
+const applyEasing = (progress: number, easing: string): number => {
+  if (progress <= 0) return 0;
+  if (progress >= 1) return 1;
+  switch (easing) {
+    case 'linear':
+      return progress;
+    case 'easeIn':
+      return easings.easeIn(progress);
+    case 'easeOut':
+      return easings.easeOut(progress);
+    case 'easeInOut':
+      return easings.easeInOut(progress);
+    default:
+      return progress;
+  }
+};
 
 const states = useMemo(() => ({
   showElement: relTime >= 0,
@@ -105,7 +221,7 @@ const elementPos = useMemo(() => {
   }
 
   // Specify element's natural orientation in degrees (0°=UP, 90°=RIGHT, 180°=DOWN, 270°=LEFT)
-  // For assets: use base_orientation from manifest
+  // For assets: use orientation from design spec
   // For shapes: determine from geometry
   const ELEMENT_ORIENTATION = 0;  // pointing UP
 
@@ -119,21 +235,29 @@ const elementPos = useMemo(() => {
     }
   }
 
-  // Animation in progress - calculate current position and rotation
-  const progress = Math.min((relTime - ANIMATION_START) / ANIMATION_DURATION, 1);
-  return getPathPoint(PATH_D, progress, ELEMENT_ORIENTATION);
+  // Animation in progress - calculate current position with EASING
+  const rawProgress = Math.min((relTime - ANIMATION_START) / ANIMATION_DURATION, 1);
+  const easedProgress = applyEasing(rawProgress, PATH_EASING);  // Apply easing from design!
+  return getPathPoint(PATH_D, easedProgress, ELEMENT_ORIENTATION);
 }, [relTime, states.isElementMoving, states.showElement]);
 
-// Render
+// Render - rotation on parent div, animations on motion.div
 {states.showElement && (
   <div
+    className="absolute z-[10]"
     style={{
       left: `${elementPos.x}px`,
       top: `${elementPos.y}px`,
-      transform: `translate(-50%, -50%) rotate(${elementPos.rotation}deg)`
+      transform: `translate(-50%, -50%) rotate(${elementPos.rotation}deg)`  // Rotation HERE
     }}
   >
-    {/* element content */}
+    <motion.div
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4, type: "spring", bounce: 0.4 }}
+    >
+      {/* element content */}
+    </motion.div>
   </div>
 )}
 ```

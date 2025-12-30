@@ -7,8 +7,8 @@ from pathlib import Path
 
 STEP_CONFIG = {
     "user-input": { "order": 1},
-    "audio": { "order": 2},
-    "direction": { "order": 3},
+    "direction": { "order": 2},
+    "audio": { "order": 3},
     "assets": { "order": 4},
     "design": { "order": 5},
     "code": { "order": 6}

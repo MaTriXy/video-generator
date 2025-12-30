@@ -1,7 +1,6 @@
 import json
 import sys
 import os
-import glob
 from typing import Dict, Any, List
 from pathlib import Path
 
@@ -12,9 +11,10 @@ if project_root not in sys.path:
 
 from scripts.enums import AssetType
 from scripts.claude_cli.base_pre_process import BasePreProcess
+from scripts.claude_cli.claude_cli_config import ClaudeCliConfig
 from scripts.controllers.utils.decorators.try_catch import try_catch
 from scripts.controllers.video_step_metadata_controller import VideoStepMetadataController
-from scripts.transcript_to_string import convert_transcript_to_string
+from scripts.utility.join_lines import truncate_content
 
 
 class VideoDesignPreProcess(BasePreProcess):
@@ -30,6 +30,34 @@ class VideoDesignPreProcess(BasePreProcess):
         self.metadata_controller = VideoStepMetadataController()
         self.video_direction = {}
         self.asset_manifest = {}
+
+    @try_catch
+    def save_config_prompts(self) -> None:
+        metadata = self.get_metadata()
+        video_style = metadata.get("video_style")
+
+        if not video_style:
+            self.logger.warning("No video_style found in metadata, skipping example fetch")
+            return
+
+        example_filename = ClaudeCliConfig.EXAMPLE_MAP.get(video_style)
+        if not example_filename:
+            self.logger.warning(f"No example file mapping for video_style: {video_style}")
+            return
+
+        sub_prompts = self.fetch_sub_prompts(["examples", "artstyle"])
+        if not sub_prompts:
+            return
+
+        examples_content = sub_prompts.get("examples", "")
+        artstyle_content = sub_prompts.get("artstyle", "")
+
+        combined_content = f"<example>{examples_content} {artstyle_content} </example>"
+        truncated_content = truncate_content(combined_content)
+
+        example_path = Path(ClaudeCliConfig.BASE_OUTPUT_PATH) / ClaudeCliConfig.TOPIC / "Design" / "examples" / example_filename
+        self.file_io.write_text(str(example_path), truncated_content)
+        self.logger.info(f"Wrote truncated example to: {example_path}")
 
     @try_catch
     def get_audio_transcript(self) -> list:

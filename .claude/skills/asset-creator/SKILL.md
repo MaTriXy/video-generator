@@ -6,61 +6,40 @@ description: This skill helps in drawing any visuals. It is a versatile skill an
 # Asset Creator Skill
 
 <asset-manifest-priority>
-
 ## CRITICAL: Asset Manifest Priority
-
 **If you receive an `asset_manifest`:**
 - **DO NOT create new assets** that already exist in the manifest
 - Use the pre-generated assets from the provided paths
 - Only create NEW assets that are NOT in the manifest
-
 </asset-manifest-priority>
-
 <core-responsibility>
-
 ## Core Responsibility
-
 Create SVG assets using fetched icons and/or custom SVG elements.
-
 - **SVG code only** - No React, no JavaScript, slight animations
 - **Transparent background** - No background unless explicitly requested
-
 </core-responsibility>
-
----
-
 <references>
 **Understand Requirements** → Determine what icons/shapes/illustrations/graphics are needed
-
 <fetch-icons-ref>
 ### **Fetch Icons** → To get references from icons before creating any assets
 Read [fetching-icons.md](./references/fetching-icons.md)
 </fetch-icons-ref>
-
 <path-creation-ref>
 ### **Path Creation** → To create any lines, curves, paths, this is important that you use the learnings from this
 Read [path-creation.md](./references/path-creation.md)
 </path-creation-ref>
-
 <character-creation-ref>
 ### **Character Creation** → Whenver scene needs characters, use this
 Read [primitive-characters.md](./references/character/primitive-characters.md)
 </character-creation-ref>
-
 <arrow-creation-ref>
 ### **Arrow Creation** → Whenever scene needs to create arrows, use this
 Read [arrow-guidelines.md](./references/arrow-guidelines.md)
 </arrow-creation-ref>
-
 </references>
-
----
-
 <svg-basics>
 Use whenever SVGs need to be created or used
-
 <basic-svg-structure>
-
 ```svg
 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -70,7 +49,6 @@ Use whenever SVGs need to be created or used
   <!-- SVG elements here -->
 </svg>
 ```
-
 <root-element-attributes>
 ### Root Element Attributes
 
@@ -79,13 +57,8 @@ Use whenever SVGs need to be created or used
 | `viewBox` | Internal coordinate system | `"0 0 100 100"` |
 | `xmlns` | XML namespace (required) | `"http://www.w3.org/2000/svg"` |
 </root-element-attributes>
-
----
-
 <basic-shapes>
-
 <rectangle>
-
 ```svg
 <rect x="10" y="10" width="80" height="60" rx="5" ry="5" fill="#3B82F6"/>
 ```
@@ -97,7 +70,6 @@ Use whenever SVGs need to be created or used
 | `rx`, `ry` | Corner radius |
 | `fill` | Fill color |
 </rectangle>
-
 <circle>
 
 ```svg
@@ -109,7 +81,6 @@ Use whenever SVGs need to be created or used
 | `cx`, `cy` | Center position |
 | `r` | Radius |
 </circle>
-
 <ellipse>
 
 ```svg
@@ -121,21 +92,18 @@ Use whenever SVGs need to be created or used
 | `cx`, `cy` | Center position |
 | `rx`, `ry` | X and Y radii |
 </ellipse>
-
 <line>
 
 ```svg
 <line x1="10" y1="10" x2="90" y2="90" stroke="#000" stroke-width="2"/>
 ```
 </line>
-
 <polyline>
 
 ```svg
 <polyline points="10,90 50,10 90,90" fill="none" stroke="#000" stroke-width="2"/>
 ```
 </polyline>
-
 <polygon>
 
 ```svg
@@ -143,13 +111,9 @@ Use whenever SVGs need to be created or used
 ```
 </polygon>
 </basic-shapes>
-
 <path-element>
-
 The `<path>` element is the most powerful SVG element, using commands to draw complex shapes.
-
 <path-commands>
-#### Path Commands
 
 | Command | Name | Parameters | Example |
 |---------|------|------------|---------|
@@ -164,9 +128,7 @@ The `<path>` element is the most powerful SVG element, using commands to draw co
 
 Lowercase commands use relative coordinates (relative to current position).
 </path-commands>
-
 <path-example>
-#### Example Path
 
 ```svg
 <!-- Triangle -->
@@ -177,11 +139,8 @@ Lowercase commands use relative coordinates (relative to current position).
 ```
 </path-example>
 </path-element>
-
 <groups-transforms>
-
 <group-element>
-
 Use `<g>` to group elements and apply shared transforms or styles:
 
 ```svg
@@ -191,7 +150,6 @@ Use `<g>` to group elements and apply shared transforms or styles:
 </g>
 ```
 </group-element>
-
 <transform-attribute>
 
 | Transform | Syntax | Example |
@@ -202,9 +160,7 @@ Use `<g>` to group elements and apply shared transforms or styles:
 | Skew | `skewX(deg)` or `skewY(deg)` | `skewX(10)` |
 </transform-attribute>
 </groups-transforms>
-
 <styling>
-
 <fill-stroke>
 
 ```svg
@@ -220,7 +176,6 @@ Use `<g>` to group elements and apply shared transforms or styles:
 />
 ```
 </fill-stroke>
-
 <colors>
 ```svg
 fill="#3B82F6"           /* Hex */
@@ -230,7 +185,6 @@ fill="currentColor"      /* Inherit from parent */
 fill="none"              /* Transparent */
 ```
 </colors>
-
 <embedded-css>
 
 ```svg
@@ -246,9 +200,7 @@ fill="none"              /* Transparent */
 ```
 </embedded-css>
 </styling>
-
 <defs-reuse>
-
 <defs-element>
 Store reusable elements that won't render directly:
 
@@ -263,7 +215,6 @@ Store reusable elements that won't render directly:
 <rect fill="url(#grad1)" x="10" y="10" width="80" height="80"/>
 ```
 </defs-element>
-
 <transform-attribute-2>
 
 | Transform | Syntax | Example |
@@ -273,7 +224,6 @@ Store reusable elements that won't render directly:
 | Rotate | `rotate(deg)` or `rotate(deg, cx, cy)` | `rotate(45)` |
 | Skew | `skewX(deg)` or `skewY(deg)` | `skewX(10)` |
 </transform-attribute-2>
-
 <use-element>
 
 Reference defined elements:
@@ -289,9 +239,7 @@ Reference defined elements:
 ```
 </use-element>
 </defs-reuse>
-
 <gradients>
-
 <linear-gradient>
 
 ```svg
@@ -303,7 +251,6 @@ Reference defined elements:
 </defs>
 ```
 </linear-gradient>
-
 <radial-gradient>
 ```svg
 <defs>
@@ -315,9 +262,7 @@ Reference defined elements:
 ```
 </radial-gradient>
 </gradients>
-
 <clipping-masking>
-
 <clip-path>
 
 ```svg
@@ -330,7 +275,6 @@ Reference defined elements:
 <rect clip-path="url(#circle-clip)" x="0" y="0" width="100" height="100" fill="#3B82F6"/>
 ```
 </clip-path>
-
 <mask>
 
 ```svg
@@ -348,7 +292,6 @@ Reference defined elements:
 ```
 </mask>
 </clipping-masking>
-
 <best-practices>
 
 1. **Always use viewBox** - Enables proper scaling
@@ -358,18 +301,11 @@ Reference defined elements:
 5. **Optimize paths** - Remove unnecessary precision (2 decimal places max)
 6. **Use classes for styling** - Separate presentation from structure
 </best-practices>
-
 </basic-svg-structure>
-
 </svg-basics>
-
-
 <position-elements>
-
 Important to position anything in the scene
-
 <understanding-viewbox>
-
 The `viewBox` attribute defines the internal coordinate system of an SVG:
 
 ```svg
@@ -383,7 +319,6 @@ The `viewBox` attribute defines the internal coordinate system of an SVG:
 | `width` | Internal width in SVG units |
 | `height` | Internal height in SVG units |
 </understanding-viewbox>
-
 <choosing-viewbox-size>
 
 | Use Case | Recommended ViewBox | Why |
@@ -393,10 +328,8 @@ The `viewBox` attribute defines the internal coordinate system of an SVG:
 | Wide banners | `0 0 300 100` | 3:1 aspect ratio |
 | Tall graphics | `0 0 100 200` | 1:2 aspect ratio |
 
-
 **Guidelines:** Match aspect ratio to display context. Larger viewBox = more precision. Square viewBox works well for icons.
 </choosing-viewbox-size>
-
 <coordinate-system>
 
 ```
@@ -423,11 +356,7 @@ The `viewBox` attribute defines the internal coordinate system of an SVG:
 | Center | (width/2, height/2) |
 | Bottom-center | (width/2, height) |
 </coordinate-system>
-
----
-
 <icon-transform-pattern>
-
 **The standard pattern for placing icons:**
 
 ```svg
@@ -440,7 +369,6 @@ The `viewBox` attribute defines the internal coordinate system of an SVG:
 1. `translate(-centerX, -centerY)` → Move icon center to origin
 2. `scale(S)` → Scale the icon
 3. `translate(targetX, targetY)` → Move to final position
-
 <icon-library-reference>
 
 | Library | ViewBox | Center Offset | Scale Formula |
@@ -449,7 +377,6 @@ The `viewBox` attribute defines the internal coordinate system of an SVG:
 | Font Awesome (Fa) | 512x512 | `translate(-256, -256)` | `desiredSize / 512` |
 | Game Icons (Gi) | 512x512 | `translate(-256, -256)` | `desiredSize / 512` |
 </icon-library-reference>
-
 <icon-examples>
 
 ```svg
@@ -465,9 +392,7 @@ The `viewBox` attribute defines the internal coordinate system of an SVG:
 ```
 </icon-examples>
 </icon-transform-pattern>
-
 <multi-icon-layouts>
-
 <side-by-side>
 
 ```svg
@@ -475,7 +400,6 @@ The `viewBox` attribute defines the internal coordinate system of an SVG:
 <g transform="translate(W*0.7, H*0.5) scale(S) translate(-cx, -cy)">...</g>
 ```
 </side-by-side>
-
 <grid-layout>
 
 | Position | Coordinates |
@@ -486,7 +410,6 @@ The `viewBox` attribute defines the internal coordinate system of an SVG:
 | Bottom-right | (75%, 75%) |
 </grid-layout>
 </multi-icon-layouts>
-
 <safe-zone-max-scale>
 
 Keep icon centers within 10%-90% of viewBox to prevent clipping:
@@ -496,28 +419,19 @@ availableSpace = viewBoxSize * 0.8
 maxScale = availableSpace / iconViewBoxSize
 ```
 </safe-zone-max-scale>
-
----
-
 <transparent-background>
-
 SVGs are transparent by default. To maintain transparency:
 - Do NOT add background rectangles unless requested
 - Do NOT set fill on root SVG
 - Apply fill only to icon paths
 </transparent-background>
-
 <aligning-effects>
-
 When adding effects (muzzle flash, sparks, etc.) to specific points on an icon, calculate the exact position mathematically.
-
 <calculation-process>
-
 1. **Find attachment point in original icon space** (e.g., gun barrel tip at (486, 175) in 512x512)
 2. **Apply transforms in order** (right-to-left)
 3. **Position effect at calculated point**
 </calculation-process>
-
 <alignment-example>
 Gun Barrel at (486, 175), icon placed at (25, 50) with scale 0.12
 
@@ -542,7 +456,6 @@ Step 3 - translate(25, 50): (25+27.6, 50-9.72) = (52.6, 40.28)
 </svg>
 ```
 </alignment-example>
-
 <common-attachment-points>
 
 | Icon Type | Attachment Point | How to Find |
@@ -552,53 +465,39 @@ Step 3 - translate(25, 50): (25+27.6, 50-9.72) = (52.6, 40.28)
 | Characters | Hand position | Look for arm/hand path segments |
 | Vehicles | Exhaust/Wheels | Bottom or rear coordinates |
 </common-attachment-points>
-
 <debugging>
 Add a debug circle at calculated position: `<circle cx="52.6" cy="40.28" r="3" fill="red"/>`
 </debugging>
 </aligning-effects>
-
 </position-elements>
-
 <animations>
-
 Use whenever any object might need animation. This master document provides an overview of all animation patterns available for SVG assets.
-
 <animation-categories>
-
 <rotation-animations-ref>
 - **[rotation-animations.md](./references/animations/rotation-animations.md) - READ THIS FOR ANY OBJECT THAT ROTATES** - Works for ANY rotating element (wheels, gears, doors, levers, etc.). Contains guidelines and links to example files covering every type of rotation pattern from simple pivots to complex systems with attached objects.
 </rotation-animations-ref>
-
 <path-following-ref>
 - **[path-following.md](./references/animations/path-following.md) - READ THIS FOR ANY OBJECT FOLLOWING A PATH** - Explains how to make and object follow any path. Works with `<animateMotion>` + `<mpath>` for any SVG element.
 </path-following-ref>
-
 <path-drawing-ref>
 - **[path-drawing.md](./references/animations/path-drawing.md) - READ THIS FOR DRAWING/REVEALING PATHS** - Animates the drawing of a path itself (line appearing on screen). Uses `stroke-dasharray` and `stroke-dashoffset` technique.
 </path-drawing-ref>
 </animation-categories>
-
 </animations>
-
 <reference-map>
-
 <core-references>
 `./references/fetching-icons.md` — Search & retrieve SVG icons from Bootstrap, Font Awesome, Game Icons via MCP tools
 `./references/path-creation.md` — Generate SVG path `d` attributes using Python scripts
 `./references/arrow-guidelines.md` - Guidelines to create the correct arrows tip
 </core-references>
-
 <path-types>
 `./references/paths_guidelines.md` - All paths types along with example and script command for each path style
 </path-types>
-
 <animations-ref>
 `./references/animations/rotation-animations.md` — All rotation patterns with pivot point calculations
 `./references/animations/path-following.md` — Objects following paths via `<animateMotion>` + `<mpath>`
 `./references/animations/path-drawing.md` — Path "drawing itself" using stroke-dasharray technique
 </animations-ref>
-
 <pivot-types>
 `./references/animations/pivots/end-pivot-examples.md` — Rotation from fixed anchor (clocks, pendulums, doors)
 `./references/animations/pivots/center-pivot-examples.md` — Spinning around center (fans, wheels, gears)
@@ -610,65 +509,44 @@ Use whenever any object might need animation. This master document provides an o
 `./references/character/emotions.md` — Facial expressions and clipPath-based eye blink animations
 `./references/character/primitive-characters.md` — Cute geometric mascot characters with consistent proportions
 </character-ref>
-
 </reference-map>
-
 <output-format>
+<composition-requirement>
+## CRITICAL: Composition Comment Required
 
-## CRITICAL: Orientation Comment Required
+**Every SVG MUST include a COMPOSITION comment as the FIRST line of the file.** This describes the asset's visual structure so downstream processes understand its geometry.
 
-**Every SVG MUST include an orientation comment as the FIRST line of the file.** This tells downstream processes which direction the asset is pointing.
+**Format:** `<!-- COMPOSITION: <detailed description> -->`
 
-**Format:** `<!-- ORIENTATION: <degrees> -->`
+**What to include:**
+- Overall shape (e.g., "Wedge-shaped vehicle", "Cylindrical rocket")
+- Each distinct part and its spatial position using TOP, BOTTOM, LEFT, RIGHT
+- Surface details (angled surfaces, flat edges, highlights)
+- For asymmetric assets: clearly state which side is UP vs DOWN
 
-| Direction Asset Points | Degrees |
-|------------------------|---------|
-| Up | 0 |
-| Up-Right | 45 |
-| Right | 90 |
-| Down-Right | 135 |
-| Down | 180 |
-| Down-Left | 225 |
-| Left | 270 |
-| Up-Left | 315 |
+**Guidelines for spatial descriptions:**
+- Use absolute positions: "TOP-LEFT", "BOTTOM edge", "RIGHT side"
+- Describe surfaces by what they face: "flat bottom edge" (not "faces down")
+- For protruding parts: "fin protrudes UPWARD from top-rear"
 
-**Any angle 0-359 is valid.** Use the exact degree that matches the asset's pointing direction.
-
-**How to determine orientation:** Find the asset's "front" (tip, nose, or functional end), then measure direction from viewBox center to that point. Negative Y = UP (0°), positive X = RIGHT (90°), positive Y = DOWN (180°), negative X = LEFT (270°).
-
-**Examples:**
+**Example:**
 ```svg
-<!-- ORIENTATION: 0 -->
-<svg>...</svg>   <!-- Missile pointing straight up -->
-
-<!-- ORIENTATION: 90 -->
-<svg>...</svg>   <!-- Arrow pointing right -->
-
-<!-- ORIENTATION: 45 -->
-<svg>...</svg>   <!-- Rocket pointing up-right diagonal -->
-
-<!-- ORIENTATION: 180 -->
-<svg>...</svg>   <!-- Arrow pointing down -->
-```
-
-**Template:**
-```svg
-<!-- ORIENTATION: [degrees] -->
-<svg viewBox="0 0 [width] [height]" xmlns="http://www.w3.org/2000/svg">
-  <!-- SVG elements here -->
+<!-- COMPOSITION: Wedge-shaped hypersonic glide vehicle pointing RIGHT. Flat horizontal bottom edge. Angled top surface slopes from thick rear (left) to thin nose (right), with lighter gray highlight. Small triangular control fin protrudes UPWARD from top-rear. Heat shield tile lines run vertically across body. Vehicle tapers from rear to pointed nose. -->
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  ...
 </svg>
 ```
 
-⚠️ **Without this comment, assets default to 0° which may cause incorrect rotations in video scenes.**
+⚠️ **Without this comment, downstream processes cannot determine asset symmetry or correct flip behavior.**
+</composition-requirement>
 
+<rotation-system>
 ## Rotation System
-
 ```
 0° = pointing up
 Positive = clockwise
 Negative = counter-clockwise
 ```
-
 **To achieve a target orientation:**
 1. Draw shape pointing UP (0°)
 2. Apply `rotate(target_degrees)` — positive rotates clockwise
@@ -680,5 +558,7 @@ Negative = counter-clockwise
 | 270° (left) | `rotate(270)` or `rotate(-90)` ✓ |
 
 ❌ **Wrong:** `rotate(-45)` for 45° gives 315° (up-left), not 45°
+
+</rotation-system>
 
 </output-format>

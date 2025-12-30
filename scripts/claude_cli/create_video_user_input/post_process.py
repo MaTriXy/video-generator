@@ -23,7 +23,7 @@ class PostProcessCreateVideoUserInput(BasePostProcess):
         )
         self.video_style_label = video_style
         self.video_style = None
-        self.script_file = Path(f"Outputs/{topic}/Scripts/script-v1.md")
+        self.script_file = Path(ClaudeCliConfig.get_latest_path(AssetType.SCRIPT))
         self.script = None
 
     def validate_style(self) -> Optional[dict]:

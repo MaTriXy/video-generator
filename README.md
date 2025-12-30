@@ -113,17 +113,17 @@ When you run `/create-video`, the tool will guide you through this pipeline:
 When creating a video, you'll be asked to choose from three distinct visual styles:
 
 ### Pencil
-https://github.com/user-attachments/assets/40e916cb-f8ff-4185-a723-893ee27fd016
+https://github.com/user-attachments/assets/318eb537-d152-4816-b948-ff3d695e1ed0
 
 A hand-drawn, sketch-like aesthetic that gives videos a personal, artistic feel. Features rough edges, sketch lines, and a notebook-paper appearance. Great for educational content that wants to feel approachable and informal.
 
 ### Infographic
-https://github.com/user-attachments/assets/f6618c17-4140-4d96-955f-fc50f13f223a
+https://github.com/user-attachments/assets/500a103b-1856-4882-9002-099234d274a3
 
 Clean, modern, and professional style with bold colors, geometric shapes, and data visualization elements. Uses flat design principles with clear iconography. Ideal for business presentations, explainer videos, and data-driven content.
 
 ### Neon
-https://github.com/user-attachments/assets/aeb9387f-104f-4d58-ab2d-caf69b5c38ac
+https://github.com/user-attachments/assets/8c57e9cf-47cf-46e1-a0f1-8fa3d5da016b
 
 Vibrant, futuristic style with glowing effects, dark backgrounds, and bright accent colors. Features electric highlights and cyberpunk-inspired visuals. Perfect for tech topics, gaming content, or when you want a high-energy, modern look.
 

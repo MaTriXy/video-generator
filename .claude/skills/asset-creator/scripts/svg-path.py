@@ -118,13 +118,17 @@ def create_spiral_path(
     center_y: float,
     max_radius: float,
     revolutions: float,
-    points: int = 100
+    points: int = 100,
+    inward: bool = False
 ) -> str:
     path_parts = []
     for i in range(points + 1):
         t = i / points  # 0 → 1
         angle = t * revolutions * 2.0 * math.pi
-        radius = t * max_radius
+        if inward:
+            radius = (1 - t) * max_radius  # starts at max_radius, shrinks to center
+        else:
+            radius = t * max_radius  # starts at center, grows to max_radius
         x = center_x + radius * math.cos(angle)
         y = center_y + radius * math.sin(angle)
         if i == 0:
@@ -168,10 +172,31 @@ def create_arc_path(
     end_x: float,
     end_y: float,
     radius: float,
-    sweep: int = 1,
+    sweep: int = 0,
     large_arc: int = 0
 ) -> str:
-    return f"M {start_x} {start_y} A {radius} {radius} 0 {large_arc} {sweep} {end_x} {end_y}"
+    """
+    sweep: 0=UP, 1=DOWN, 2=LEFT, 3=RIGHT
+    Converts to SVG sweep based on arc direction.
+    """
+    dx = end_x - start_x
+    dy = end_y - start_y
+    is_horizontal = abs(dx) >= abs(dy)
+    going_right = dx > 0
+    going_down = dy > 0
+
+    if is_horizontal:
+        if sweep == 0:  # UP
+            svg_sweep = 1 if going_right else 0
+        else:  # DOWN (1)
+            svg_sweep = 0 if going_right else 1
+    else:
+        if sweep == 2:  # LEFT
+            svg_sweep = 0 if going_down else 1
+        else:  # RIGHT (3)
+            svg_sweep = 1 if going_down else 0
+
+    return f"M {start_x} {start_y} A {radius} {radius} 0 {large_arc} {svg_sweep} {end_x} {end_y}"
 
 
 def create_bezier_path(
@@ -358,7 +383,8 @@ def get_path(equation: str, **params: Any) -> str:
         return create_spiral_path(
             params["center_x"], params["center_y"],
             params["max_radius"], params["revolutions"],
-            params.get("points", 100)
+            params.get("points", 100),
+            params.get("inward", False)
         )
     elif eq_enum == PathEquation.S_CURVE:
         require_params(["start_x", "start_y", "end_x", "end_y"])
@@ -379,7 +405,7 @@ def get_path(equation: str, **params: Any) -> str:
             params["start_x"], params["start_y"],
             params["end_x"], params["end_y"],
             params["radius"],
-            params.get("sweep", 1),
+            params.get("sweep", 0),
             params.get("large_arc", 0)
         )
     elif eq_enum == PathEquation.BEZIER:

@@ -1,6 +1,6 @@
 # Direction Creation Step
 
-Creates scene-by-scene video direction from the script and audio.
+Creates scene-by-scene video direction from the script.
 
 ## Step 1: Run the below commnand to get the starting step
 

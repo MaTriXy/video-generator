@@ -60,10 +60,14 @@ class VideoStepSubStatus:
         latest_path_template = ClaudeCliConfig.get_latest_path(asset_type)
         output_path = latest_path_template.format(scene_index=scene_index)
 
+        # Scene 0 requires reading hook guidelines for Design step
+        if asset_type == AssetType.DESIGN and scene_index == 0:
+            print(f"You will be working on scene {scene_index}. Read hook guidelines first: {ClaudeCliConfig.HOOK_GUIDELINES_PATH}")
+
         if self.io_controller.exists(output_path) and os.path.getsize(output_path) > 0:
-            print(f"You will be working on scene {scene_index}. Skip all the steps below and only run the validation step")
+            print(f"You will be working on scene {scene_index}. Skip all the steps and only run the validation step")
         else:
-            print(f"You will be working on scene {scene_index}. You will be implementing all the below steps")
+            print(f"You will be working on scene {scene_index}.")
 
 
 def main():
@@ -82,7 +86,7 @@ def main():
         manager.get_next_step(asset_type)
     elif args.command == 'mark-complete':
         manager.mark_complete(asset_type, args.subagent_id)
-    elif args.command == 'init-subagent':
+    elif args.command == 'init':
         manager.init_subagent(asset_type)
 
     sys.exit(0)

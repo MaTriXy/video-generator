@@ -79,7 +79,6 @@ class VideoScenePreProcess(BasePreProcess):
 
     @try_catch
     def save_prompt(self):
-        """Save the compiled prompt to a file. (Required by BasePreProcess)"""
         self.video_direction = self.output_controller.read_output(AssetType.DIRECTION)
         self.logger.info(f"Video direction: read")
         if not self.video_direction:
@@ -91,10 +90,6 @@ class VideoScenePreProcess(BasePreProcess):
         total_scenes = len(self.video_direction.get('scenes', []))
         if self.max_scenes and total_scenes > self.max_scenes:
             total_scenes = self.max_scenes
-            
-        output = {
-            "total_scenes": total_scenes
-        }
 
         for scene_index in range(total_scenes):
             variables = self.build_prompt_variables(
@@ -107,6 +102,9 @@ class VideoScenePreProcess(BasePreProcess):
             self.save_prompt_to_file(prompt, scene_index)
             self.logger.info(f" Saved video scene prompt to: {file_path.format(scene_index=scene_index)}")
 
+        output = {
+            "total_scenes": total_scenes
+        }
         self.metadata_controller.write(self.asset_type, output)
 
     @try_catch
@@ -126,6 +124,7 @@ class VideoScenePreProcess(BasePreProcess):
         self.logger.info(f"Retrieved scene {scene_index} from video_direction")
 
         return scene
+
 
     @try_catch
     def build_prompt_variables(

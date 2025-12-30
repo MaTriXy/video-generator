@@ -6,7 +6,7 @@ To use path an element should set "type" of the element as "path".
 
 ### **Path Types**
 
-Read the Path Types [path-guidelines.md](./path-references.md)
+Read the Path Types [path-references.md](./path-references.md)
 
 ### **Coordinate System**
 
@@ -88,6 +88,7 @@ When an object should travel along a visible path, use the `follow-path` action 
 **Important:**
 - Object's initial `x`, `y` should match path's start coordinates
 - Set `follow-path` duration equal to `path-draw` duration to sync movement with path drawing
+- Set `path-draw` easing to match `follow-path` easing (e.g., both use `"easeInOut"` or both use `"linear"`)
 
 **Example: Object following a simple path**
 ```json
@@ -106,17 +107,18 @@ When an object should travel along a visible path, use the `follow-path` action 
     "start_y": 400,
     "end_x": 800,
     "end_y": 400,
-    "height": 300
+    "arc_height": 300
   },
   "animation": {
     "entrance": {
       "type": "path-draw",
-      "duration": 2000
+      "duration": 2000,
+      "easing": "easeInOut"
     }
   }
 }
 
-// Object following the path
+// Object following the path (easing must match path-draw)
 {
   "id": "moving_object",
   "type": "asset",
@@ -134,7 +136,7 @@ When an object should travel along a visible path, use the `follow-path` action 
         "autoRotate": true,
         "on": 1000,
         "duration": 2000,
-        "easing": "ease-in-out"
+        "easing": "easeInOut"
       }
     ]
   }
@@ -164,12 +166,13 @@ When a path uses `merge_path_params` to combine multiple segments, objects can f
   "animation": {
     "entrance": {
       "type": "path-draw",
-      "duration": 3000
+      "duration": 3000,
+      "easing": "linear"
     }
   }
 }
 
-// Object follows the entire composite path
+// Object follows the entire composite path (easing must match path-draw)
 {
   "id": "moving_object",
   "type": "asset",
@@ -186,7 +189,8 @@ When a path uses `merge_path_params` to combine multiple segments, objects can f
         "pathId": "composite_path",
         "autoRotate": true,
         "on": 1000,
-        "duration": 3000
+        "duration": 3000,
+        "easing": "linear"
       }
     ]
   }

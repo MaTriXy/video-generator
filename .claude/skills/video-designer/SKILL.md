@@ -13,9 +13,7 @@ This skill provides design guidelines for creating consistent, high-quality vide
 `./references/3d-shapes.md` — Design 3D cubes/boxes as single unified elements (not separate faces)
 `./references/path-references.md` — Different types of paths along with their parameters and output JSON example
 </overview>
-
 <designer-general-guidelines>
-
 <coordinate-system>
 ```
 COORDINATE SYSTEM
@@ -30,7 +28,7 @@ FOR PATHS:
   All coordinates are ABSOLUTE screen positions
   No position/size fields needed (implied by path coordinates)
 
-ROTATION
+ROTATION DIRECTIONS
 0° = pointing up (↑)
 90° = pointing right (→)
 180° = pointing down (↓)
@@ -38,6 +36,35 @@ ROTATION
 
 Positive values = clockwise rotation
 Negative values = counter-clockwise (-90° same as 270°)
+
+SETTING TRANSFORMS BY ELEMENT TYPE
+
+For shapes/text: Set `rotation` directly to the desired direction.
+
+For assets: Check `asset_manifest` for `composition`.
+- `composition` describes the asset's structure and orientation
+- Infer the asset's base orientation from the composition description
+- Use composition to determine if the asset is symmetric or asymmetric
+
+SYMMETRIC ASSETS (no distinct top/bottom in composition):
+- Use `rotation = desired_direction - inferred_orientation`
+
+ASYMMETRIC ASSETS (composition mentions distinct top/bottom):
+- If NO direction change needed, omit rotation/flip fields entirely
+- If direction change is small (e.g., 45°) and won't invert, use `rotation` only
+- If direction change would invert the asset (180°), use `flipX`/`flipY` instead of rotation
+- `flipX: true` = horizontal mirror (for LEFT↔RIGHT flip)
+- `flipY: true` = vertical mirror (for UP↔DOWN flip)
+- Can combine flip + rotation for diagonal directions
+
+Example: Asset with composition: "Wedge-shaped vehicle pointing RIGHT. Flat BOTTOM, angled TOP"
+- Inferred orientation: 90° (pointing RIGHT)
+- To point RIGHT: No transform needed (omit rotation/flip fields)
+- To point UP-RIGHT: Use `rotation: -45` (small angle, no inversion)
+- To point BOTTOM-RIGHT: Use `rotation: 45` (small angle, no inversion)
+- To point LEFT: Use `flipX: true` (not rotation: 180 which inverts it)
+- To point UP-LEFT: Use `flipX: true, rotation: 45`
+- To point DOWN-LEFT: Use `flipX: true, rotation: -45`
 
 EXAMPLE (1920×1080 viewport)
 Screen center:        x = 960,  y = 540
@@ -74,6 +101,9 @@ Your output must be a valid JSON object matching this schema:
       "width": number,
       "height": number,
       "rotation": number,
+      "flipX": boolean,
+      "flipY": boolean,
+      "orientation": number,
       "scale": number,
       "opacity": number,
       "fill": "#HEXCOLOR",
@@ -99,7 +129,7 @@ Your output must be a valid JSON object matching this schema:
             "duration": number,
             "targetProperty": "opacity|scale|x|y|rotation|fill|stroke",
             "value": number,
-            "easing": "linear|ease-in|ease-out|ease-in-out"
+            "easing": "linear|easeIn|easeOut|easeInOut"
           },
           {
             "type": "follow-path",
@@ -107,7 +137,7 @@ Your output must be a valid JSON object matching this schema:
             "autoRotate": boolean,
             "on": number,
             "duration": number,
-            "easing": "linear|ease-in|ease-out|ease-in-out"
+            "easing": "linear|easeIn|easeOut|easeInOut"
           }
         ]
       }
@@ -117,12 +147,11 @@ Your output must be a valid JSON object matching this schema:
 ```
 
 **Required fields per element:** `id`, `type`, `enterOn`, `exitOn`, `content`, `zIndex`
+**Required for assets with follow-path:** `orientation` (inferred from composition, e.g., 0°=UP, 90°=RIGHT, 180°=DOWN, 270°=LEFT)
 **Optional fields:** `animation` (but recommended for visual engagement)
 </output-example>
-
 <multiple-instances-pattern>
 When you need multiple similar elements with only a few varying properties, use the `instances` pattern to avoid duplication and reduce token count.
-
 <syntax>
 All base properties go at the root level. The `instances` array specifies overrides for each copy.
 
@@ -157,27 +186,20 @@ All base properties go at the root level. The `instances` array specifies overri
 
 <rules>
 1. **First instance is always `{ "useDefaults": true }`** - Represents an element with no overrides (uses all base values)
-2. **Shallow merge only** - Instance properties directly override base properties (no deep merging)
+2. **Deep merge for nested objects** - Nested objects (`animation`, `path_params`, `container`) merge recursively; unspecified fields inherit from base
 3. **Field ordering** - `instances` must be the **last field** in the object
 4. **IDs generated automatically** - Pattern: `${baseId}_${index}` (e.g., `arrow_0`, `arrow_1`)
 5. **Works on any level** - Can be used on elements, `path_params`, or any nested object
 6. **Array length = instance count** - The array length determines how many copies are created
 </rules>
-
 <when-to-use>
-✅ **Use instances when:**
-- You need **2 or more** similar elements (this is the minimum requirement)
-- Multiple similar elements with only a few varying properties
-- Properties follow a pattern (grid positions, varying sizes, different colors)
-- Reduces verbosity and maintains consistency
+**⚠️ CRITICAL: Instances are MANDATORY when 2+ similar elements exist.**
 
-❌ **Don't use instances when:**
-- Elements are significantly different from each other
-- Overrides are more complex than the base definition
+✅ **MUST use instances for:**
+- Any 2+ elements of the same `type` with similar structure
+- This includes: shapes, paths, text labels, assets - ANY element type
 </when-to-use>
-
 <examples>
-
 <grid-example>
 ```json
 {
@@ -192,29 +214,22 @@ All base properties go at the root level. The `instances` array specifies overri
   "height": 30,
   "fill": "#3B82F6",
   "opacity": 1,
+  "animation": {
+    "entrance": { "type": "pop-in", "duration": 300 }
+  },
   "instances": [
     { "useDefaults": true },
-    { "x": 960, "y": 290 },
-    { "x": 1260, "y": 290 },
-    { "x": 660, "y": 540 },
-    { "x": 960, "y": 540 },
-    { "x": 1260, "y": 540 },
-    { "x": 660, "y": 790 },
-    { "x": 960, "y": 790 },
-    { "x": 1260, "y": 790 }
+    { "x": 960, "animation": { "entrance": { "duration": 200 } } },
+    { "x": 1260, "fill": "#FF5722" }
   ]
 }
 ```
 
-Creates a 3×3 grid of dots with 300px horizontal and 250px vertical spacing:
-
-- **Row 1**: y=290, x varies (660, 960, 1260)
-- **Row 2**: y=540, x varies (660, 960, 1260)
-- **Row 3**: y=790, x varies (660, 960, 1260)
-
-**Row/Column-Specific Properties:** If individual rows need different properties (e.g., different colors per row) or individual columns need different properties (e.g., different sizes per column), specify those properties directly in each instance override alongside the coordinates.
+Creates 3 dots:
+- `dot_0`: x=660, animation.entrance.duration=300 (base values)
+- `dot_1`: x=960, animation.entrance.duration=200, type="pop-in" inherited (deep merge)
+- `dot_2`: x=1260, fill=#FF5722, animation.entrance.duration=300 inherited
 </grid-example>
-
 <path-parameters-example>
 ```json
 {
@@ -246,9 +261,7 @@ Creates a 3×3 grid of dots with 300px horizontal and 250px vertical spacing:
 
 Creates 4 arc paths with different radii, positions, and directions while sharing the base coordinates.
 </path-parameters-example>
-
 </examples>
-
 <benefits>
 - **Logical organization** - Related elements stay together (e.g., all parts of a smartphone)
 - **Simplified management** - Transform entire groups at once (move, rotate, scale)
@@ -256,7 +269,6 @@ Creates 4 arc paths with different radii, positions, and directions while sharin
 - **Reduced repetition** - Common properties defined at parent level
 </benefits>
 </multiple-instances-pattern>
-
 <when-to-use-groups>
 ✅ **Use groups when:**
 - Multiple elements logically belong together (parts of an icon, device, or object)
@@ -269,7 +281,6 @@ Creates 4 arc paths with different radii, positions, and directions while sharin
 - Elements are unrelated or independent
 - No shared timing or transformation needed
 </when-to-use-groups>
-
 <group-properties>
 Groups support these properties:
 - **Timing:** `enterOn`, `exitOn` (inherited by children unless overridden)
@@ -278,7 +289,6 @@ Groups support these properties:
 
 Individual children can override timing and have their own animations.
 </group-properties>
-
 <timing-values>
 **CRITICAL: Timing Values Must Be Absolute**
 
@@ -296,7 +306,6 @@ Your timing should be:
 
 **Formula:** `absolute_time = scene.startTime + audio_relative_time`
 </timing-values>
-
 <content-field-requirements>
 The `content` field is the most critical part. It must answer ALL of these:
 
@@ -312,21 +321,16 @@ The `content` field is the most critical part. It must answer ALL of these:
 
 **Precision Test**: Could someone draw this without seeing the original? If uncertain, add more detail.
 </content-field-requirements>
-
 <design-process>
-
 <phase-1-extract-design-system>
 Before designing anything, analyze the example to establish your style guide:
-
 <global-properties>
 - Background color
 - Layout strategy
 </global-properties>
-
 <typography>
 Document font styles and calculate proportional sizes (fontSize ÷ viewport_height).
 </typography>
-
 <animation-library>
 Document each animation type with duration:
 ```
@@ -336,7 +340,6 @@ scale-grow: Xms
 color-transition: Xms
 ```
 </animation-library>
-
 <visual-personality>
 | Attribute | Example's Approach |
 |-----------|-------------------|
@@ -346,17 +349,13 @@ color-transition: Xms
 | Motion | (organic wobbles, breathing animations) |
 | Metaphors | (how abstract concepts become visual) |
 </visual-personality>
-
 </phase-1-extract-design-system>
-
 <phase-2-design-new-scene>
-
 <parse-narrative>
 Reconstruct sentences from transcript. Identify:
 - Key moments needing visual emphasis
 - Natural timing beats for element entrances
 </parse-narrative>
-
 <identify-elements>
 From scene_direction, list:
 - Primary elements (must have)
@@ -364,7 +363,6 @@ From scene_direction, list:
 - Labels/text (identify concepts)
 **CRITICAL: Only create elements mentioned in `videoDescription`.**
 </identify-elements>
-
 <design-each-element>
 For every element:
 1. Write complete `content` description (see content_field_requirements)
@@ -374,7 +372,6 @@ For every element:
 5. Define entrance/exit animations
 6. Specify any mid-scene actions
 </design-each-element>
-
 <sync-to-transcript>
 Audio timestamps are relative to scene start. Convert to absolute video time:
 ```
@@ -540,11 +537,9 @@ The `container` object gives text its own background, border, and padding. The b
   }
   ```
 </text-schema>
-
 <key-points>
 1. **Auto-fit backgrounds**: When using container.background, the background automatically sizes to fit the text + padding
 2. **Padding makes backgrounds auto-size**: The container.padding property creates spacing and makes the background fit perfectly
 3. **No separate shape elements needed**: Text backgrounds are built into the text element itself
 </key-points>
-
 </text-guidelines>

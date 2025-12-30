@@ -19,7 +19,7 @@ class VideoStepMetadataController(metaclass=SingletonMeta):
 
     def read(self, asset_type: AssetType) -> Dict[str, Any]:
         metadata_path = self.get_metadata_path(asset_type)
-        if not os.path.exists(metadata_path):
+        if not os.path.exists(metadata_path) or os.path.getsize(metadata_path) == 0:
             return {}
         return self.io_controller.read_json(metadata_path) or {}
 

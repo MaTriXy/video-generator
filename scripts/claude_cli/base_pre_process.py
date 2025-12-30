@@ -18,6 +18,7 @@ if project_root not in sys.path:
 from scripts.controllers.utils.decorators.try_catch import try_catch
 from scripts.controllers.utils.system_io_controller import SystemIOController
 from scripts.controllers.prompt.prompt_manager import PromptManager
+from scripts.controllers.prompt.prompt_process_controller import PromptProcessController
 from scripts.logging_config import get_utility_logger, set_console_logging
 from pathlib import Path
 
@@ -53,12 +54,15 @@ class BasePreProcess(ABC):
         # Initialize video system controllers
         self.output_controller = OutputController()
         self.prompt_manager = PromptManager()
+        self.prompt_processor = PromptProcessController()
         self.gen_metadata_controller = GenMetadataController(asset_type)
         self.file_io = SystemIOController()
 
         log_file_dir = Path(self.claude_cli_config.BASE_OUTPUT_PATH) / topic / "logs"
         self.logger = get_utility_logger(logger_name, log_file_name, log_file_dir)
         self.logger.info(f"Initialized {logger_name} with video system and prompt: {self.prompt_name}")
+
+        self.prompt_config = None
 
     @try_catch
     def build_prompt(
@@ -73,6 +77,7 @@ class BasePreProcess(ABC):
             variables=variables,
             tag=tag
         )
+        self.prompt_config = prompt_data.get('config', {})
         # if output_format is None:
         #     output_format = (
         #         f"output_format: {prompt_data['config']['output_schema']}"
@@ -95,7 +100,12 @@ class BasePreProcess(ABC):
     @try_catch
     def save_prompt_to_file(self, prompt: str, scene_index: Optional[int] = 0) -> None:
         self.logger.info(f"Saving prompt to: {self.prompt_path}")
-        self.file_io.write_text(self.prompt_path.format(scene_index=scene_index), prompt)
+        prompt_path = self.prompt_path.format(scene_index=scene_index)
+        path_obj = Path(prompt_path)
+        original_path = path_obj.with_stem(path_obj.stem + "_original")
+        self.file_io.write_text(str(original_path), prompt)
+        truncated_prompt = ' '.join(prompt.split())
+        self.file_io.write_text(prompt_path, truncated_prompt)
         self.logger.info(f"Prompt saved to: {self.prompt_path}")
 
     @try_catch
@@ -153,6 +163,31 @@ class BasePreProcess(ABC):
         else:
             self.logger.info("No existing prompts found")
 
+    @try_catch
+    def fetch_sub_prompts(self, sub_prompt_keys: list) -> Dict[str, str]:
+        if not self.prompt_config:
+            self.logger.warning("No prompt_config available for sub-prompt fetch")
+            return {}
+
+        sub_prompts = self.prompt_processor.get_sub_prompts(
+            {"config": self.prompt_config},
+            sub_prompt_keys
+        )
+
+        result = {}
+        for key, prompt_name in sub_prompts.items():
+            if prompt_name:
+                prompt_data = self.prompt_manager.fetch_and_build_prompt(
+                    prompt_name=prompt_name,
+                    tag=self.prompt_tag
+                )
+                result[key] = self.prompt_processor.get_prompt_content(prompt_data)
+
+        return result
+
+    def save_config_prompts(self) -> None:
+        pass
+
     @abstractmethod
     def build_prompt_variables(self, *args, **kwargs) -> Dict[str, Any]:
         pass
@@ -168,6 +203,7 @@ class BasePreProcess(ABC):
         if self.gen_prompt:
             self.save_prompt()
             self.logger.info(f"Saved prompts for {self.asset_type}")
+            self.save_config_prompts()
         else:
             self.logger.info(f"Skipped saving prompts for {self.asset_type}")
         self.logger.info(f"Completed pre-processing for {self.asset_type}")

@@ -117,6 +117,13 @@ class PromptProcessController:
 
         return sub_prompts
 
+    def get_prompt_content(self, prompt_data: Dict[str, Any]) -> str:
+        if not prompt_data:
+            return ""
+        system_prompt = prompt_data.get('system_prompt') or ''
+        user_prompt = prompt_data.get('prompt') or ''
+        return (system_prompt + ' ' + user_prompt).strip()
+
     @try_catch
     def inject_sub_prompts(
         self,

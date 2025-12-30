@@ -55,7 +55,7 @@ Example: "quantum-computing-a7x2"
 
 1. **Get Script File Path**: Run bash command to get the script file path:
 ```bash
-python .claude/skills/video-creator/scripts/path_manager.py --topic <topic> --asset-type "Scripts" --subpath "script-file"
+python .claude/skills/video-creator/scripts/path_manager.py --topic <topic> --asset-type "Scripts" --subpath "latest"
 ```
 
 2. **Write Script**: Write the user's script to the path returned by the above command.
@@ -69,11 +69,3 @@ python scripts/claude_cli/create_video_user_input/post_process.py --topic <topic
 
 Check the output:
 - If output starts with `ERROR:`: Show the error message to user and ask again only for the script or video style input that failed validation
-
-**E. Generate script with emotion tags**
-
-After validation passes, invoke the audio-tags agent to add ElevenLabs emotion tags to the script.
-
-Invoke the audio-tags agent using Task tool with `--topic <topic>`: (do not run in background)
-
-Wait for the agent to complete before proceeding.

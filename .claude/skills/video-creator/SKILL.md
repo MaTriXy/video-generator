@@ -61,5 +61,3 @@ python .claude/skills/video-creator/scripts/list-topics.py
 ```
 
 When user doesn't specify a topic, use this script to get all available topics, display them to the user, and ask them to specify which topic they want to work with
-
-

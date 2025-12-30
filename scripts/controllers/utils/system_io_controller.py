@@ -83,6 +83,8 @@ class SystemIOController(metaclass=SingletonMeta):
                 raise FileNotFoundError(f"File not found: {filepath}")
             else:
                 return None
+        if os.path.getsize(filepath) == 0:
+            raise ValueError(f"Empty file: {filepath}")
         with open(filepath, 'r', encoding=self.encoding) as f:
             return json.load(f)
 

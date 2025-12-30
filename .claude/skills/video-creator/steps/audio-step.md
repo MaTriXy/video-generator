@@ -2,9 +2,19 @@
 
 Generates audio from the video script using text-to-speech.
 
-## Execute
+## Step 1: Add Emotion Tags
 
-### Initial Generation (v3 Model)
+Invoke the audio-tags agent to add emotion tags to the script
+
+```
+<invoke name="Task">
+    <parameter name="subagent_type">audio-tags</parameter>
+    <parameter name="prompt">Add emotion tags for: --topic <topic></parameter>
+    <parameter name="description">Add emotion tags</parameter>
+</invoke>
+```
+
+## Step 2: Generate Audio (v3 Model)
 
 ```bash
 python scripts/claude_cli/content_audio/post_process.py --topic <topic>

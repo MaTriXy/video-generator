@@ -1,5 +1,6 @@
 import sys
 import os
+from pathlib import Path
 from typing import Optional, Tuple
 
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -10,7 +11,6 @@ from scripts.claude_cli.base_post_process import BasePostProcess
 from scripts.claude_cli.claude_cli_config import ClaudeCliConfig, AssetType
 from scripts.controllers.utils.decorators.try_catch import try_catch
 from scripts.logging_config import set_console_logging
-from scripts.claude_cli.content_video_direction.scene_timestamp_calculator import match_narration_to_transcript
 
 
 class VideoDirectionPostProcessing(BasePostProcess):
@@ -24,11 +24,7 @@ class VideoDirectionPostProcessing(BasePostProcess):
         )
 
     @try_catch
-    def _calculate_timestamps(self) -> bool:
-        """
-        Calculate startTime/endTime for each scene by matching narration to transcript.
-        This runs before scene indices are added.
-        """
+    def _extract_script_from_direction(self) -> bool:
         source_file = self.claude_cli_config.get_latest_path(AssetType.DIRECTION)
 
         if not self.file_io.exists(source_file):
@@ -41,18 +37,7 @@ class VideoDirectionPostProcessing(BasePostProcess):
             self.logger.error("Invalid direction data: missing 'scenes' array")
             return False
 
-        # Read transcript
-        self.logger.info("Reading transcript for timestamp calculation")
-        transcript = self.output_controller.read_output(AssetType.TRANSCRIPT)
-
-        if not transcript:
-            self.logger.error("No transcript found - cannot calculate timestamps")
-            return False
-
-        self.logger.info(f"Transcript loaded: {len(transcript)} words")
-
-        # Match each scene's narration to transcript sequentially
-        transcript_index = 0
+        script_parts = []
         total_scenes = len(direction_data['scenes'])
 
         for scene_idx, scene in enumerate(direction_data['scenes']):
@@ -62,40 +47,28 @@ class VideoDirectionPostProcessing(BasePostProcess):
                 self.logger.warning(f"Scene {scene_idx + 1}: No audioTranscriptPortion text found")
                 continue
 
-            self.logger.info(f"Scene {scene_idx + 1}/{total_scenes}: Matching narration ({len(narration)} chars)")
+            script_parts.append(narration.strip())
+            self.logger.info(f"Scene {scene_idx + 1}/{total_scenes}: Extracted {len(narration)} chars")
 
-            # Match narration to transcript
-            start_ms, end_ms, next_index, matched_count, total_words = match_narration_to_transcript(
-                narration, transcript, transcript_index
-            )
+        if not script_parts:
+            self.logger.error("No audioTranscriptPortion found in any scene")
+            return False
 
-            if start_ms is None or end_ms is None:
-                self.logger.error(f"Scene {scene_idx + 1}: Failed to match narration to transcript")
-                return False
+        full_script = "\n\n".join(script_parts)
 
-            scene['sceneStartTime'] = start_ms
-            scene['sceneEndTime'] = end_ms
+        script_output_path = self.claude_cli_config.get_final_path(AssetType.SCRIPT)
+        Path(script_output_path).parent.mkdir(parents=True, exist_ok=True)
 
-            # Update transcript index for next scene
-            transcript_index = next_index
-
-            match_percentage = (matched_count / total_words * 100) if total_words > 0 else 0
-            self.logger.info(
-                f"Scene {scene_idx + 1}: {start_ms}ms - {end_ms}ms "
-                f"({matched_count}/{total_words} words matched = {match_percentage:.1f}%)"
-            )
-
-        # Write back the modified data
-        success = self.file_io.write_json(source_file, direction_data)
+        success = self.file_io.write_text(script_output_path, full_script)
 
         if success:
-            self.logger.info(f"✓ Calculated timestamps for {total_scenes} scenes")
+            self.logger.info(f"✓ Extracted script from {total_scenes} scenes to: {script_output_path}")
+            self.logger.info(f"  Total script length: {len(full_script)} characters")
 
         return success
 
     @try_catch
     def _add_scene_indices(self) -> bool:
-        """Add sceneIndex to each scene object in the direction output."""
         source_file = self.claude_cli_config.get_latest_path(AssetType.DIRECTION)
 
         if not self.file_io.exists(source_file):
@@ -108,14 +81,12 @@ class VideoDirectionPostProcessing(BasePostProcess):
             self.logger.error("Invalid direction data: missing 'scenes' array")
             return False
 
-        # Add sceneIndex as the first field in each scene
         updated_scenes = []
         for index, scene in enumerate(direction_data['scenes']):
             updated_scene = {'sceneIndex': index, **scene}
             updated_scenes.append(updated_scene)
         direction_data['scenes'] = updated_scenes
 
-        # Write back the modified data
         success = self.file_io.write_json(source_file, direction_data)
 
         if success:
@@ -127,14 +98,12 @@ class VideoDirectionPostProcessing(BasePostProcess):
     def process_output(self) -> Tuple[Optional[str], Optional[str]]:
         self.logger.info("Processing video direction output")
 
-        # Calculate timestamps from narration + transcript
-        if not self._calculate_timestamps():
-            self.logger.error("Failed to calculate timestamps")
-            return None, None
-
-        # Add scene indices after timestamps are calculated
         if not self._add_scene_indices():
             self.logger.error("Failed to add scene indices")
+            return None, None
+
+        if not self._extract_script_from_direction():
+            self.logger.error("Failed to extract script from direction")
             return None, None
 
         file_path, version = self.write_versioned_output()

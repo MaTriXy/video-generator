@@ -1,5 +1,6 @@
 import json
 import os
+from functools import wraps
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from filelock import FileLock
@@ -12,8 +13,20 @@ from scripts.controllers.utils.singleton import SingletonMeta
 from scripts.claude_cli.claude_cli_config import ClaudeCliConfig
 from scripts.utility.config import MANIFEST_FILE
 
+
+def with_file_lock(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        lock_path = self.manifest_path.replace('.json', '.lock')
+        lock = FileLock(lock_path)
+        with lock:
+            self.manifest_json = self.io_controller.read_json(self.manifest_path)
+            result = func(self, *args, **kwargs)
+            return result
+    return wrapper
+
+
 class ManifestController(metaclass=SingletonMeta):
-    LOCK_TIMEOUT = 10
 
     def __init__(self):
         self.current_gen_version = None
@@ -29,6 +42,7 @@ class ManifestController(metaclass=SingletonMeta):
         self.manifest_json = self.io_controller.read_json(self.manifest_path)
         
 
+    @with_file_lock
     def set_dimensions(self) -> None:
         video_ratio = self.manifest_json['metadata']['video_ratio']
         viewport_width = 1080
@@ -62,7 +76,7 @@ class ManifestController(metaclass=SingletonMeta):
                 },
                 "Scripts": {
                     "version": 1,
-                    "path": f"Outputs/{self.TOPIC}/Scripts/script-v1.md",
+                    "path": f"Outputs/{self.TOPIC}/Scripts/script-user-input.md",
                     "current_gen_version": 1,
                     "subagents_completed": []
                 },
@@ -139,6 +153,7 @@ class ManifestController(metaclass=SingletonMeta):
         self.io_controller.write_json(video_url_path, video_data)
         return True
 
+    @with_file_lock
     def get_current_gen_version(self, asset_type: AssetType) -> Optional[int]:
         if(self.current_gen_version is None):
             version = self.manifest_json[asset_type.value].get('version') or 0
@@ -151,6 +166,7 @@ class ManifestController(metaclass=SingletonMeta):
 
         return self.current_gen_version
 
+    @with_file_lock
     @try_catch
     def update_file(self, file_type: AssetType, file_path: str, version: int) -> bool:
         key = file_type.value
@@ -160,6 +176,7 @@ class ManifestController(metaclass=SingletonMeta):
         self.logger.info(f"Manifest updated successfully for asset type: {key}, version: {version}, file_path: {file_path}")
         return self.io_controller.write_json(self.manifest_path, self.manifest_json)
 
+    @with_file_lock
     @try_catch
     def update_metadata(self, key: str, value: Any) -> bool:
         if 'metadata' not in self.manifest_json:
@@ -172,47 +189,46 @@ class ManifestController(metaclass=SingletonMeta):
     def get_output_dir(self, asset_type: AssetType) -> str:
         return os.path.join(self.TOPIC, asset_type.value)
 
+    @with_file_lock
     def get_subagents_completed(self, asset_type: AssetType) -> List[int]:
         if 'subagents_completed' not in self.manifest_json[asset_type.value]:
             self.manifest_json[asset_type.value]['subagents_completed'] = []
             self.io_controller.write_json(self.manifest_path, self.manifest_json)
         return self.manifest_json[asset_type.value]['subagents_completed']
 
+    @with_file_lock
     def get_subagents_claimed(self, asset_type: AssetType) -> List[int]:
         if 'subagents_claimed' not in self.manifest_json[asset_type.value]:
             self.manifest_json[asset_type.value]['subagents_claimed'] = []
             self.io_controller.write_json(self.manifest_path, self.manifest_json)
         return self.manifest_json[asset_type.value]['subagents_claimed']
 
+    @with_file_lock
     def clear_claimed_agents(self, asset_type: AssetType) -> None:
         self.manifest_json[asset_type.value]['subagents_claimed'] = []
         self.io_controller.write_json(self.manifest_path, self.manifest_json)
 
+    @with_file_lock
     @try_catch
     def claim_subagent(self, asset_type: AssetType, subagent_id: int) -> bool:
-        lock_path = self.manifest_path.replace('.json', '.lock')
-        lock = FileLock(lock_path, timeout=self.LOCK_TIMEOUT)
+        if 'subagents_claimed' not in self.manifest_json[asset_type.value]:
+            self.manifest_json[asset_type.value]['subagents_claimed'] = []
 
-        with lock:
-            self.manifest_json = self.io_controller.read_json(self.manifest_path)
+        if 'subagents_completed' not in self.manifest_json[asset_type.value]:
+            self.manifest_json[asset_type.value]['subagents_completed'] = []
 
-            if 'subagents_claimed' not in self.manifest_json[asset_type.value]:
-                self.manifest_json[asset_type.value]['subagents_claimed'] = []
+        if subagent_id in self.manifest_json[asset_type.value]['subagents_claimed']:
+            return False
+        if subagent_id in self.manifest_json[asset_type.value]['subagents_completed']:
+            return False
 
-            if 'subagents_completed' not in self.manifest_json[asset_type.value]:
-                self.manifest_json[asset_type.value]['subagents_completed'] = []
+        self.manifest_json[asset_type.value]['subagents_claimed'].append(subagent_id)
+        self.manifest_json[asset_type.value]['subagents_claimed'].sort()
+        self.io_controller.write_json(self.manifest_path, self.manifest_json)
+        self.logger.info(f"Claimed subagent {subagent_id} for {asset_type.value}")
+        return True
 
-            if subagent_id in self.manifest_json[asset_type.value]['subagents_claimed']:
-                return False
-            if subagent_id in self.manifest_json[asset_type.value]['subagents_completed']:
-                return False
-
-            self.manifest_json[asset_type.value]['subagents_claimed'].append(subagent_id)
-            self.manifest_json[asset_type.value]['subagents_claimed'].sort()
-            self.io_controller.write_json(self.manifest_path, self.manifest_json)
-            self.logger.info(f"Claimed subagent {subagent_id} for {asset_type.value}")
-            return True
-
+    @with_file_lock
     @try_catch
     def mark_subagent_completed(self, asset_type: AssetType, subagent_id: int) -> bool:
         if 'subagents_completed' not in self.manifest_json[asset_type.value]:

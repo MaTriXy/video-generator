@@ -66,10 +66,12 @@ class TsxSyntaxValidator:
         """Run TypeScript compiler on the TSX file and return results."""
         full_path = os.path.join(project_root, self.file_path)
 
+        # Use local TypeScript binary directly (avoids npx hanging on macOS)
+        tsc_path = os.path.join(self.tsc_cwd, "node_modules", ".bin", "tsc")
+
         # TypeScript compiler command
         cmd = [
-            "npx",
-            "tsc",
+            tsc_path,
             "--noEmit",
             "--jsx", "react-jsx",
             "--esModuleInterop",
@@ -85,8 +87,7 @@ class TsxSyntaxValidator:
                 cmd,
                 cwd=self.tsc_cwd,
                 capture_output=True,
-                text=True,
-                shell=True  # Required for Windows npx
+                text=True
             )
 
             # tsc returns exit code 0 if no errors, non-zero if errors
