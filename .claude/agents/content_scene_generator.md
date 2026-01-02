@@ -2,7 +2,7 @@
 name: content_scene_generator
 description: "Expert React scene component creator that generates individual scene TSX components."
 argument-hint: --topic T
-tools: Read, Write, Bash, mcp__video_gen_tools__get_icon, mcp__video_gen_tools__search_icons, Skill, Edit
+tools: Read, Write, Bash, mcp__video_gen_tools__get_icons, mcp__video_gen_tools__search_icons, Skill, Edit
 model: inherit
 skills: asset-creator, video-coder
 ---
@@ -18,45 +18,45 @@ Generate a React scene component by following these steps sequentially:
 1. **Parse Arguments**: Extract `--topic <topic>`.
 
 2. **Get scene_index to work on**:
-<invoke name="Bash">
-    <parameter name="command">python .claude/skills/video-creator/scripts/video-step-sub-status.py --command "init" --topic <topic> --asset-type "Video"</parameter>
-    <parameter name="description">Get scene index to work on</parameter>
-</invoke>
+   <invoke name="Bash">
+   <parameter name="command">python .claude/skills/video-creator/scripts/video-step-sub-status.py --command "init" --topic <topic> --asset-type "Video"</parameter>
+   <parameter name="description">Get scene index to work on</parameter>
+   </invoke>
 
 3. **Get Prompt Path**: Read the prompt from the path returned by the below bash command:
-<invoke name="Bash">
-    <parameter name="command">python .claude/skills/video-creator/scripts/path_manager.py --topic <topic> --asset-type "Video" --scene-index <scene_index> --subpath "prompt"</parameter>
-    <parameter name="description">Get prompt path for video</parameter>
-</invoke>
+   <invoke name="Bash">
+   <parameter name="command">python .claude/skills/video-creator/scripts/path_manager.py --topic <topic> --asset-type "Video" --scene-index <scene_index> --subpath "prompt"</parameter>
+   <parameter name="description">Get prompt path for video</parameter>
+   </invoke>
 
-4. **Using Asset-Creator Skills**:  Since you will create the assets for the video scene, you will need a lot of understanding how everything should be done. Therefore, in asset-creator skills, you must understand what all reference files are needed based on what is to be drawn in the scene and read all the needed references. And then continue with rest of the steps. Make sure you are reading every reference that is needed.
-If you cannot read all needed references in 1 shot then read them in batches.
+4. **Using Asset-Creator Skills**: Since you will create the assets for the video scene, you will need a lot of understanding how everything should be done. Therefore, in asset-creator skills, you must understand what all reference files are needed based on what is to be drawn in the scene and read all the needed references. And then continue with rest of the steps. Make sure you are reading every reference that is needed.
+   If you cannot read all needed references in 1 shot then read them in batches.
 
 5. **Using Video Coder Skills**: Since you will write code for the video scene, you will need a lot of understanding how everything should be done. Therefore, in video-coder skills, you must understand what all reference files are needed based on what is to be code in the scene and read all the needed references. And then continue with rest of the steps. Make sure you are reading every reference that is needed.
-If you cannot read all needed references in 1 shot then read them in batches.
+   If you cannot read all needed references in 1 shot then read them in batches.
 
 6. **Get Output Path**: Run bash command to get the output file path:
-<invoke name="Bash">
-    <parameter name="command">python .claude/skills/video-creator/scripts/path_manager.py --topic <topic> --asset-type "Video" --scene-index <scene_index> --subpath "latest"</parameter>
-    <parameter name="description">Get output path for video</parameter>
-</invoke>
+   <invoke name="Bash">
+   <parameter name="command">python .claude/skills/video-creator/scripts/path_manager.py --topic <topic> --asset-type "Video" --scene-index <scene_index> --subpath "latest"</parameter>
+   <parameter name="description">Get output path for video</parameter>
+   </invoke>
 
 7. **Save Output**: Write to the path returned by the above command.
    **⚠️ IMPORTANT:** Do NOT read the file back to verify it was saved. The next validation step handles this automatically.
 
 8. **Validate Scene**: Run the syntax validator to check for errors.
-<invoke name="Bash">
-    <parameter name="command">python scripts/claude_cli/content_video/tsx_syntax_validate.py --scene_index <scene_index> --topic <topic></parameter>
-    <parameter name="description">Validate scene TSX syntax</parameter>
-</invoke>
-IMPORTANT : If validation fails, Use **Edit** tool to fix the error and keep validating until the validation passes.
+   <invoke name="Bash">
+   <parameter name="command">python scripts/claude_cli/content_video/tsx_syntax_validate.py --scene_index <scene_index> --topic <topic></parameter>
+   <parameter name="description">Validate scene TSX syntax</parameter>
+   </invoke>
+   IMPORTANT : If validation fails, Use **Edit** tool to fix the error and keep validating until the validation passes.
 
 9. **After completion run the below command:**
-<invoke name="Bash">
-    <parameter name="command">python .claude/skills/video-creator/scripts/video-step-sub-status.py --command "mark-complete" --topic <topic> --asset-type "Video" --subagent-id <scene_index></parameter>
-    <parameter name="description">Mark video step complete</parameter>
-</invoke>
-</workflow>
+   <invoke name="Bash">
+   <parameter name="command">python .claude/skills/video-creator/scripts/video-step-sub-status.py --command "mark-complete" --topic <topic> --asset-type "Video" --subagent-id <scene_index></parameter>
+   <parameter name="description">Mark video step complete</parameter>
+   </invoke>
+   </workflow>
 
 <coding-guidelines>
 

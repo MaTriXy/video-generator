@@ -2,18 +2,18 @@
 
 <overview>
 Use the `mcp__video_gen_tools__search_icons` tool to fetch the list of icon names.
-Use the `mcp__video_gen_tools__get_icon` tool to fetch SVG content for icons returned by search_icons.
+Use the `mcp__video_gen_tools__get_icons` tool to fetch SVG content for icons returned by search_icons.
 </overview>
 
 <icon-libraries>
 Icon Libraries:
 
-| Prefix | Library
-| ------ | -----------------
-| `Bs`   | Bootstrap Icons
-| `Fa`   | Font Awesome 5
-| `Fa6`  | Font Awesome 6
-| `Gi`   | Game Icons
+| Prefix | Library         |
+| ------ | --------------- |
+| `Bs`   | Bootstrap Icons |
+| `Fa`   | Font Awesome 5  |
+| `Fa6`  | Font Awesome 6  |
+| `Gi`   | Game Icons      |
 
 </icon-libraries>
 
@@ -28,6 +28,7 @@ After fetching an icon, analyze its structure to determine key positions for ali
 ```
 
 Common viewBox sizes:
+
 - Bootstrap: 16x16
 - Font Awesome: 512x512
 - Game Icons: 512x512
@@ -43,11 +44,11 @@ Examine path commands to identify key coordinates:
 <path d="M79.238 115.768l-28.51 67.863h406.15..."/>
 ```
 
-| Command | Meaning | Example |
-|---------|---------|---------|
-| `M x,y` | Move to absolute position | `M79.238 115.768` → starts at (79, 115) |
-| `h value` | Horizontal line (relative) | `h406.15` → moves right 406 units |
-| `l x,y` | Line to (relative) | `l-28.51 67.863` → draws line |
+| Command   | Meaning                    | Example                                 |
+| --------- | -------------------------- | --------------------------------------- |
+| `M x,y`   | Move to absolute position  | `M79.238 115.768` → starts at (79, 115) |
+| `h value` | Horizontal line (relative) | `h406.15` → moves right 406 units       |
+| `l x,y`   | Line to (relative)         | `l-28.51 67.863` → draws line           |
 
 See [viewbox-positioning.md](./references/viewbox-positioning.md) → "Aligning Elements to Icon Attachment Points" for how to transform these coordinates.
 

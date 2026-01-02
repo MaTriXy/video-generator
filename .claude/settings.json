@@ -4,7 +4,7 @@
     "allow": [
       "Bash(python:*)",
       "Read(.claude/skills/)",
-      "mcp__video_gen_tools__get_icon",
+      "mcp__video_gen_tools__get_icons",
       "mcp__video_gen_tools__search_icons",
       "Skill(asset-creator)",
       "Skill(video-coder)",
