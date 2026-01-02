@@ -142,3 +142,6 @@ Vibrant, futuristic style with glowing effects, dark backgrounds, and bright acc
 
 > [!IMPORTANT]
 > If you run individual `gen:` commands instead of `/create-video`, you must run all subsequent commands in the workflow sequence for your changes to take effect. For example, if you run `/gen:director`, you'll need to manually run `/gen:assets`, `/gen:design`, and `/gen:video` afterwards.
+
+> ## Star History
+[![Star History Chart](https://api.star-history.com/svg?repos=outscal/video-generator&type=date&legend=top-left)](https://www.star-history.com/#outscal/video-generator&type=date&legend=top-left)
