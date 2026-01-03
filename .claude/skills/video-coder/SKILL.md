@@ -64,13 +64,12 @@ Then implement working React code following the component format that is:
 </critical-requirements>
 <frontend-aesthetics>
 <aesthetics-focus>
-- **Typography**: Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics; unexpected, characterful font choices. Pair a distinctive display font with a refined body font.
 - **Color & Theme**: Follow the color theme as required
 - **Motion**: Use framer-motion for all animations in React video components. Focus on high-impact moments: one well-orchestrated scene entry with staggered reveals (using delay) creates more delight than scattered micro-animations. Sync animations with the given timing in the given design.
 - **Backgrounds & Visual Details**: Create atmosphere and depth rather than defaulting to solid colors. Add contextual effects and textures that match the overall aesthetic. Apply creative forms like gradient meshes, noise textures, geometric patterns, layered transparencies, dramatic shadows, decorative borders, custom cursors, and grain overlays and etc. But make sure you follow the given color theme. You can be creative artist following the given design.
 </aesthetics-focus>
 <creative-interpretation>
-Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same. Vary between light and dark themes, different fonts, different aesthetics. NEVER converge on common choices (Space Grotesk, for example) across generations.
+Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same.
 </creative-interpretation>
 <complexity-matching>
 **IMPORTANT**: Match implementation complexity to the given vision/design. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details. Elegance comes from executing the design/vision well.
@@ -659,7 +658,10 @@ transition={{
 <text-important-notes>
 - All text elements MUST be wrapped in a container div with `w-fit h-fit` and padding. The container div also handles positioning using classes from Component Positioning.
 - Always use z-index values to control layering.
-- Do not set fontFamily to the text let it use the default font-family set in the parent
+- Never set fontFamily to a specific font. Either omit it or use 'inherit'.
+- **lineHeight MUST match the design**: If design specifies lineHeight, use that exact value. If not specified, browser default is 1.5.
+- **textAlign is CSS only, NOT positioning**: The `textAlign` field from design applies to CSS `text-left`/`text-center`/`text-right` classes for multi-line text flow within the container. It does NOT affect container positioning. Always use `-translate-x-1/2 -translate-y-1/2` to center the container on x,y coordinates regardless of textAlign.
+- **NEVER add `whitespace-nowrap`**: Do not add `whitespace-nowrap` to text elements unless explicitly specified in the design. Text should wrap naturally based on available width. Adding `whitespace-nowrap` can cause text to overflow outside the viewport.
 </text-important-notes>
 <example-container-pattern>
 {/* Container: positioning + fit dimensions + padding */}

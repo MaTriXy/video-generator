@@ -508,11 +508,14 @@ class TextElementModel(BaseElementModel):
     """Model for text elements."""
     type: Literal[ElementType.TEXT] = ElementType.TEXT
     text: str = Field(..., description="Text content to display")
+    # width and height are calculated by validation using formulas - not required in design
     fontColor: Optional[str] = Field(None, description="Font color in hex format")
     fontSize: Optional[float] = Field(None, gt=0, description="Font size in pixels")
     textAlign: Optional[TextAlign] = Field(None, description="Text alignment")
     fontWeight: Optional[Union[int, str]] = Field(None, description="Font weight (number or string)")
-    lineHeight: Optional[float] = Field(None, gt=0, description="Line height multiplier")
+    lineHeight: Optional[float] = Field(None, gt=0, description="Line height multiplier (default 1.5)")
+    containerWidth: Optional[float] = Field(None, gt=0, description="Fixed container width - if set, text wraps within this width")
+    padding: Optional[float] = Field(None, ge=0, description="Padding in pixels (default 8)")
     bgID: Optional[str] = Field(None, description="Background element ID reference")
     container: Optional[ContainerModel] = Field(None, description="Container configuration for background box")
 

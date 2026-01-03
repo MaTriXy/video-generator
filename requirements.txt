@@ -9,3 +9,4 @@ psutil==7.1.0
 filelock==3.19.1
 uvicorn==0.37.0
 concurrent-log-handler==0.9.25
+fonttools>=4.0.0

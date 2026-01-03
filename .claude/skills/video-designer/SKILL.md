@@ -398,8 +398,38 @@ Always create text elements when you need to show the text on the screen.
 </text-separation>
 
 <auto-sizing>
-Text elements are auto-sized based on content and fontSize.
+Text elements are auto-sized based on content and fontSize. Position elements with adequate spacing to avoid overlaps.
 </auto-sizing>
+
+<text-align-clarification>
+**CRITICAL: textAlign is CSS only, NOT positioning**
+
+The `textAlign` field controls how text lines flow within the text container. It does NOT change where the container is positioned.
+
+**Universal coordinate system rule applies:**
+- x,y is ALWAYS the center point of the text element
+- textAlign affects internal text alignment, not container position
+
+**When textAlign matters:**
+- Multi-line text (e.g., "MONKEY\nTALKS") - shorter lines align left/center/right within the container width
+- Single-line text with `containerWidth` set - text aligns within that fixed width
+
+**When textAlign has NO visible effect:**
+- Single-line text without containerWidth - the container shrinks to fit the text exactly, leaving no extra space for alignment to matter
+
+**Example - Multi-line text at x=540 (viewport center):**
+```
+textAlign: "center"   textAlign: "left"
+┌──────┐              ┌──────┐
+│MONKEY│              │MONKEY│
+│ TALKS│              │TALKS │
+└──────┘              └──────┘
+   ↑                     ↑
+ x=540                 x=540
+```
+
+Both containers are centered on x=540. PHASED (longest line) fills container width. Only ARRAY (shorter line) shifts based on textAlign.
+</text-align-clarification>
 
 <text-sizing-guidelines>
 
@@ -448,7 +478,9 @@ The `container` object gives text its own background, border, and padding. The b
     "fontSize": number,
     "textAlign": "left|center|right",
     "fontWeight": number,
-    "lineHeight": number,
+    "lineHeight": number,  // Optional, default 1.5
+    "containerWidth": number,  // Optional, for fixed-width text that wraps
+    "padding": number,  // Optional, default 8
     "zIndex": number,
 
     "animation": {
@@ -498,7 +530,7 @@ The `container` object gives text its own background, border, and padding. The b
     "rotation": 0,
     "opacity": 1,
     "fontColor": "#FFFFFF",
-    "fontSize": 96,  // Calculate as percentage of viewport height. Ensure readability and proper visual hierarchy.
+    "fontSize": 96,
     "textAlign": "center",
     "fontWeight": 700,
     "lineHeight": 1.4,

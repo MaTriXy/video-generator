@@ -62,7 +62,6 @@ Choose the most appropriate tag for each paragraph's emotional context. You are 
 | `[laughs harder]` | Escalating comedy, absurd situations |
 | `[starts laughing]` | Building into a humorous moment |
 | `[wheezing]` | Peak comedy, uncontrollable laughter |
-| `[whispers]` | Secrets, intimate moments, dramatic tension |
 | `[sighs]` | Resignation, disappointment, fatigue |
 | `[exhales]` | Relief, preparation, collecting thoughts |
 | `[gasps]` | Shock, sudden realization, surprise |
@@ -132,7 +131,7 @@ Choose the most appropriate tag for each paragraph's emotional context. You are 
 - Reflections: `[sorrowful]`, `[regretful]`, `[hesitant]`
 
 **Context matters:**
-- Opening hooks often use dramatic tags: `[dramatic]`, `[whispers]`, `[panicked]`
+- Opening hooks often use dramatic tags: `[dramatic]`, `[panicked]`
 - Transitions can use: `[pauses]`, `[clears throat]`, `[exhales]`
 - Punchlines work with: `[deadpan]`, `[sarcastic]`, `[laughs]`
 - Serious warnings need: `[serious]`, `[trembling]`, `[menacing]`

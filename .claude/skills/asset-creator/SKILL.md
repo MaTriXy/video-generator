@@ -5,13 +5,6 @@ description: This skill helps in drawing any visuals. It is a versatile skill an
 
 # Asset Creator Skill
 
-<asset-manifest-priority>
-## CRITICAL: Asset Manifest Priority
-**If you receive an `asset_manifest`:**
-- **DO NOT create new assets** that already exist in the manifest
-- Use the pre-generated assets from the provided paths
-- Only create NEW assets that are NOT in the manifest
-</asset-manifest-priority>
 <core-responsibility>
 ## Core Responsibility
 Create SVG assets using fetched icons and/or custom SVG elements.
@@ -20,10 +13,6 @@ Create SVG assets using fetched icons and/or custom SVG elements.
 </core-responsibility>
 <references>
 **Understand Requirements** → Determine what icons/shapes/illustrations/graphics are needed
-<fetch-icons-ref>
-### **Fetch Icons** → To get references from icons before creating any assets
-Read [fetching-icons.md](./references/fetching-icons.md)
-</fetch-icons-ref>
 <path-creation-ref>
 ### **Path Creation** → To create any lines, curves, paths, this is important that you use the learnings from this
 Read [path-creation.md](./references/path-creation.md)
@@ -37,6 +26,56 @@ Read [primitive-characters.md](./references/character/primitive-characters.md)
 Read [arrow-guidelines.md](./references/arrow-guidelines.md)
 </arrow-creation-ref>
 </references>
+
+<fetch-icons-ref>
+High-quality assets require visual references—use the steps below to fetch icons that guide each asset's shape.
+
+<tools-to-use>
+Use the `mcp__video_gen_tools__search_icons` tool to fetch the list of icon names. Use it  multiple times with different keywords if needed to get enough candidates.
+Use the `mcp__video_gen_tools__get_icons` tool to fetch SVG content for icons returned by search_icons.
+
+For each asset, fetch multiple reference icons before selecting the best match. The agent specifies the exact number of icons to read per asset.
+</tools-to-use>
+
+---
+
+<handling-failed-searches>
+
+<fallback-strategies>
+1. Try alternative keyword to fetch the icon list.
+</fallback-strategies>
+
+</handling-failed-searches>
+
+---
+
+</fetch-icons-ref>
+
+<asset-type-handling>
+## Creation Guidelines by Asset Type
+
+### `logo`
+- Fetch reference icons
+- Use EXACTLY as-is. Zero modifications.
+- If no matching references found: Write the name of that brand/entity inside a visual box.
+
+### `icon`
+- Fetch reference icons
+- Use EXACTLY as-is. Zero modifications.
+- If no matching references found: Create from scratch, keep simple like icons
+
+### `customized`
+- Fetch reference icons
+- If a reference matches description → use as-is
+- Only if NO reference matches → tweak the closest one
+- If no direct references found → search for similar references, understand their shape, and create the asset
+
+### `character`
+- NO icon fetching
+- Use <character-creation-ref> to create from scratch
+
+</asset-type-handling>
+
 <svg-basics>
 Use whenever SVGs need to be created or used
 <basic-svg-structure>
@@ -319,17 +358,7 @@ The `viewBox` attribute defines the internal coordinate system of an SVG:
 | `width` | Internal width in SVG units |
 | `height` | Internal height in SVG units |
 </understanding-viewbox>
-<choosing-viewbox-size>
 
-| Use Case | Recommended ViewBox | Why |
-|----------|---------------------|-----|
-| Simple icons | `0 0 100 100` | Easy math, percentage-based |
-| Detailed illustrations | `0 0 200 200` or `0 0 500 500` | More precision for complex paths |
-| Wide banners | `0 0 300 100` | 3:1 aspect ratio |
-| Tall graphics | `0 0 100 200` | 1:2 aspect ratio |
-
-**Guidelines:** Match aspect ratio to display context. Larger viewBox = more precision. Square viewBox works well for icons.
-</choosing-viewbox-size>
 <coordinate-system>
 
 ```
@@ -356,60 +385,6 @@ The `viewBox` attribute defines the internal coordinate system of an SVG:
 | Center | (width/2, height/2) |
 | Bottom-center | (width/2, height) |
 </coordinate-system>
-<icon-transform-pattern>
-**The standard pattern for placing icons:**
-
-```svg
-<g transform="translate(targetX, targetY) scale(S) translate(-centerX, -centerY)">
-  <!-- icon paths here -->
-</g>
-```
-
-**Read right-to-left:**
-1. `translate(-centerX, -centerY)` → Move icon center to origin
-2. `scale(S)` → Scale the icon
-3. `translate(targetX, targetY)` → Move to final position
-<icon-library-reference>
-
-| Library | ViewBox | Center Offset | Scale Formula |
-|---------|---------|---------------|---------------|
-| Bootstrap (Bs) | 16x16 | `translate(-8, -8)` | `desiredSize / 16` |
-| Font Awesome (Fa) | 512x512 | `translate(-256, -256)` | `desiredSize / 512` |
-| Game Icons (Gi) | 512x512 | `translate(-256, -256)` | `desiredSize / 512` |
-</icon-library-reference>
-<icon-examples>
-
-```svg
-<!-- Bootstrap icon at center (50,50), size 50 units, scale: 50/16 = 3.125 -->
-<g transform="translate(50, 50) scale(3.125) translate(-8, -8)">
-  <path d="..." />
-</g>
-
-<!-- Game Icon at center (960,540), size 400 units, scale: 400/512 = 0.78 -->
-<g transform="translate(960, 540) scale(0.78) translate(-256, -256)">
-  <path d="..." />
-</g>
-```
-</icon-examples>
-</icon-transform-pattern>
-<multi-icon-layouts>
-<side-by-side>
-
-```svg
-<g transform="translate(W*0.3, H*0.5) scale(S) translate(-cx, -cy)">...</g>
-<g transform="translate(W*0.7, H*0.5) scale(S) translate(-cx, -cy)">...</g>
-```
-</side-by-side>
-<grid-layout>
-
-| Position | Coordinates |
-|----------|-------------|
-| Top-left | (25%, 25%) |
-| Top-right | (75%, 25%) |
-| Bottom-left | (25%, 75%) |
-| Bottom-right | (75%, 75%) |
-</grid-layout>
-</multi-icon-layouts>
 <safe-zone-max-scale>
 
 Keep icon centers within 10%-90% of viewBox to prevent clipping:
@@ -426,48 +401,40 @@ SVGs are transparent by default. To maintain transparency:
 - Apply fill only to icon paths
 </transparent-background>
 <aligning-effects>
-When adding effects (muzzle flash, sparks, etc.) to specific points on an icon, calculate the exact position mathematically.
-<calculation-process>
-1. **Find attachment point in original icon space** (e.g., gun barrel tip at (486, 175) in 512x512)
-2. **Apply transforms in order** (right-to-left)
-3. **Position effect at calculated point**
-</calculation-process>
-<alignment-example>
-Gun Barrel at (486, 175), icon placed at (25, 50) with scale 0.12
+When adding effects (muzzle flash, sparks, etc.) to specific points on an icon, position them using the icon's coordinate system.
 
-```
-Step 1 - translate(-256, -256): (486-256, 175-256) = (230, -81)
-Step 2 - scale(0.12): (230×0.12, -81×0.12) = (27.6, -9.72)
-Step 3 - translate(25, 50): (25+27.6, 50-9.72) = (52.6, 40.28)
-```
+**Process:**
+1. **Identify the attachment point** in the icon's original coordinate space (e.g., gun barrel tip)
+2. **Position the effect** at that coordinate using `transform="translate(x, y)"`
 
+**Example: Gun with muzzle flash**
 ```svg
-<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <g transform="translate(25, 50) scale(0.12) translate(-256, -256)">
-    <path d="M79.238 115.768..." fill="#333"/>
-  </g>
+<!-- Gun icon with viewBox 0 0 512 512, barrel tip at (486, 175) -->
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <path d="M79.238 115.768..." fill="#333"/>  <!-- Gun icon -->
 
-  <!-- Muzzle flash at calculated (52.6, 40.28) -->
-  <g transform="translate(52.6, 40.28)">
+  <!-- Position muzzle flash at barrel tip coordinates -->
+  <g transform="translate(486, 175)">
     <polygon points="0,0 15,-8 12,0 15,8" fill="#FF6600">
       <animate attributeName="opacity" values="1;0;1" dur="0.1s" repeatCount="indefinite"/>
     </polygon>
   </g>
 </svg>
 ```
-</alignment-example>
-<common-attachment-points>
+
+**Finding attachment points:**
 
 | Icon Type | Attachment Point | How to Find |
 |-----------|------------------|-------------|
-| Guns/Weapons | Barrel tip | Rightmost X, mid-height Y |
-| Swords/Blades | Blade tip | Topmost or rightmost point |
-| Characters | Hand position | Look for arm/hand path segments |
-| Vehicles | Exhaust/Wheels | Bottom or rear coordinates |
-</common-attachment-points>
-<debugging>
-Add a debug circle at calculated position: `<circle cx="52.6" cy="40.28" r="3" fill="red"/>`
-</debugging>
+| Guns/Weapons | Barrel tip | Rightmost X, mid-height Y in icon's coordinate space |
+| Swords/Blades | Blade tip | Topmost or rightmost point in icon's coordinate space |
+| Characters | Hand position | Look for arm/hand path segments, note their coordinates |
+| Vehicles | Exhaust/Wheels | Bottom or rear coordinates in icon's coordinate space |
+
+**Debugging tip:** Add a visible circle at the attachment point to verify position:
+```svg
+<circle cx="486" cy="175" r="5" fill="red"/>  <!-- Shows barrel tip location -->
+```
 </aligning-effects>
 </position-elements>
 <animations>
@@ -511,34 +478,6 @@ Use whenever any object might need animation. This master document provides an o
 </character-ref>
 </reference-map>
 <output-format>
-<composition-requirement>
-## CRITICAL: Composition Comment Required
-
-**Every SVG MUST include a COMPOSITION comment as the FIRST line of the file.** This describes the asset's visual structure so downstream processes understand its geometry.
-
-**Format:** `<!-- COMPOSITION: <detailed description> -->`
-
-**What to include:**
-- Overall shape (e.g., "Wedge-shaped vehicle", "Cylindrical rocket")
-- Each distinct part and its spatial position using TOP, BOTTOM, LEFT, RIGHT
-- Surface details (angled surfaces, flat edges, highlights)
-- For asymmetric assets: clearly state which side is UP vs DOWN
-
-**Guidelines for spatial descriptions:**
-- Use absolute positions: "TOP-LEFT", "BOTTOM edge", "RIGHT side"
-- Describe surfaces by what they face: "flat bottom edge" (not "faces down")
-- For protruding parts: "fin protrudes UPWARD from top-rear"
-
-**Example:**
-```svg
-<!-- COMPOSITION: Wedge-shaped hypersonic glide vehicle pointing RIGHT. Flat horizontal bottom edge. Angled top surface slopes from thick rear (left) to thin nose (right), with lighter gray highlight. Small triangular control fin protrudes UPWARD from top-rear. Heat shield tile lines run vertically across body. Vehicle tapers from rear to pointed nose. -->
-<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  ...
-</svg>
-```
-
-⚠️ **Without this comment, downstream processes cannot determine asset symmetry or correct flip behavior.**
-</composition-requirement>
 
 <rotation-system>
 ## Rotation System
