@@ -3,10 +3,7 @@ from pathlib import Path
 from scripts.enums import AssetType
 from scripts.server_agents.execution_types import ExecutionType
 from scripts.path_setup import PROMPTS_DIR
-from scripts.utility.config import (
-    BASIC_CLAUDE_CODE_TOKEN,
-    CODE_CLAUDE_CODE_TOKEN,
-)
+from scripts.utility.config import BASIC_CLAUDE_CODE_TOKEN
 
 
 VIDEO_GEN_API_BASE_URL = os.environ.get("VIDEO_GEN_API_URL", "http://localhost:3012/api")
@@ -71,7 +68,7 @@ ASSET_CONFIG = {
         "settings_folder": str(PROMPTS_DIR / "orchestrator" / "code"),
         "output_folder": "Video",
         "agent_label": "CodeAgent",
-        "oauth_token": CODE_CLAUDE_CODE_TOKEN,
+        "oauth_token": BASIC_CLAUDE_CODE_TOKEN,
         "multi_prompt": True,
     },
     AssetType.ASSETS: {

@@ -39,7 +39,7 @@ class ShortAgent:
 
     def _build_options(self) -> ClaudeAgentOptions:
         env = {}
-        oauth_token = os.environ.get("CLAUDE_CODE_OAUTH_TOKEN")
+        oauth_token = os.environ.get("BASIC_CLAUDE_CODE_TOKEN")
         if oauth_token:
             env["CLAUDE_CODE_OAUTH_TOKEN"] = oauth_token
         self._stderr_lines = []
