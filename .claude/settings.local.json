@@ -7,7 +7,9 @@
       "Bash(python -m scripts.cli_pipeline *)",
       "Bash(python -m scripts.tools_cli *)",
       "Bash(cd video-tools && python -m scripts.tools_cli *)",
-      "Bash(python -c \"import sys,json; data=json.loads\\(sys.stdin.read\\(\\)\\); [print\\(f'Scene {i}: {d[\\\\\"success\\\\\"]} - {d[\\\\\"message\\\\\"][:100]}'\\) for i,d in enumerate\\(data\\)]\")"
+      "Bash(python -c \"import sys,json; data=json.loads\\(sys.stdin.read\\(\\)\\); [print\\(f'Scene {i}: {d[\\\\\"success\\\\\"]} - {d[\\\\\"message\\\\\"][:100]}'\\) for i,d in enumerate\\(data\\)]\")",
+      "Bash(python *)",
+      "Bash(ls C:\\\\Outscal\\\\video-generator\\\\Outputs\\\\pre-order-traversal-v2\\\\Video\\\\Latest\\\\ *)"
     ]
   }
 }

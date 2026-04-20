@@ -103,8 +103,9 @@ async def _fetch_audio_and_timestamps(text: str, api_key: str, config: Dict, pho
             "text": text,
             "model_id": model_id,
             "voice_settings": {"speed": speed, "stability": stability, "similarity_boost": similarity},
-            "pronunciation_dictionary_locators": [{"pronunciation_dictionary_id": phonetics_dict_id}]
         }
+        if phonetics_dict_id:
+            payload["pronunciation_dictionary_locators"] = [{"pronunciation_dictionary_id": phonetics_dict_id}]
         logger.debug(f"Sending payload to ElevenLabs: {json.dumps(payload)}")
         async with aiohttp.ClientSession() as session:
             async with session.post(url, headers=headers, json=payload) as response:
