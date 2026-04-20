@@ -1,0 +1,9 @@
+<input>
+<uploaded_assets>{{uploaded_assets}}</uploaded_assets>
+<video_ratio>{{video_ratio}}</video_ratio>
+<viewport_width>{{viewport_width}}</viewport_width>
+<viewport_height>{{viewport_height}}</viewport_height>
+<art_style>{{art_style}}</art_style>
+<script>{{script}}</script>
+{{visual_instructions}}
+</input>

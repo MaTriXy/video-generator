@@ -1,0 +1,179 @@
+{
+  "direction": {
+    "scene_guidelines": {
+      "alignment": "Strict center-axis alignment."
+    },
+    "audio_synchronization": {
+      "type": "Hard Sync",
+      "description": "Visual changes happen on the exact frame the syllable is spoken. If the narrator lists three items, the visual appears instantly on the first consonant of each item.",
+      "effect": "Creates a rhythmic, percussive visual style."
+    },
+    "camera_behavior": {
+      "type": "2D plane with Z-depth",
+      "moves": "Camera moves physically backward (Z-axis) to create room for new elements",
+      "parallax": "The foreground moves faster than the background during pans",
+      "framing": "Always perfectly centered symmetry"
+    },
+    "morph_logic": {
+      "rule": "Objects do not just vanish; they compress and become the building blocks of the next object/scene."
+    },
+    "effects": {
+      "emphasis_3d_tilt": "Elements tilt slightly in 3D perspective (rotateX/rotateY) when narration references them",
+      "camera_zoom": "Camera pulls back on Z-axis to reveal new elements, or pushes in to focus on a single element",
+      "blur": "Background elements blur to isolate the focal point during key moments",
+      "desaturation": "Elements drain to greyscale to signal failure, rejection, or obsolescence"
+    }
+  },
+
+  "code": {
+    "description": "High-contrast, and authoritative. A sophisticated dark-mode aesthetic that utilizes motion to explain relationships between linguistics and visual perception. Main visuals are perfectly centered and the canvas is fully utilised",
+    "colors": {
+      "background": {
+        "primary": "#121212",
+        "secondary": "#000000"
+      },
+      "data_palette": ["#2E4F70", "#44344E", "#443832", "#FFFFFF"],
+      "functional_accents": {
+        "label_backgrounds": "#FFFFFF (Pantone style) or #000000 (Inverse tags)",
+        "highlight_glow": "Outer glow #FFFFFF",
+        "linguistic_grouping": "#F2C94C (Yellow used for English grouping label)"
+      },
+      "text": {
+        "primary": "#FFFFFF",
+        "inverse_on_chip": "#000000",
+        "highlight": "#FFFF00"
+      },
+      "color_scheme_type": "utilitarian multicolor — colors are the *subject*, not just decoration",
+      "contrast_level": "extremely high (pure white text on almost black background)"
+    },
+    "typography": {
+      "font_families": [
+        {
+          "name": "Jost",
+          "weights": [
+            "100",
+            "200",
+            "300",
+            "400",
+            "500",
+            "600",
+            "700",
+            "800",
+            "900"
+          ],
+          "subsets": ["cyrillic", "latin", "latin-ext"]
+        },
+        {
+          "name": "IBMPlexMono",
+          "weights": ["100", "200", "300", "400", "500", "600", "700"],
+          "subsets": [
+            "cyrillic",
+            "cyrillic-ext",
+            "latin",
+            "latin-ext",
+            "vietnamese"
+          ]
+        },
+        {
+          "name": "PlayfairDisplay",
+          "weights": ["400", "500", "600", "700", "800", "900"],
+          "subsets": ["cyrillic", "latin", "latin-ext", "vietnamese"]
+        },
+        {
+          "name": "IBMPlexSerif",
+          "weights": ["100", "200", "300", "400", "500", "600", "700"],
+          "subsets": [
+            "cyrillic",
+            "cyrillic-ext",
+            "latin",
+            "latin-ext",
+            "vietnamese"
+          ]
+        }
+      ],
+      "text_formatting": [
+        "Title Case for Names (Blue, Wobé, Kpe)",
+        "UPPERCASE for categories (ENGLISH, DARK, LIGHT)",
+        "Specific tracking (slightly tight letter spacing)"
+      ],
+      "hierarchy": {
+        "primary_label": "White, Sans-Serif, Heavy, approx 48-60px",
+        "sub_data": "Black, Sans-Serif, on white card background, approx 14px",
+        "header": "White, centered, animated entrance"
+      }
+    },
+    "shapes": {
+      "primary_forms": [
+        "sharp rectangles (chips, bars)",
+        "hollow stroke rectangles",
+        "squares (pixels)",
+        "connecting brackets"
+      ],
+      "corner_radius": "0px - sharp corners on all data elements; distinct lack of rounding",
+      "edge_quality": "razor-sharp vector edges",
+      "dimensionality": "strictly 2D flat, organized in Z-space layers (camera moves, not objects)",
+      "complexity_level": "geometric abstraction (color swatches represent abstract concepts)"
+    },
+    "lines_and_arrows": {
+      "line_style": "straight solid lines or 'bracket' connectors",
+      "arrow_tips": "none — connections are implied by brackets or lines drawing between objects",
+      "thickness": "2-3px white stroke",
+      "colors": ["#FFFFFF"],
+      "curved_connectors": "minimal — branching data lines use straight angular paths or slight mechanical bends",
+      "forbidden": ["wobbly lines", "hand-drawn sketchiness", "dashed lines", "arrowheads"]
+    },
+    "animation_style": {
+      "technique": "2.5D Motion Graphics with shape morphing",
+      "easing_type": "Exponential Ease-Out (Quintic)",
+      "easing_description": "Snappy starts with very long, smooth decelerations. Objects arrive quickly and slide imperceptibly into place.",
+      "movement_quality": "Mechanical and Precise. No overshoot, no bounce, no elasticity.",
+      "timing": {
+        "snappy": "150ms for text appearing",
+        "flow": "600ms for element sliding/sorting",
+        "morph": "800ms for object-to-text transformation"
+      }
+    },
+    "texture_and_imperfection": {
+      "primary": "Clean Digital Vectors (99% of runtime)",
+      "secondary": "Analog Glitch (1% of runtime - only used for impact/brand reveal)",
+      "glitch_type": "VHS Tracking Error, Chromatic Aberration offset (Red/Cyan separation), Scanlines"
+    }
+  },
+
+  "asset": {
+    "instructions": "Data-first minimalism. Backgrounds must be deep dark grey with a dotted grid. Use absolutely sharp corners (0px border radius) for all rectangles. Preservation of exact data identity colors (Pantone hex codes) is mandatory. Textures should be non-existent except for specific signal noise/glitch effects on transitions.",
+    "palette": [
+      "#121212",
+      "#000000",
+      "#FFFFFF",
+      "#F2C94C",
+      "#2E4F70",
+      "#44344E",
+      "#443832",
+      "#E5E5E5"
+    ],
+    "effects": ["glow", "glitch-overlay"],
+    "gradients": {
+      "use": false,
+      "notes": "No aesthetic gradients on shapes. Elements must be flat, solid blocks of color to represent 'Data'. If a spectrum is needed, use distinct bands of flat color, not a smooth fade."
+    },
+    "stroke": {
+      "style": "clean-solid",
+      "width": "2-3px",
+      "color": "#FFFFFF",
+      "notes": "Use consistent white strokes for hollow data boxes, connecting lines, and brackets. Stroke weight must not vary. No tapered lines; ends should be flat or square."
+    },
+    "shading": {
+      "approach": "flat",
+      "notes": "Strictly 2D flat fills. No shadows, ambient occlusion, or highlights on the assets themselves. Depth is achieved purely through layer separation (Z-space positioning), not lighting effects."
+    },
+    "complexity": {
+      "level": "minimal-geometric",
+      "notes": "Abstract geometry only. Icons should be reduced to their simplest pixel or vector representation. 'Objects' are essentially just rectangular canvases for color data."
+    },
+    "filters": {
+      "allowed": ["feDropShadow", "feColorMatrix", "feTurbulence"],
+      "notes": "Use `feDropShadow` (color #FFFFFF) only for 'active' state highlights. Use `feColorMatrix` and `feTurbulence` strictly for the momentary 'VHS/Analog Glitch' distortion effects on logos or scene transitions."
+    }
+  }
+}

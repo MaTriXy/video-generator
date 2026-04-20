@@ -7,5 +7,4 @@ class AssetType(Enum):
     AUDIO = "Audio"
     DIRECTION = "Direction"
     ASSETS = "Assets"
-    DESIGN = "Design"
     VIDEO = "Video"

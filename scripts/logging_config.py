@@ -3,6 +3,7 @@ Simplified process-isolated logging configuration for the course workflow system
 Each process gets a single log file containing all logging output.
 """
 
+
 import logging
 import sys
 import os
@@ -22,14 +23,24 @@ DEFAULT_LOG_LEVEL = logging.DEBUG if ENV == 'dev' else logging.INFO
 # Global console logging control (default: enabled)
 _CONSOLE_LOGGING_ENABLED = True
 
+class VideoContextFilter(logging.Filter):
+    """Filter that adds default video_id and step fields to log records."""
+
+    def filter(self, record):
+        if not hasattr(record, 'video_id'):
+            record.video_id = '--'
+        if not hasattr(record, 'step'):
+            record.step = '--'
+        return True
+
+
 class SafeStreamHandler(logging.StreamHandler):
     """Custom StreamHandler that safely handles Unicode characters and respects console logging control"""
 
     def emit(self, record):
         global _CONSOLE_LOGGING_ENABLED
 
-        # Skip console output if console logging is disabled (except for ERROR and CRITICAL)
-        if not _CONSOLE_LOGGING_ENABLED and record.levelno < logging.ERROR:
+        if not _CONSOLE_LOGGING_ENABLED:
             return
 
         try:
@@ -98,14 +109,16 @@ def setup_logger(name: str, level: int = None, log_file_name: str = None, log_fi
 
     logger.propagate = False
     logger.setLevel(level or DEFAULT_LOG_LEVEL)
+    logger.addFilter(VideoContextFilter())
 
     formatter = logging.Formatter(
-        '%(asctime)s - [%(name)s] - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s',
+        '[%(levelname)s] [%(name)s] [%(video_id)s] [%(step)s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 
     console_handler = SafeStreamHandler(sys.stdout)
     console_handler.setFormatter(formatter)
+    console_handler.addFilter(VideoContextFilter())
     logger.addHandler(console_handler)
 
     global _PROCESS_LOG_FILE
@@ -113,6 +126,7 @@ def setup_logger(name: str, level: int = None, log_file_name: str = None, log_fi
     file_path = _PROCESS_LOG_FILE
     file_handler = logging.FileHandler(file_path, encoding='utf-8')
     file_handler.setFormatter(formatter)
+    file_handler.addFilter(VideoContextFilter())
     logger.addHandler(file_handler)
 
     return logger
@@ -126,8 +140,11 @@ def get_orchestrator_logger() -> logging.Logger:
     """Get logger for orchestrator service"""
     return setup_logger('orchestrator')
 
-def get_utility_logger(module_name: str, log_file_name: str = None, log_file_dir: Path = None) -> logging.Logger:
-    return setup_logger(f'utils.{module_name}', log_file_name=log_file_name, log_file_dir=log_file_dir)
+def get_utility_logger(module_name: str, log_file_name: str = None, log_file_dir: Path = None, video_id: str = None, step: str = None):
+    logger = setup_logger(f'utils.{module_name}', log_file_name=log_file_name, log_file_dir=log_file_dir)
+    if video_id or step:
+        return logging.LoggerAdapter(logger, {"video_id": video_id or "--", "step": step or "--"})
+    return logger
 
 def get_streamlit_logger() -> logging.Logger:
     """Get logger for Streamlit app"""
@@ -162,21 +179,24 @@ def setup_root_logger():
         # Use INFO level for dev, WARNING for prod
         root_level = logging.INFO if ENV == 'dev' else logging.WARNING
         root_logger.setLevel(root_level)
+        root_logger.addFilter(VideoContextFilter())
         
         # Console handler for root logger with safe Unicode handling
         console_handler = SafeStreamHandler(sys.stdout)
         console_handler.setLevel(root_level)
-        
+        console_handler.addFilter(VideoContextFilter())
+
         formatter = logging.Formatter(
-            '%(asctime)s - [%(name)s] - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s',
+            '[%(levelname)s] [%(name)s] [%(video_id)s] [%(step)s] %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
         )
         console_handler.setFormatter(formatter)
         root_logger.addHandler(console_handler)
-        
+
         # Single file handler for root logger
         file_handler = logging.FileHandler(_PROCESS_LOG_FILE, encoding='utf-8')
         file_handler.setLevel(root_level)
+        file_handler.addFilter(VideoContextFilter())
         file_handler.setFormatter(formatter)
         root_logger.addHandler(file_handler)
 

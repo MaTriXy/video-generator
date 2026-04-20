@@ -1,0 +1,294 @@
+{
+  "direction": {
+    "colors": {
+      "primary_palette": [
+        "#121212",
+        "#2EFF5F",
+        "#FFFFFF"
+      ],
+      "color_scheme_type": "high contrast neon",
+      "saturation_level": "highly saturated accents on dark background",
+      "contrast_level": "high contrast"
+    },
+    "typography": {
+      "font_families": [
+        { "name": "SpaceGrotesk" },
+        { "name": "Rajdhani" },
+        { "name": "SpaceMono" },
+        { "name": "Orbitron" },
+        { "name": "Audiowide" },
+        { "name": "Oxanium" }
+      ]
+    },
+    "animation_style": {
+      "technique": "motion graphics with spring physics",
+      "movement_quality": "smooth, digital, snappy — spring-based with controlled overshoot",
+      "easing_type": "spring for entrances (snappy pops or smooth reveals), ease-out for exits",
+      "complexity": "simple but dynamic — every element has purposeful motion"
+    },
+    "animations": {
+      "entrance_types": [
+        "spring scale up (snappy overshoot then settle)",
+        "fade in with upward slide",
+        "slide in from edge",
+        "staggered children (elements appear sequentially with slight delay)",
+        "draw-in for line/wave elements (line traces itself on screen)",
+        "neon flicker-on (rapid flashes then steady glow)"
+      ],
+      "exit_types": [
+        "fade out with scale down",
+        "slide out to edge",
+        "neon flicker-off (rapid opacity drops then 0)"
+      ],
+      "transitions": [
+        "fade between scenes",
+        "slide with direction (from-left, from-right, from-bottom)",
+        "wipe with neon-green leading edge",
+        "toggle switch slide for state changes",
+        "icon transformation (morph between shapes)"
+      ],
+      "emphasis_effects": [
+        "spring scale pulse (brief size bump then settle)",
+        "neon glow expansion (glow radius grows outward)",
+        "color flash green to white then back on key moments"
+      ],
+      "loops": [
+        "oscillating sine waves",
+        "radiating signal arcs (opacity pulse outward with stagger)",
+        "subtle neon glow pulse (glow intensity oscillates)"
+      ]
+    },
+    "text_behavior": {
+      "entrance_methods": [
+        "spring pop in with overshoot",
+        "fade in with slide up",
+        "typewriter reveal for binary/code strings (character-by-character with blinking cursor)"
+      ]
+    },
+    "scene_timing": {
+      "sync_rule": "All visual entrances are locked to narration. Text and elements appear on the exact syllable they represent.",
+      "entrance_duration": "300ms — from trigger to fully settled position, including any overshoot or spring settle",
+      "stagger_delay": "100ms between sequential elements in the same group",
+      "scene_transitions": "800ms between scenes",
+      "overshoot_constraint": "Spring overshoot is a visual effect only. The element must reach its final resting state within the entrance_duration. No element should still be settling when the next narration beat fires.",
+      "effect": "Creates a punchy, rhythmic tech-demo feel where visuals lock to the voiceover pace."
+    },
+    "text_placement": {
+      "screen_positions": [
+        "center",
+        "below icons"
+      ],
+      "alignment": "center",
+      "layering": "foreground"
+    },
+    "composition": {
+      "balance": "symmetrical",
+      "focal_points": [
+        "center screen icons",
+        "animated waves"
+      ],
+      "negative_space": "generous",
+      "visual_flow": "vertical stack"
+    },
+    "overall_notes": {
+      "unique_visual_characteristics": [
+        "neon green on dark mode aesthetic",
+        "infographic style data visualization"
+      ],
+      "notable_visual_patterns": [
+        "circular containers for key metrics",
+        "green highlight color for active elements"
+      ]
+    }
+  },
+
+  "code": {
+    "colors": {
+      "primary_palette": [
+        "#121212",
+        "#2EFF5F",
+        "#FFFFFF"
+      ],
+      "color_scheme_type": "high contrast neon",
+      "saturation_level": "highly saturated accents on dark background",
+      "contrast_level": "high contrast"
+    },
+    "typography": {
+      "font_families": [
+        {
+          "name": "SpaceGrotesk",
+          "weights": ["300", "400", "500", "600", "700"],
+          "subsets": ["latin", "latin-ext", "vietnamese"]
+        },
+        {
+          "name": "Rajdhani",
+          "weights": ["300", "400", "500", "600", "700"],
+          "subsets": ["devanagari", "latin", "latin-ext"]
+        },
+        {
+          "name": "SpaceMono",
+          "weights": ["400", "700"],
+          "subsets": ["latin", "latin-ext", "vietnamese"]
+        },
+        {
+          "name": "Orbitron",
+          "weights": ["400", "500", "600", "700", "800", "900"],
+          "subsets": ["latin"]
+        },
+        {
+          "name": "Audiowide",
+          "weights": ["400"],
+          "subsets": ["latin", "latin-ext"]
+        },
+        {
+          "name": "Oxanium",
+          "weights": ["200", "300", "400", "500", "600", "700", "800"],
+          "subsets": ["latin", "latin-ext"]
+        }
+      ],
+      "font_weights": [
+        "bold",
+        "black"
+      ],
+      "text_hierarchy": {
+        "headlines": "large centered bold numbers",
+        "subheadings": "smaller all-caps labels"
+      },
+      "text_formatting": [
+        "ALL CAPS",
+        "Numerical data"
+      ]
+    },
+    "shapes": {
+      "primary_forms": [
+        "circles",
+        "rounded rectangles",
+        "sine waves",
+        "linear icons",
+        "lock icons",
+        "house outlines",
+        "tower outlines"
+      ],
+      "edge_quality": "sharp vector edges",
+      "dimensionality": "2D flat with layered depth (background, mid-ground, foreground)",
+      "complexity_level": "minimalist"
+    },
+    "animation_style": {
+      "technique": "motion graphics with spring physics",
+      "movement_quality": "smooth, digital, snappy — spring-based with controlled overshoot",
+      "easing_type": "spring for entrances (snappy pops or smooth reveals), ease-out for exits",
+      "complexity": "simple but dynamic — every element has purposeful motion"
+    },
+    "gradients": {
+      "types_used": [
+        "radial glow gradients behind neon elements",
+        "linear gradient on background for subtle depth"
+      ],
+      "placement": [
+        "behind key icons and text as neon glow halos",
+        "background base layer"
+      ],
+      "intensity": "medium — visible but not overpowering, reinforces neon aesthetic",
+      "examples": [
+        "radial glow halo fading from neon green to transparent",
+        "vertical gradient from dark to slightly lighter dark"
+      ]
+    },
+    "object_style": {
+      "rendering_approach": "flat iconography",
+      "outline_treatment": "thick uniform strokes",
+      "dimensionality": "flat"
+    },
+    "micro_interactions_and_details": {
+      "text_effects": {
+        "pop_in": "elastic scale up from 0% to 110% then settle at 100%",
+        "counter_scroll": "digital odometer rolling effect for numbers increasing",
+        "glitch_jitter": "subtle horizontal displacement on frequency change"
+      },
+      "icon_behavior": {
+        "bounce_on_entry": "icons squash and stretch slightly upon appearance",
+        "hover_state": "slow, subtle vertical float for static icons",
+        "pulse": "rhythmic scaling of signal rings (opacity 100% to 0%)"
+      },
+      "character_micro_animations": {
+        "tower_sway": "imperceptible easing sway on antenna tips",
+        "blink_cursor": "solid block cursor flashing at end of binary strings",
+        "sine_wave_modulation": "frequency compression (accordion squeeze) when switching 4G to 5G"
+      }
+    },
+    "effects": {
+      "glow_and_light": [
+        "neon green glow halos behind active elements",
+        "flicker on connect (rapid flashes then steady)",
+        "light leak overlay on scene transitions (green-tinted)"
+      ],
+      "shadows": {
+        "style": "colored neon glow shadows",
+        "green_glow": "soft neon green outer glow",
+        "white_glow": "subtle white ambient glow",
+        "purpose": "reinforce neon aesthetic, create depth on dark background"
+      },
+      "particles": [
+        "small floating dots with slow drift for ambient depth",
+        "scatter particles on impact moments (burst outward from origin)"
+      ],
+      "blur_types": [
+        "subtle blur on background layers for depth separation",
+        "motion blur effect on fast-moving elements"
+      ]
+    },
+    "background": {
+      "type": "solid dark with subtle radial gradient",
+      "complexity": "minimal with ambient depth — visible grid lines or circuit traces",
+      "depth_layers": "2-3 layers (deep background, mid-ground glow halos, foreground elements)",
+      "animation": "slow ambient drift on background particles, subtle gradient shift"
+    },
+    "scene_timing": {
+      "sync_rule": "All visual entrances are locked to narration. Text and elements appear on the exact syllable they represent.",
+      "entrance_duration": "300ms — from trigger to fully settled position, including any overshoot or spring settle",
+      "stagger_delay": "100ms between sequential elements in the same group",
+      "scene_transitions": "800ms between scenes",
+      "overshoot_constraint": "Spring overshoot is a visual effect only. The element must reach its final resting state within the entrance_duration. No element should still be settling when the next narration beat fires.",
+      "effect": "Creates a punchy, rhythmic tech-demo feel where visuals lock to the voiceover pace."
+    }
+  },
+
+  "asset": {
+    "instructions": "Apply neon glow to all elements. Use palette colors for abstract elements. If an asset has an identity color (brand, recognizable object), preserve its identity color instead of palette. Use clean outlined icons with glow effects.",
+    "palette": [
+      "#0D0D0D",
+      "#003D00",
+      "#00CC00",
+      "#7FFF7F",
+      "#00FFFF",
+      "#FF00FF",
+      "#FF007F",
+      "#FFFF00"
+    ],
+    "effects": ["glow", "gradient-fill"],
+    "gradients": {
+      "use": true,
+      "types": ["linear", "radial"],
+      "notes": "Use radial gradients for glow halos behind elements. Use linear gradients for surface sheen on metallic or glass-like objects. Gradient stops should go from a bright palette color to transparent or to #0D0D0D."
+    },
+    "stroke": {
+      "style": "clean-outlined",
+      "width": "1-2px",
+      "color": "palette bright color matching the fill",
+      "notes": "Thin, clean outlines in a matching bright palette color. Strokes can have glow via feGaussianBlur filter."
+    },
+    "shading": {
+      "approach": "gradient",
+      "light_direction": "center-out (radial glow)",
+      "notes": "Neon assets glow from within. Use radial gradients centered on the element: bright core fading to darker edges. This creates the signature neon-lit look."
+    },
+    "complexity": {
+      "level": "moderate",
+      "notes": "Clean shapes with glow effects. Not overly detailed — the glow is the visual richness. Internal structure should be visible but simplified."
+    },
+    "filters": {
+      "allowed": ["feGaussianBlur", "feDropShadow"],
+      "notes": "Use feGaussianBlur for neon glow halos (blur 4-8px, placed behind the main shape). Use feDropShadow for colored glow beneath elements."
+    }
+  }
+}

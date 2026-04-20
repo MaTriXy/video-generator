@@ -1,144 +1,180 @@
-<p align="center">
-  <h1 align="center">Outscal Video Generator</h1>
-  <p align="center">An AI-powered video generation tool that creates animated videos from text scripts using Claude Code.</p>
-  <p align="center">
-    <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Mac%20%7C%20Linux-blue" alt="Platform"/>
-    <img src="https://img.shields.io/badge/python-3.13+-blue" alt="Python"/>
-    <img src="https://img.shields.io/badge/built%20with-Claude%20Code-orange" alt="Built with Claude Code"/>
-    <img src="https://img.shields.io/badge/built%20with-React-61DAFB?logo=react" alt="Built with React"/>
-    <img src="https://img.shields.io/badge/TTS-ElevenLabs-black" alt="TTS"/>
-  </p>
-</p>
+# OVG — Outscal Video Generator
 
-## 📑 Table of Contents
+> **Getting started?** Ask your coding agent (Claude Code) to read this
+> `README.md` end-to-end and set up the project for you. It will install the
+> Python and Node dependencies, guide you through filling in `.env`, and
+> verify the pipeline is ready to run.
 
-- [How It Works](#-how-it-works)
-- [Prerequisites](#-prerequisites)
-- [Quick Start](#-quick-start)
-- [Video Creation Workflow](#-video-creation-workflow)
-- [Video Art Styles](#-video-art-styles)
-- [Commands Reference](#-commands-reference-fyi)
+A Claude-Code-driven pipeline that turns a plain-text script into an animated
+Remotion video you can preview locally. The four steps — direction, audio,
+assets, code — are each handled by a specialized sub-agent coordinated from
+your Claude Code session.
 
-## 💡 How It Works
+## Prerequisites
 
-Unlike traditional AI video generators that output video files, this tool generates **React/TSX code** that renders as animated videos. The AI writes the code—the code becomes the video.
+- **Python 3.13**
+- **Node.js 18+** (for the Remotion Studio preview and the iconify asset index)
+- **Claude Code** installed and authenticated
+- **API keys** — at minimum an Anthropic Claude Code OAuth token and an
+  ElevenLabs key. See [`example.env`](./example.env) for the full list.
 
-## 📋 Prerequisites
+## One-time setup
 
-- **Claude Code CLI** installed and configured. see [Claude Code Quickstart](https://code.claude.com/docs/en/quickstart)
+From the repo root:
 
-## 🚀 Quick Start
+```bash
+# 1. Configure secrets
+cp example.env .env
+#   then edit .env and fill in the keys
 
-> **⚡ TL;DR:** Clone repo → Run `/tools:init` → Set API key → Run `/create-video`
+# 2. Python deps for the orchestrator pipeline
+pip install -r requirements.txt
 
-### 1. Clone and Setup
+# 3. Python deps for the tools CLI (asset fetching, validation, TTS, SFX)
+pip install -r video-tools/requirements.txt
 
-1. **Get the repository**: Either clone the repository or download it as a ZIP file and extract it.
+# 4. Node deps for the iconify icon library
+cd video-tools && npm install && cd ..
 
-2. **Open Claude Code** in the repository directory to ensure all commands work properly.
-
-### 2. Install Dependencies
-
-Run the initialization command in Claude Code:
-
-```
-/tools:init
+# 5. Node deps for the Remotion Studio preview
+cd studio && npm install && cd ..
 ```
 
-This command will automatically:
-
-- install the requirements needed to start generating video
-- will direct you to setup the api key and will tell you how.
-
-> [!NOTE]
-> This command only needs to be run once during initial setup.
-
-### 3. API Key Setup (Required)
-
-After installation completes, you need to set up your API key (this will be instructed after the `/tools:init` comand as well):
-
-1. **Get your API key**: Visit [https://production2.outscal.com/v2/get-video-generation-api-key](https://production2.outscal.com/v2/get-video-generation-api-key) and register or login
-2. **Add your API key** to the `.env` file:
-   ```
-   OUTSCAL_API_KEY="your_api_key_here"
-   ```
-   Replace `your_api_key_here` with the actual API key you received.
-
-### 4. Optional Environment Variables
-
-The following environment variable is **optional** and only needed if you want to use a different voice:
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `ELEVENLABS_VOICE_ID` | Voice ID from ElevenLabs. You can pick different voice IDs from your ElevenLabs account if you want to change the voice. | No |
-
-> [!NOTE]
-> Only ElevenLabs' pre-made voices are supported. Custom or cloned voices will not work.
-
-### 5. Create Your Video
-
-Run the video creation command:
+## Project layout
 
 ```
-/create-video
+OVG/
+├── scripts/             # Python orchestrator — pipeline steps + claude-cli glue
+├── video-tools/         # Python tools CLI (validate, get_asset, svg_path, TTS, SFX)
+│   └── node_modules/    # Iconify & react-icons — source of all icon assets
+├── prompts/             # Per-step prompt templates (direction, scene, etc.)
+├── studio/              # Remotion Studio workspace for local preview
+├── Outputs/             # Per-topic runtime artifacts (gitignored)
+│   └── {TOPIC}/
+│       ├── script.md                       # your input
+│       ├── manifest.json
+│       ├── Direction/Latest/latest.json
+│       ├── Audio/latest.mp3
+│       ├── Transcript/latest.json
+│       ├── Assets/Latest/*.svg
+│       ├── Video/Latest/scene_{i}.tsx      # generated scenes
+│       ├── Video/Latest/composition.tsx    # Remotion composition
+│       └── public/                         # what Studio serves via staticFile()
+├── .claude/             # Orchestrator instructions + agent definitions
+├── .env                 # your secrets (gitignored)
+└── example.env          # template
 ```
 
-> [!TIP]
-> Run this command every time you want to create a new video.
+## Generating a video
 
-## 🔄 Video Creation Workflow
+The pipeline is driven by Claude Code. Open the project in Claude Code
+(`claude` from the OVG root) and ask the main chat to generate a video —
+it reads `.claude/CLAUDE.md` and knows what to do.
 
-When you run `/create-video`, the tool will guide you through this pipeline:
+### 1. Write a script
 
+Save your narration script to `Outputs/{TOPIC}/script.md`, where `{TOPIC}` is
+a slug ending in `-v2` (e.g. `how-wifi-works-v2`). One paragraph per scene
+works best, but any prose is fine — the direction step will break it up.
+
+### 2. Initialize the topic
+
+```bash
+python -m scripts.cli_pipeline init \
+  --topic how-wifi-works-v2 \
+  --script Outputs/how-wifi-works-v2/script.md \
+  --style vox \
+  --ratio 9:16
 ```
-┌─────────┐   ┌─────────┐   ┌───────────┐   ┌───────────┐   ┌────────┐   ┌────────┐   ┌───────┐
-│  Style  │ → │ Script  │ → │ Direction │ → │   Audio   │ → │ Assets │ → │ Design │ → │ Video │
-└─────────┘   └─────────┘   └───────────┘   └───────────┘   └────────┘   └────────┘   └───────┘
+
+- `--style` — `4g5g | brutalism | glitch-art | memphis | neobrutalism | risograph | synthwave | typography-apple | vox`
+- `--ratio` — `9:16` (portrait) or `16:9` (landscape)
+- `--voice-id` — optional ElevenLabs voice override
+
+### 3. Let the orchestrator run the four steps
+
+In the Claude Code chat at the OVG root, say something like:
+
+> Generate the video for `how-wifi-works-v2`.
+
+The orchestrator will spawn each sub-agent in order:
+
+| Step | Sub-agent | What it produces |
+|------|-----------|------------------|
+| 1. Direction | `direction-agent` | Scene-by-scene visual plan in `Direction/Latest/latest.json` |
+| 2. Audio     | `audio-agent`     | `Audio/latest.mp3` + per-scene frame timestamps |
+| 3. Assets    | `asset-agent`     | SVGs in `Assets/Latest/` mirrored into `public/` |
+| 4. Code      | `code-agent`      | `Video/Latest/scene_{i}.tsx` + `composition.tsx` |
+
+Each sub-agent runs its own pre-processing and post-processing internally.
+The orchestrator reviews each step's output against the quality bar and can
+loop back to rework weak scenes.
+
+### 4. Preview in Remotion Studio
+
+After the code-agent reports `Code complete`:
+
+```bash
+cd studio
+OVG_TOPIC=how-wifi-works-v2 npm run studio
+# Windows: set OVG_TOPIC=how-wifi-works-v2 && npm run studio
 ```
 
-| Step | What Happens |
-|------|--------------|
-| 🎨 **Style** | Choose from available art styles |
-| 📝 **Script** | Provide your narration script (max 2000 characters) |
-| 🎬 **Direction** | Generate scene-by-scene video direction |
-| 🔊 **Audio** | Convert script to speech using ElevenLabs |
-| 🖼️ **Assets** | Create SVG assets for the video |
-| ✏️ **Design** | Generate detailed design specifications |
-| 🎥 **Video** | Create and deploy video (displays deployed URL) |
+Studio opens on <http://localhost:3000> and loads
+`Outputs/{TOPIC}/Video/Latest/composition.tsx`, using `Outputs/{TOPIC}/public/`
+as the asset root and `public/audio/latest.mp3` as the narration track.
 
-> [!TIP]
-> After videos are created and deployed, use `/tools:list-videos` to view all deployed video URLs.
+To render the preview to an `.mp4`:
 
-## 🎨 Video Art Styles
-When creating a video, you'll be asked to choose from three distinct visual styles:
+```bash
+OVG_TOPIC=how-wifi-works-v2 npm run render
+```
 
-### Pencil
+The output file lands in `studio/out/video.mp4`.
 
-https://github.com/user-attachments/assets/d0eac993-6b4f-4757-8317-936550ba3b93
+## Regenerating a single scene
 
-A hand-drawn, sketch-like aesthetic that gives videos a personal, artistic feel. Features rough edges, sketch lines, and a notebook-paper appearance. Great for educational content that wants to feel approachable and informal.
+You don't have to re-run the whole pipeline to fix one weak scene.
 
-### Neon
+1. Edit the scene's entry in `Outputs/{TOPIC}/Direction/Latest/latest.json`.
+2. In Claude Code, say: _"Re-spawn the code-agent for scene 3."_ The agent
+   re-runs `cli_pipeline pre`, regenerates only that scene's `scene_3.tsx`,
+   and re-writes the composition. Refresh Studio to see the new scene.
 
-https://github.com/user-attachments/assets/e3356b5f-8f5b-4e98-b146-25054382057a
+For scene-level re-generation that also needs new assets, re-spawn the
+`asset-agent` first with the new asset names, then the `code-agent`.
 
-Vibrant, futuristic style with glowing effects, dark backgrounds, and bright accent colors. Features electric highlights and cyberpunk-inspired visuals. Perfect for tech topics, gaming content, or when you want a high-energy, modern look.
+## Manifest state
 
-## 📖 Commands Reference (FYI)
+```bash
+python -m scripts.cli_pipeline info --topic {TOPIC}
+```
 
-| Command | Description |
-|---------|-------------|
-| `/tools:init` | Install all project dependencies |
-| `/tools:list-videos` | List all deployed video URLs for the project |
-| `/create-video` | Start the full video creation workflow |
-| `/gen:audio --topic "topic-name"` | Generate audio only |
-| `/gen:director --topic "topic-name"` | Generate video direction only |
-| `/gen:assets --topic "topic-name"` | Generate SVG assets only |
-| `/gen:design --topic "topic-name"` | Generate design specifications only |
-| `/gen:video --topic "topic-name"` | Generate video components only |
+Prints the parsed manifest JSON — shows which steps have run, their versions,
+and the current metadata (viewport, voice, style).
 
-> [!IMPORTANT]
-> If you run individual `gen:` commands instead of `/create-video`, you must run all subsequent commands in the workflow sequence for your changes to take effect. For example, if you run `/gen:director`, you'll need to manually run `/gen:assets`, `/gen:design`, and `/gen:video` afterwards.
+## Useful tools_cli subcommands
 
-> ## Star History
-[![Star History Chart](https://api.star-history.com/svg?repos=outscal/video-generator&type=date&legend=top-left)](https://www.star-history.com/#outscal/video-generator&type=date&legend=top-left)
+Run from `video-tools/`:
+
+```bash
+python -m scripts.tools_cli get_asset              --payload payload.json
+python -m scripts.tools_cli validate_json          --file path.json
+python -m scripts.tools_cli validate_tsx           --payload payload.json
+python -m scripts.tools_cli svg_path               --equation PARABOLIC --params-json '{...}'
+python -m scripts.tools_cli generate_sound_effect  --text "..." --duration 3 --output-dir .
+```
+
+These are what the sub-agents invoke under the hood; they're available for
+manual use too.
+
+## Troubleshooting
+
+- **`OUTSCAL_API_KEY not set, falling back to .env values`** — informational,
+  safe to ignore.
+- **`OVG_TOPIC is not set`** — set the env var before `npm run studio`.
+- **Icon search is slow on first run** — the index (`.icon_index.bin`) is
+  built once from `@iconify/json` and cached in `video-tools/node_modules/`.
+- **`@topic/...` import red squiggles in editor** — harmless. `@topic` is a
+  webpack alias resolved at Remotion build time from `OVG_TOPIC`; TypeScript
+  can't resolve it statically.

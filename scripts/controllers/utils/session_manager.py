@@ -12,11 +12,11 @@ class SessionManager(metaclass=SingletonMeta):
 
 
     def add_summary(self, key: str, value: Dict[str, Any]):
-            logger.info(f"Adding summary: {key}: {json.dumps(value, indent=2)}")
+            logger.info(f"Adding summary: {key}: {json.dumps(value)}")
             if key in self.run_summary:
                 self.run_summary[key]={**self.run_summary[key], **value}
             else:
                 self.run_summary[key] = value
 
     def log_summary(self):
-        logger.info(f"\n\n{json.dumps(self.run_summary, indent=2)}\n\n")
+        logger.info(json.dumps(self.run_summary))

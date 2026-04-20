@@ -14,14 +14,14 @@ from scripts.enums import AssetType
 
 class OutputController:
 
-    def __init__(self):
-        topic=ClaudeCliConfig.TOPIC
-        BASE_OUTPUT_PATH=ClaudeCliConfig.BASE_OUTPUT_PATH
-        self.base_path = f"{BASE_OUTPUT_PATH}/{topic}".format(BASE_OUTPUT_PATH=BASE_OUTPUT_PATH,topic=topic)
-        self.logger = get_utility_logger('OutputController')
+    def __init__(self, topic: str, manifest_controller: ManifestController):
+        self.claude_cli_config = ClaudeCliConfig(topic)
+        self.base_path = f"{ClaudeCliConfig.BASE_OUTPUT_PATH}/{topic}"
+        video_id = topic.rsplit("-v2", 1)[0] if topic else "--"
+        self.logger = get_utility_logger('OutputController', video_id=video_id)
         self.io_controller = SystemIOController()
         self._create_output_directories()
-        self.manifest_controller = ManifestController()
+        self.manifest_controller = manifest_controller
 
     def _create_output_directories(self) -> None:
         """Create the base output folder and all asset type subdirectories."""
@@ -52,7 +52,7 @@ class OutputController:
             return False
 
     def read_llm_file(self, asset_type: AssetType) -> Any:
-        file_path = ClaudeCliConfig.get_latest_path(asset_type)
+        file_path = self.claude_cli_config.get_latest_path(asset_type)
         if not file_path:
             raise ValueError(f"No file path provided for asset type: {asset_type}")
         return self.io_controller.read_json(file_path)

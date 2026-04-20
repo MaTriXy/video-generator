@@ -1,65 +1,46 @@
 ---
 name: video-director
-description: Creative director for educational video content. Generates scene-by-scene narrative direction specifying character actions, emotions, visual metaphors, and storytelling flow without technical implementation details.
+description: Reference bank for writing cinematic scene-by-scene video direction. Contains curated scene examples across 13 visual categories plus mandatory rules for UI mockups and maps.
+metadata:
+  tags: video, direction, storytelling, scenes, reference
 ---
 
-# Video Director
+## When to use
 
-<overview>
-This skill provides direction guidelines for creating consistent, high-quality video content. Load the relevant reference files based on what needs to be directed.
-</overview>
-<asset-creation-constraints>
-**IMPORTANT:** All visual assets in scenes are created using React icons from icon libraries.
-**Direct accordingly:**
-- Direct visuals using recognizable objects that likely have icon representations
-- Prefer simple, icon-friendly visual elements
-- Avoid overly complex custom illustrations
-</asset-creation-constraints>
-<human-characters>
-<human-character-system-constraints>
-> **IMPORTANT - Design Philosophy:**
-> These primitive shape characters (think Hey Duggee, Dumb Ways to Die) are the **ONLY** character style allowed.
-> Do NOT design complex multi-part characters, realistic characters, or detailed illustrations.
-> Keep it simple: single geometric body shape with an expressive face.
-**Structure:**
-- Body = ONE geometric shape (this IS the head+torso, no separate head)
-- Single body shape only
-**Face:**
-- White circular eyes with black pupils
-- Colored circular cheeks
-- Simple curved mouth
-- All facial features stay inside the body shape
-</human-character-system-constraints>
-<human-character-constraints>
-| ✅ ALLOWED | ❌ NOT ALLOWED |
-|-----------|----------------|
-| Any geometric body shape | New body parts (tails, wings, arms, legs) |
-| Any color combination | Breaking/detaching body parts |
-| Facial expressions with animations | - |
-</human-character-constraints>
-<human-character-objects-and-props>
-When a character needs to interact with or "hold" an object:
-- Place the object on the **right side** of the character
-- The object does NOT need to touch the character's body
-- Characters do not literally hold objects (no arms/legs to hold with)
-- Simply position the object near the character to show association
-</human-character-objects-and-props>
-</human-characters>
-<non-human-characters>
-**Non-Human Characters** (robots, animals, creatures):
-- Structure can be adapted
-- Must keep the same cute aesthetic
-- Same face style applies (white eyes, black pupils, colored cheeks)
-- Still use simple geometric shapes as base
-**Personified Objects** (objects given personality, not actual characters):
-- Keep the object's original form/shape
-- ONLY add eyes and expressions
-- Add whatever facial expressions are needed (eyes, cheeks, mouth)
-- Do NOT restructure the object into a character body
-- The object itself IS the body
-</non-human-characters>
-<important-notes>
-- **Colors are NOT specified by the director** - they come from the designer
-- Focus on character actions, emotions, and what they represent
-- Describe character purpose and context, not visual appearance details
-</important-notes>
+Load this skill whenever you are writing or reviewing scene-by-scene video direction JSON. Use the example files to calibrate the expected level of phased detail, physical metaphor, and visual richness for each scene.
+
+## How to use
+
+### Contextual examples (read 0-N based on the script)
+
+Analyze the script first, then read ONLY the example files whose category matches the visual patterns your scenes will need. Most scripts match 2-4 categories. Do NOT read every file.
+
+| Category | Read when the script involves... | File |
+|----------|----------------------------------|------|
+| Hook scenes (ALWAYS for Scene 0) | Every video has a hook | [references/examples/hook-scenes.md](references/examples/hook-scenes.md) |
+| UI Mockups | Apps, websites, dashboards, phone screens, checkout forms, product pages, game interfaces | [references/examples/ui-mockup-scenes.md](references/examples/ui-mockup-scenes.md) |
+| Data & Statistics | Charts, gauges, bar graphs, line graphs, data panels with axes and labels | [references/examples/data-stats-scenes.md](references/examples/data-stats-scenes.md) |
+| Process & Flow | Step-by-step processes, "how X works", pipelines, circular tracks, node-to-node traversals | [references/examples/process-flow-scenes.md](references/examples/process-flow-scenes.md) |
+| Comparisons | "vs", "compared to", before/after, side-by-side, contrasting two alternatives | [references/examples/comparison-scenes.md](references/examples/comparison-scenes.md) |
+| Metaphor & Physics | Abstract concepts shown through physical metaphors -- weight, gravity, orbits, growth, pressure | [references/examples/metaphor-physics-scenes.md](references/examples/metaphor-physics-scenes.md) |
+| Cinematic & Atmospheric | Dramatic reveals, science phenomena, nature events, cosmic events, large-scale transformations | [references/examples/cinematic-atmospheric-scenes.md](references/examples/cinematic-atmospheric-scenes.md) |
+| Text & Typography | Text-dominant scenes, kinetic typography, word-by-word reveals, editorial corrections | [references/examples/text-typography-scenes.md](references/examples/text-typography-scenes.md) |
+| Multi-Element Layouts | Grids, radial arrangements, many items needing spatial organization without overlap | [references/examples/multi-element-layout-scenes.md](references/examples/multi-element-layout-scenes.md) |
+| Simple Statements | Short punchy text, bridge transitions, emotional asides, big number reveals, outros | [references/examples/simple-statement-scenes.md](references/examples/simple-statement-scenes.md) |
+| Object Interaction | Physical objects moving, morphing, emitting signals, connecting, mechanical interaction | [references/examples/object-interaction-scenes.md](references/examples/object-interaction-scenes.md) |
+| Screen Fill & Reveal | Many identical elements flooding the screen then a dramatic peel/sweep/clearing effect | [references/examples/screen-fill-reveal-scenes.md](references/examples/screen-fill-reveal-scenes.md) |
+| Narrative & Story | Mini-stories within a scene -- setup, event, outcome. A visual narrative arc | [references/examples/narrative-story-scenes.md](references/examples/narrative-story-scenes.md) |
+
+### Mandatory rule files (read on demand)
+
+- [references/ui-mockups.md](references/ui-mockups.md) -- MUST read before writing ANY scene that depicts an app screen, website, dashboard, phone screen, checkout, or game interface.
+- [references/maps.md](references/maps.md) -- MUST read before writing ANY scene that involves a world map, country map, geographic distribution, travel route, or location highlight.
+
+## Script-to-category matching examples
+
+- "How payment processing works" -> Process & Flow, UI Mockups, Data & Statistics
+- "Why most startups fail" -> Metaphor & Physics, Simple Statements, Multi-Element Layouts
+- "The speed of light explained" -> Cinematic & Atmospheric, Comparisons, Metaphor & Physics
+- "Best mobile app designs of 2025" -> UI Mockups, Multi-Element Layouts, Comparisons
+- "How trains changed the world" -> Object Interaction, Narrative & Story, Process & Flow
+- "The water cycle explained" -> Process & Flow, Cinematic & Atmospheric, Screen Fill & Reveal

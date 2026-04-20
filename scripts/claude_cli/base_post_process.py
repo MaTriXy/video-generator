@@ -31,24 +31,23 @@ class BasePostProcess(ABC):
         log_file_name: str,
         topic: str,
         asset_type: AssetType = AssetType.SCRIPT,
-        console_logging: bool = False
+        console_logging: bool = True
     ):
         set_console_logging(console_logging)
 
-        # Set topic in both config and manifest controller
-        ClaudeCliConfig.set_topic(topic)
-        self.claude_cli_config = ClaudeCliConfig()
+        self.claude_cli_config = ClaudeCliConfig(topic)
 
         self.manifest_controller = ManifestController()
         self.manifest_controller.set_topic(topic)
 
         self.asset_type = asset_type
-        self.output_controller = OutputController()
+        self.output_controller = OutputController(topic, manifest_controller=self.manifest_controller)
         self.file_io = SystemIOController()
-        self.gen_metadata_controller = GenMetadataController(asset_type)
+        self.gen_metadata_controller = GenMetadataController(topic, asset_type, manifest_controller=self.manifest_controller)
 
         log_file_dir = Path(self.claude_cli_config.BASE_OUTPUT_PATH) / topic / "logs"
-        self.logger = get_utility_logger(logger_name, log_file_name, log_file_dir)
+        video_id = topic.rsplit("-v2", 1)[0] if topic else "--"
+        self.logger = get_utility_logger(logger_name, log_file_name, log_file_dir, video_id=video_id, step=asset_type.value if asset_type else "--")
         self.logger.info(f"Initialized {logger_name}")
 
     @try_catch
@@ -70,11 +69,11 @@ class BasePostProcess(ABC):
         self.logger.info(message)
 
     @abstractmethod
-    def process(self, *args, **kwargs) -> Tuple[bool, Optional[str]]:
+    async def process(self, *args, **kwargs) -> Tuple[bool, Optional[str]]:
         pass
 
-    def run(self) -> Tuple[bool, Optional[str]]:
+    async def run(self) -> Tuple[bool, Optional[str]]:
         self.gen_metadata_controller.set_metadata({"type":"claude_cli"})
-        result = self.process()
+        result = await self.process()
         self.gen_metadata_controller.save_metadata()
         return result

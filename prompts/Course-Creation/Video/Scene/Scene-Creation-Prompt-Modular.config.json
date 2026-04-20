@@ -1,0 +1,65 @@
+{
+  "model": "gemini-2.5-pro",
+  "temperature": 1,
+  "thinkingConfig": {
+    "thinkingBudget": 32768
+  },
+  "max_tokens": 65536,
+  "tools": [
+    "get_documentation",
+    "web_search"
+  ],
+  "prompts": {
+    "examples": [
+      {
+        "prompt": "Course-Creation/Video/Scene/Examples/portrait-what-if",
+        "video_ratio": "portrait",
+        "video_style": "what-if"
+      },
+      {
+        "prompt": "Course-Creation/Video/Scene/Examples/landscape-kurzgesagt",
+        "video_ratio": "landscape",
+        "video_style": "kurzgesagt"
+      },
+      {
+        "prompt": "Course-Creation/Video/Scene/Examples/portrait-kurzgesagt",
+        "video_ratio": "portrait",
+        "video_style": "kurzgesagt"
+      },
+      {
+        "prompt": "Course-Creation/Video/Scene/Examples/landscape-vox",
+        "video_ratio": "landscape",
+        "video_style": "vox"
+      }
+    ],
+    "artstyle": [
+      {
+        "prompt": "Course-Creation/Video/Designer/Examples/portrait-infographicshow-artstyle",
+        "video_style": "infographicshow"
+      },
+      {
+        "prompt": "Course-Creation/Video/Designer/Examples/portrait-4g5g-artstyle",
+        "video_style": "4g5g"
+      },
+      {
+        "prompt": "Course-Creation/Video/Designer/Examples/portrait-what-if-artstyle",
+        "video_style": "what-if"
+      },
+      {
+        "prompt": "Course-Creation/Video/Designer/Examples/minimal-blue",
+        "video_style": "minimal-blue"
+      },
+      {
+        "prompt": "Course-Creation/Video/Designer/Examples/vox-artstyle",
+        "video_style": "vox"
+      },
+      {
+        "prompt": "Course-Creation/Video/Designer/Examples/typography-apple",
+        "video_style": "typography-apple"
+      }
+    ]
+  },
+  "variables": {
+    "tools": "CRITICAL WORKFLOW ENFORCEMENT: You MUST complete ALL research steps before generating output. TOOL USAGE: Before writing scripts, you MUST verify all technical content: 1) Use WebSearch to find concept listing, best practices, and pros and cons, 2) Use mcp__context7__resolve-library-id to find official documentation library IDs, 3) Use mcp__context7__get-library-docs to get authentic technical details from official documentation, 4) ONLY AFTER completing all 3 research steps may you generate the final video script. DO NOT skip any research steps. DO NOT call final_result until ALL research is complete."
+  }
+}

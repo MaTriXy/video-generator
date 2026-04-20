@@ -1,0 +1,197 @@
+{
+  "direction": {
+    "description": "High-energy, hyper-kinetic typographic style blending crisp, modernist digital text with fluid, imperfect hand-drawn marker overlays. Built for aggressive audio-visual synchronization.",
+    "colors": {
+      "background": {
+        "primary": "#F2F2F2",
+        "secondary": "#000000",
+        "behavior": "Canvas background snaps inverted (white to black / black to white) immediately to punctuate macro beat shifts in the narrative."
+      },
+      "functional_accents": {
+        "label_backgrounds": "Transparent with sketchy fill #00F553 applied selectively underneath specific typography syllables",
+        "highlight_glow": "None.",
+        "linguistic_grouping": "#00F553 (Acid Green used strictly for user emphasis, positive environmental markers, or call-to-actions)"
+      },
+      "text": {
+        "primary": "#000000",
+        "inverse_on_chip": "#FFFFFF",
+        "highlight": "#00F553"
+      },
+      "color_scheme_type": "Binary with single maximalist neon highlight.",
+      "contrast_level": "Extremes only. Avoid all mid-tones unless representing photographic/video materials."
+    },
+    "typography": {
+      "font_families": [
+        { "name": "BebasNeue" },
+        { "name": "Montserrat" },
+        { "name": "ArchivoBlack" },
+        { "name": "PermanentMarker" },
+        { "name": "Caveat" },
+        { "name": "BlackOpsOne" }
+      ]
+    },
+    "animation_style": {
+      "technique": "Directional Kinetic Typography combined with Stop-Motion / Cel-Animation Emulation for doodle overlays. Text always enters from a direction — it is never static or instantly placed.",
+      "easing_type": "Fast directional slide into a hard rest. Text travels a very short distance from its entry direction, decelerates sharply, and snaps to its final position. Zero bounce, zero overshoot after the snap.",
+      "easing_description": "Every text element originates from a direction (left, right, bottom, or following the reading flow) and completes a brief, fast slide before locking into its resting position. The movement is always intentional and directional — it communicates where the word is coming from. Once rested, the element is completely frozen. No lingering motion, no bounce, no elastic behavior. Doodle assets use zero easing, animating frame-by-frame at a lowered frame rate (12-15fps) to emulate hand-drawn cel animation.",
+      "entrance_modes": {
+        "word_by_word_directional": "Used for high-importance narration words. Each word slides in individually from its entry direction, locks to rest, then the next word follows — all mapped exactly to the spoken audio syllable-by-syllable.",
+        "phrase_group_directional": "Used for lower-emphasis or supporting text. A partial sentence or group of words slides in together as a single unit from one direction, settling into position as a block."
+      },
+      "movement_quality": "Percussive, unpolished, punchy. Extremely deliberate lack of 'slickness' to favor rawness.",
+      "word_chaining": "Audio-Reactive Typewriter Spacing. Words chain left-to-right one at a time, each sliding in from its entry direction and locking to rest on the narrator's spoken syllable.",
+      "transitions": {
+        "whip_pan": "When the canvas needs to transition between layouts, it whip-pans violently to the next frame — not a smooth float.",
+        "brutalist_media_cut": "Hard single-frame slam cuts between stark 2D black-and-white graphics and hyper-detailed macro live-action b-roll footage."
+      },
+      "timing": {
+        "snappy": "Audio-Reactive (0-50ms snap per verbal syllable)",
+        "flow": "Relative matching duration to VO pacing — words slide in and lock left-to-right to match exact speaker rhythm and pauses.",
+        "morph": "Audio-Responsive Cut: Assets transition precisely on plosive consonants (P, T, K)."
+      }
+    }
+  },
+
+  "code": {
+    "description": "High-energy, hyper-kinetic typographic style blending crisp, modernist digital text with fluid, imperfect hand-drawn marker overlays. Built for aggressive audio-visual synchronization.",
+    "colors": {
+      "background": {
+        "primary": "#F2F2F2",
+        "secondary": "#000000",
+        "behavior": "Canvas background snaps inverted (white to black / black to white) immediately to punctuate macro beat shifts in the narrative."
+      },
+      "functional_accents": {
+        "label_backgrounds": "Transparent with sketchy fill #00F553 applied selectively underneath specific typography syllables",
+        "highlight_glow": "None.",
+        "linguistic_grouping": "#00F553 (Acid Green used strictly for user emphasis, positive environmental markers, or call-to-actions)"
+      },
+      "text": {
+        "primary": "#000000",
+        "inverse_on_chip": "#FFFFFF",
+        "highlight": "#00F553"
+      },
+      "color_scheme_type": "Binary with single maximalist neon highlight.",
+      "contrast_level": "Extremes only. Avoid all mid-tones unless representing photographic/video materials."
+    },
+    "typography": {
+      "font_families": [
+        {
+          "name": "BebasNeue",
+          "weights": ["400"],
+          "subsets": ["latin", "latin-ext"]
+        },
+        {
+          "name": "Montserrat",
+          "weights": ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+          "subsets": ["cyrillic", "cyrillic-ext", "latin", "latin-ext", "vietnamese"]
+        },
+        {
+          "name": "ArchivoBlack",
+          "weights": ["400"],
+          "subsets": ["latin", "latin-ext"]
+        },
+        {
+          "name": "PermanentMarker",
+          "weights": ["400"],
+          "subsets": ["latin"]
+        },
+        {
+          "name": "Caveat",
+          "weights": ["400", "500", "600", "700"],
+          "subsets": ["cyrillic", "cyrillic-ext", "latin", "latin-ext"]
+        },
+        {
+          "name": "BlackOpsOne",
+          "weights": ["400"],
+          "subsets": ["cyrillic-ext", "latin", "latin-ext", "vietnamese"]
+        }
+      ],
+      "font_weights": {
+        "labels": "Bold / Heavy",
+        "codes": "Medium",
+        "brand": "Extra Bold"
+      },
+      "text_formatting": {
+        "font": "Clean, modernist geometric sans-serif. Heavy/Bold weight exclusively throughout.",
+        "tracking": "Extremely tight letter spacing. Words feel solid and block-like, letters nearly touching.",
+        "case_rules": {
+          "standard_text": "Sentence case ('To make every...') or entirely lowercase for stark minimalism ('apple.com', 'plastic', 'carbon neutral').",
+          "marker_annotation_text": "Exclusively UPPERCASE for all sketchy, handwritten-style overlay text (e.g., 'AND A PROMISE', 'ALREADY', 'STILL')."
+        },
+        "color_rules": "Highly restricted. True black text on light gray/white background, or pure white text on black background. Bright acid green (#00F553) strictly reserved for marker sketches, specific emphasis URLs, or words receiving massive spoken emphasis.",
+        "inline_symbols": "The physical Apple logo symbol is embedded directly into the text flow to phonetically represent the word 'Apple' (e.g., 'To make  carbon neutral')."
+      },
+      "positioning": {
+        "default": "Narration text is center-anchored or left-anchored relative to the reading flow. Not randomly placed.",
+        "rule": "Text positioning is always intentional and directional — anchored to the nearest active graphic or the spoken word's visual weight. Dead-center single-word isolation is common for high-emphasis words. Multi-word chains build left-to-right from an anchor point.",
+        "forbidden": "Do not randomly scatter text. Do not center every element by default. Positioning must always serve the audio rhythm and visual hierarchy."
+      },
+      "hierarchy": {
+        "primary_label": "Proportional: Mega-Scale (Text breaks frame margins to function as texture)",
+        "sub_data": "Proportional: Body Size (Snug to the mega-text with sketchy arrow connectors)",
+        "header": "Stark contrast, size dictating spoken-word audio emphasis volume."
+      }
+    },
+    "shapes": {
+      "primary_forms": "Text is the primary form. Typography functions as both the content and the visual structure of every scene.",
+      "edge_quality": "High contrast vectors but animated at a lower frame-rate (12-15fps step-timing) to feel 'chunky' and hand-sketched.",
+      "dimensionality": "Strictly 2D flat layer structure (Typography layer -> Doodle overlay layer -> Live-action base layer)",
+      "complexity_level": "Minimalist juxtaposition. Absolute sterile type against raw, sketchy icons."
+    },
+    "lines_and_arrows": {
+      "line_style": "Clean, confident hand-drawn marker strokes. Mostly straight. No wobble, no irregular flow. The hand-drawn quality comes from weight variation and draw-on animation, not from distortion or jitter.",
+      "underlines": "Used very sparingly — only under specific words or phrases that require critical viewer attention. A single clean, mostly straight stroke. Not a decorative pattern. Must not appear frequently throughout the video.",
+      "arrow_tips": "Asymmetric, quickly drawn heads (e.g., one stroke longer than the other).",
+      "thickness": "Proportional: thick stroke (2-3% of viewport height). Should rival the stem weight of the bold text.",
+      "curved_connectors": "Used selectively to weave through tight clusters of text, linking isolated concepts across the screen."
+    },
+    "animation_style": {
+      "technique": "Directional Kinetic Typography combined with Stop-Motion / Cel-Animation Emulation for doodle overlays. Text always enters from a direction — it is never static or instantly placed.",
+      "easing_type": "Fast directional slide into a hard rest. Text travels a very short distance from its entry direction, decelerates sharply, and snaps to its final position. Zero bounce, zero overshoot after the snap.",
+      "easing_description": "Every text element originates from a direction (left, right, bottom, or following the reading flow) and completes a brief, fast slide before locking into its resting position. The movement is always intentional and directional — it communicates where the word is coming from. Once rested, the element is completely frozen. No lingering motion, no bounce, no elastic behavior. Doodle assets use zero easing, animating frame-by-frame at a lowered frame rate (12-15fps) to emulate hand-drawn cel animation.",
+      "entrance_modes": {
+        "word_by_word_directional": "Used for high-importance narration words. Each word slides in individually from its entry direction, locks to rest, then the next word follows — all mapped exactly to the spoken audio syllable-by-syllable.",
+        "phrase_group_directional": "Used for lower-emphasis or supporting text. A partial sentence or group of words slides in together as a single unit from one direction, settling into position as a block."
+      },
+      "movement_quality": "Percussive, unpolished, punchy. Extremely deliberate lack of 'slickness' to favor rawness.",
+      "word_chaining": "Audio-Reactive Typewriter Spacing. Words chain left-to-right one at a time, each sliding in from its entry direction and locking to rest on the narrator's spoken syllable.",
+      "transitions": {
+        "whip_pan": "When the canvas needs to transition between layouts, it whip-pans violently to the next frame — not a smooth float.",
+        "brutalist_media_cut": "Hard single-frame slam cuts between stark 2D black-and-white graphics and hyper-detailed macro live-action b-roll footage."
+      },
+      "timing": {
+        "snappy": "Audio-Reactive (0-50ms snap per verbal syllable)",
+        "flow": "Relative matching duration to VO pacing — words slide in and lock left-to-right to match exact speaker rhythm and pauses.",
+        "morph": "Audio-Responsive Cut: Assets transition precisely on plosive consonants (P, T, K)."
+      }
+    }
+  },
+
+  "asset": {
+    "instructions": "Hyper-kinetic typographic aesthetic. Frame is dominated by stark, sterile, heavy-weight text. Secondary visual elements must act as punctuation to the text, taking the form of crude, fluid marker-style doodles. Absolute high contrast. The canvas physically scrolls or completely inverts colors (white-to-black/black-to-white) dynamically as it runs out of space.",
+    "palette": ["#FFFFFF", "#000000", "#F2F2F2", "#111111", "#00F553"],
+    "effects": ["kinetic-scaling", "color-inversion", "marker-texture", "stop-motion-paths"],
+    "gradients": {
+      "use": false,
+      "notes": "Absolutely no gradients on data, text, or vector layers. Visual punch relies entirely on flat, unbroken blocks of stark contrasting color."
+    },
+    "stroke": {
+      "style": "marker-doodle",
+      "width": "proportional-heavy (match font stem width)",
+      "color": "highlight neon (#00F553) or stark background inverse",
+      "notes": "Strokes must look organically hand-drawn. Allow minor path irregularities, slightly overlapping path closures, and minor stroke tapering to simulate a human lifting a wet marker."
+    },
+    "shading": {
+      "approach": "flat",
+      "notes": "Strict 2D execution. No shadows, highlights, or 3D extrusions on text or doodles. The visual friction comes from the pairing of perfectly flat computer text with imperfect 2D sketches."
+    },
+    "complexity": {
+      "level": "kinetic-minimalism",
+      "notes": "Assets must be distilled to one-liner sketches, thick underlines, rough arrows, or filled blobs. Do not draw intricate details; rely entirely on scaling motion and bold layout positioning for visual interest."
+    },
+    "filters": {
+      "allowed": ["feTurbulence"],
+      "notes": "Apply a very subtle, localized `feTurbulence` mapping strictly to the vector strokes of the 'doodle' elements to simulate ink bleeding or marker texture. Exclude typography from all filters so the text remains ruthlessly clean."
+    }
+  }
+}

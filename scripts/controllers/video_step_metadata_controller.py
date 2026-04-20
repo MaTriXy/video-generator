@@ -3,19 +3,19 @@ from typing import Any, Dict, Optional
 
 from scripts.claude_cli.claude_cli_config import ClaudeCliConfig
 from scripts.controllers.utils.system_io_controller import SystemIOController
-from scripts.controllers.utils.singleton import SingletonMeta
 from scripts.enums import AssetType
 from scripts.logging_config import get_utility_logger
 
 
-class VideoStepMetadataController(metaclass=SingletonMeta):
+class VideoStepMetadataController:
 
-    def __init__(self):
+    def __init__(self, topic: str):
+        self._claude_cli_config = ClaudeCliConfig(topic)
         self.io_controller = SystemIOController()
         self.logger = get_utility_logger('VideoStepMetadataController')
 
     def get_metadata_path(self, asset_type: AssetType) -> str:
-        return ClaudeCliConfig.get_metadata_path(asset_type)
+        return self._claude_cli_config.get_metadata_path(asset_type)
 
     def read(self, asset_type: AssetType) -> Dict[str, Any]:
         metadata_path = self.get_metadata_path(asset_type)

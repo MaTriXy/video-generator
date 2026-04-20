@@ -1,9 +1,17 @@
 import json
+import asyncio
 import base64
-import requests
+import aiohttp
+from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 from scripts.utility.config import ELEVENLABS_API_KEY
 from scripts.logging_config import get_utility_logger
+from scripts.utility.audio_batch_processor import (
+    split_text_into_chunks,
+    merge_mp3_files,
+    merge_transcripts,
+    ELEVENLABS_CHAR_LIMIT
+)
 
 logger = get_utility_logger('elevenlabs_tts')
 
@@ -17,9 +25,22 @@ def _validate_transcript_timing(words: List[Dict]) -> Tuple[bool, Optional[str],
 
     punct = set([".", ",", ";", ":", "!", "?", "(", ")", "[", "]", "{", "}", "'", "\"", "—", "–", "-"])
 
+    # Skip words inside square brackets — these are v3 emotion tags (e.g. [matter-of-factly])
+    # and are not spoken content. ElevenLabs often returns zero-duration timing for them.
+    inside_bracket = False
+    bracket_skipped = []
     filtered_words = []
     for i, word_data in enumerate(words):
         word = word_data.get("word", "")
+        if word == "[":
+            inside_bracket = True
+            continue
+        if word == "]":
+            inside_bracket = False
+            continue
+        if inside_bracket:
+            bracket_skipped.append(word)
+            continue
         if word in punct or len(word) <= 1:
             continue
         filtered_words.append({
@@ -28,6 +49,9 @@ def _validate_transcript_timing(words: List[Dict]) -> Tuple[bool, Optional[str],
             "start_ms": word_data.get("start_ms"),
             "end_ms": word_data.get("end_ms")
         })
+
+    if bracket_skipped:
+        logger.info(f"Skipped {len(bracket_skipped)} emotion-tag words from timing validation: {bracket_skipped}")
 
     if not filtered_words:
         return True, None, 0
@@ -62,7 +86,7 @@ def _validate_transcript_timing(words: List[Dict]) -> Tuple[bool, Optional[str],
     return True, None, 0
 
 
-def _fetch_audio_and_timestamps(text: str, api_key: str, config: Dict, phonetics_dict_id: str, model_override: str = None):
+async def _fetch_audio_and_timestamps(text: str, api_key: str, config: Dict, phonetics_dict_id: str, model_override: str = None) -> Optional[Tuple[Dict, int]]:
     try:
         voice_id = config.get("voice_id", "QzyAJCjnDHxLPazR6j3v")
         model_id = model_override if model_override else config.get("model_id", "eleven_multilingual_v2")
@@ -81,10 +105,19 @@ def _fetch_audio_and_timestamps(text: str, api_key: str, config: Dict, phonetics
             "voice_settings": {"speed": speed, "stability": stability, "similarity_boost": similarity},
             "pronunciation_dictionary_locators": [{"pronunciation_dictionary_id": phonetics_dict_id}]
         }
-        logger.debug(f"Sending payload to ElevenLabs: {json.dumps(payload, indent=2)}")
-        response = requests.post(url, headers=headers, json=payload)
-        response.raise_for_status()
-        return response.json()
+        logger.debug(f"Sending payload to ElevenLabs: {json.dumps(payload)}")
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, headers=headers, json=payload) as response:
+                if response.status >= 400:
+                    error_text = await response.text()
+                    raise aiohttp.ClientResponseError(
+                        request_info=response.request_info,
+                        history=response.history,
+                        status=response.status,
+                        message=error_text,
+                    )
+                data = await response.json(content_type=None)
+                return data, len(text)
     except Exception as e:
         logger.error(f"Error fetching audio and timestamps: {e}")
         return None
@@ -163,26 +196,28 @@ def _save_raw_alignment(alignment_data: Dict, transcript_path: str, model_id: st
     logger.info(f"Raw character alignment saved to {raw_path}")
 
 
-def generate_audio(
+async def generate_audio(
     text: str,
     audio_output_path: str,
     transcript_output_path: str,
     config: Dict,
     phonetics_dict_id: str,
     model_override: str = None
-) -> Tuple[bool, Optional[str], int, int]:
+) -> Tuple[bool, Optional[str], int, int, int]:
     logger.info("Generating audio with ElevenLabs...")
 
     api_key = ELEVENLABS_API_KEY
     if not api_key:
         logger.error("ElevenLabs API key not found. Set ELEVENLABS_API_KEY environment variable.")
-        return False, "ElevenLabs API key not found", 0, 0
+        return False, "ElevenLabs API key not found", 0, 0, 0
 
     model_id = model_override if model_override else config.get("model_id", "eleven_multilingual_v2")
-    api_data = _fetch_audio_and_timestamps(text, api_key, config, phonetics_dict_id, model_override)
+    result = await _fetch_audio_and_timestamps(text, api_key, config, phonetics_dict_id, model_override)
 
-    if not api_data:
-        return False, "ElevenLabs API returned no data", 0, 0
+    if not result:
+        return False, "ElevenLabs API returned no data", 0, 0, 0
+
+    api_data, char_count = result
 
     _save_audio_file(api_data["audio_base64"], audio_output_path)
     _save_raw_alignment(api_data["alignment"], transcript_output_path, model_id)
@@ -192,8 +227,149 @@ def generate_audio(
     is_valid, error_msg, affected_count = _validate_transcript_timing(words)
 
     if is_valid:
-        logger.info("ElevenLabs audio generation completed successfully")
-        return True, None, 0, total_words
+        logger.info(f"ElevenLabs audio generation completed successfully (char count: {char_count})")
+        return True, None, 0, total_words, char_count
     else:
         logger.warning(f"Timing validation failed: {error_msg}")
-        return False, error_msg, affected_count, total_words
+        return False, error_msg, affected_count, total_words, char_count
+
+
+async def generate_audio_batched(
+    text: str,
+    audio_output_path: str,
+    transcript_output_path: str,
+    config: Dict,
+    phonetics_dict_id: str,
+    model_override: str = None
+) -> Tuple[bool, Optional[str], int, int, int]:
+    """
+    Generate audio with automatic batching for scripts exceeding ElevenLabs' character limit.
+
+    Splits long scripts into chunks, generates audio for each chunk concurrently,
+    then merges all MP3s and transcripts together.
+
+    All chunks must succeed before merging. No fallback model is used.
+
+    Args:
+        text: Full script text (any length)
+        audio_output_path: Path for final merged audio
+        transcript_output_path: Path for final merged transcript
+        config: ElevenLabs configuration dict
+        phonetics_dict_id: Pronunciation dictionary ID
+        model_override: Optional model override (uses v3 by default)
+
+    Returns:
+        Tuple of (success, error_msg, affected_count, total_words, char_count)
+    """
+    # Check if batching is needed
+    if len(text) <= ELEVENLABS_CHAR_LIMIT:
+        logger.info(f"Text is {len(text)} chars, using single API call")
+        return await generate_audio(
+            text, audio_output_path, transcript_output_path,
+            config, phonetics_dict_id, model_override
+        )
+
+    logger.info(f"Text is {len(text)} chars, batching required (limit: {ELEVENLABS_CHAR_LIMIT})")
+
+    # Split text into chunks
+    chunks = split_text_into_chunks(text)
+    num_chunks = len(chunks)
+    logger.info(f"Split into {num_chunks} chunks")
+
+    # Prepare temp file paths
+    audio_base = Path(audio_output_path)
+    transcript_base = Path(transcript_output_path)
+
+    temp_audio_paths = []
+    temp_transcript_paths = []
+
+    for i in range(num_chunks):
+        temp_audio_paths.append(str(audio_base.parent / f"{audio_base.stem}_part{i+1}{audio_base.suffix}"))
+        temp_transcript_paths.append(str(transcript_base.parent / f"{transcript_base.stem}_part{i+1}{transcript_base.suffix}"))
+
+    # Generate audio for each chunk in parallel - all must succeed
+    api_key = ELEVENLABS_API_KEY
+    if not api_key:
+        logger.error("ElevenLabs API key not found")
+        return False, "ElevenLabs API key not found", 0, 0
+
+    model_id = model_override if model_override else config.get("model_id", "eleven_multilingual_v2")
+
+    async def _process_chunk(i, chunk):
+        logger.info(f"Generating chunk {i+1}/{num_chunks} ({len(chunk)} chars)...")
+        print(f"[Generating audio part {i+1}/{num_chunks}...]")
+
+        result = await _fetch_audio_and_timestamps(chunk, api_key, config, phonetics_dict_id, model_override)
+
+        if not result:
+            error_msg = f"Chunk {i+1}/{num_chunks} failed: ElevenLabs API returned no data"
+            logger.error(error_msg)
+            return False, error_msg, 0, 0, 0
+
+        api_data, chunk_char_count = result
+
+        _save_audio_file(api_data["audio_base64"], temp_audio_paths[i])
+        _save_raw_alignment(api_data["alignment"], temp_transcript_paths[i], model_id)
+        words = _create_word_transcript(api_data["alignment"], temp_transcript_paths[i])
+
+        is_valid, error_msg, affected_count = _validate_transcript_timing(words)
+        if not is_valid:
+            logger.error(f"Chunk {i+1}/{num_chunks} timing validation failed: {error_msg}")
+            return False, f"Chunk {i+1} failed: {error_msg}", affected_count, len(words), chunk_char_count
+
+        logger.info(f"Chunk {i+1}/{num_chunks} completed successfully (char count: {chunk_char_count})")
+        return True, None, 0, len(words), chunk_char_count
+
+    # Run all chunks concurrently — TaskGroup cancels siblings on first exception
+    results: list = [None] * num_chunks
+    chunk_failed = False
+    try:
+        async with asyncio.TaskGroup() as tg:
+            async def _run_chunk(idx, chunk):
+                result = await _process_chunk(idx, chunk)
+                if not result[0]:  # success == False
+                    raise RuntimeError(f"chunk_{idx}")
+                results[idx] = result
+
+            for i, chunk in enumerate(chunks):
+                tg.create_task(_run_chunk(i, chunk))
+    except* RuntimeError:
+        chunk_failed = True
+
+    if chunk_failed:
+        for i, r in enumerate(results):
+            if r is not None and not r[0]:
+                return False, r[1], r[2], r[3], r[4]
+        return False, "Audio chunk generation failed", 0, 0, 0
+
+    total_char_count = 0
+    for i, (success, error_msg, affected_count, word_count, chunk_char_count) in enumerate(results):
+        if not success:
+            return False, error_msg, affected_count, word_count, chunk_char_count
+        total_char_count += chunk_char_count
+
+    # All chunks succeeded - merge them
+    logger.info("All chunks generated successfully, merging...")
+    print("[Merging audio parts...]")
+
+    # Merge MP3 files
+    if not merge_mp3_files(temp_audio_paths, audio_output_path):
+        return False, "Failed to merge MP3 files", 0, 0, total_char_count
+
+    # Merge transcripts
+    success, merged_words = merge_transcripts(temp_transcript_paths, temp_audio_paths, transcript_output_path)
+    if not success:
+        return False, "Failed to merge transcripts", 0, 0, total_char_count
+
+    total_words = len(merged_words)
+
+    # Validate final merged transcript
+    is_valid, error_msg, affected_count = _validate_transcript_timing(merged_words)
+    if not is_valid:
+        logger.warning(f"Merged transcript validation failed: {error_msg}")
+        return False, error_msg, affected_count, total_words, total_char_count
+
+    logger.info(f"Batched audio generation completed: {num_chunks} chunks merged, {total_words} words, {total_char_count} chars")
+    print(f"[OK] Audio generated successfully ({num_chunks} parts merged, {total_char_count} chars)")
+
+    return True, None, 0, total_words, total_char_count
