@@ -283,7 +283,8 @@ class PostProcessAudio(BasePostProcess):
         src = Path(audio_path)
         if not src.exists():
             return
-        public_audio_dir = src.parent.parent.parent / "public" / "audio"
+        # src is Outputs/{TOPIC}/Audio/latest.mp3 -> two levels up is Outputs/{TOPIC}/
+        public_audio_dir = src.parent.parent / "public" / "audio"
         public_audio_dir.mkdir(parents=True, exist_ok=True)
         dest = public_audio_dir / "latest.mp3"
         shutil.copyfile(src, dest)

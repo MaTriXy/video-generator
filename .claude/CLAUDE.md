@@ -131,13 +131,15 @@ Once `Outputs/{TOPIC}/script.md` exists:
 3. **If any scene's TSX reveals the direction was too ambitious, too vague, or not visually strong enough**, go back — update that scene's direction, re-run assets if needed, and re-spawn `code-agent` for just that scene (see Scene-Level Re-Generation below).
 
 ### 7. Report
-Tell the user the scene files are at `Outputs/{TOPIC}/Video/Latest/`. To preview:
+Tell the user the scene files are at `Outputs/{TOPIC}/Video/Latest/`. To preview, give them this single OS-agnostic command (the launcher lives at the repo root and handles env vars + cwd for Windows / macOS / Linux):
+
 ```
-cd studio
-npm install       # first time only
-OVG_TOPIC={TOPIC} npm run studio
+python studio.py {TOPIC}
 ```
-(On Windows: `set OVG_TOPIC={TOPIC} && npm run studio`.) The Studio opens on http://localhost:3000 and loads `Outputs/{TOPIC}/Video/Latest/composition.tsx`, using `Outputs/{TOPIC}/public/` as its asset root and `Outputs/{TOPIC}/public/audio/latest.mp3` as the narration track.
+
+First-time setup only: `cd studio && npm install`.
+
+The Studio opens on http://localhost:3000 and loads `Outputs/{TOPIC}/Video/Latest/composition.tsx`, using `Outputs/{TOPIC}/public/` as its asset root and `Outputs/{TOPIC}/public/audio/latest.mp3` as the narration track.
 
 ## Scene-Level Re-Generation
 
