@@ -19,7 +19,6 @@ from scripts.utility.config import (
     ELEVENLABS_STABILITY,
     ELEVENLABS_SIMILARITY,
     ELEVEN_LABS_DICTIONARY,
-    ADD_EMOTIONS,
 )
 from scripts.claude_cli.base_post_process import BasePostProcess
 from scripts.logging_config import set_console_logging
@@ -312,9 +311,7 @@ class PostProcessAudio(BasePostProcess):
 
         self.gen_metadata_controller.set_metadata({"config": self.config})
 
-        use_emotion_tags = ADD_EMOTIONS and not self.use_fallback
-        if not ADD_EMOTIONS:
-            self.logger.info("ADD_EMOTIONS=false, using original script without emotion tags")
+        use_emotion_tags = not self.use_fallback
 
         if self.use_fallback:
             self.logger.info(f"Using fallback model {ELEVENLABS_FALLBACK_MODEL} with original script (no emotion tags)")

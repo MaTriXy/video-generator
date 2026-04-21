@@ -26,7 +26,6 @@ from scripts.enums import AssetType
 from scripts.claude_cli.claude_cli_config import ClaudeCliConfig
 from scripts.controllers.manifest_controller import ManifestController
 from scripts.logging_config import get_agent_logger, set_console_logging
-from scripts.utility.config import ADD_EMOTIONS
 
 logger = get_agent_logger("base_persistent_agent")
 
@@ -258,15 +257,6 @@ class BasePersistentAgent:
                 manifest_controller.increment_gen_version(self.asset_type)
                 await self._send_completion_callback(video_id, step_type)
                 return (None, 0, "")
-
-        # Skip emotion agent for audio when ADD_EMOTIONS is disabled
-        if self.asset_type == AssetType.AUDIO and not ADD_EMOTIONS:
-            logger.info("ADD_EMOTIONS=false, skipping emotion agent — running post-processing directly", extra={"video_id": video_id, "step": self.agent_label})
-            manifest_controller = ManifestController()
-            manifest_controller.set_topic(topic_id)
-            manifest_controller.increment_gen_version(self.asset_type)
-            await self._send_completion_callback(video_id, step_type)
-            return (None, 0, "")
 
         # Clean up stale prompts from previous runs
         cleanup_prompts(topic_id, self.step_name)

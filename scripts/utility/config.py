@@ -42,7 +42,6 @@ VIDEO_PROMPT_TAG = _get_config("VIDEO_PROMPT_TAG", PROMPT_TAG)
 BASIC_CLAUDE_CODE_TOKEN = _get_config("BASIC_CLAUDE_CODE_TOKEN")
 
 MAPBOX_TOKENS = _get_config("MAPBOX_TOKENS", "")
-ADD_EMOTIONS = os.getenv("ADD_EMOTIONS", "true").lower() == "true"
 
 # Load config from API on module import
 from scripts.controllers.config.app_config import load_config
