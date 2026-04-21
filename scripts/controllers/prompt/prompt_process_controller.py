@@ -4,7 +4,6 @@ from typing import Dict, Any, List, Optional, Tuple
 
 from scripts.controllers.utils.decorators.try_catch import try_catch
 from scripts.logging_config import get_utility_logger
-from scripts.controllers.manifest_controller import ManifestController
 
 logger = get_utility_logger('prompt_processing')
 
@@ -12,7 +11,6 @@ logger = get_utility_logger('prompt_processing')
 class PromptProcessController:
 
     def __init__(self):
-        self.manifest_controller = ManifestController()
         logger.info("Initialized PromptProcessor")
 
     def extract_prompt(self, text: str) -> Optional[List[str]]:
@@ -99,8 +97,8 @@ class PromptProcessController:
         return ""
 
     @try_catch
-    def get_sub_prompts(self, prompt_data: Dict[str, Any], sub_prompts_var: List[str]) -> Dict[str, str]:
-        metadata = self.manifest_controller.get_metadata()
+    def get_sub_prompts(self, prompt_data: Dict[str, Any], sub_prompts_var: List[str], manifest_controller=None) -> Dict[str, str]:
+        metadata = manifest_controller.get_metadata()
         selection_data = {
             "video_ratio": metadata.get("video_ratio"),
             "video_style": metadata.get("video_style"),

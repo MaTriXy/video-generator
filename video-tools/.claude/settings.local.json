@@ -1,0 +1,11 @@
+{
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "video_gen_tools"
+  ],
+  "permissions": {
+    "allow": [
+      "WebSearch"
+    ]
+  }
+}

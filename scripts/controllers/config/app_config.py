@@ -1,14 +1,13 @@
 import sys
 from pathlib import Path
 
-from scripts.logging_config import get_utility_logger,set_console_logging
+from scripts.logging_config import get_utility_logger
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 import requests
 from typing import Dict, Any
 
 logger = get_utility_logger(__name__)
-set_console_logging(False)
 
 def load_config() -> Dict[str, Any]:
     """Load configuration from the API. Call this and wait before using config values."""
@@ -45,17 +44,8 @@ def load_config() -> Dict[str, Any]:
 
     # Update module-level variables with API config
     cfg.ELEVENLABS_API_KEY = cfg._get_config("ELEVENLABS_API_KEY")
-    cfg.LANGFUSE_PUBLIC_KEY = cfg._get_config("LANGFUSE_PUBLIC_KEY")
-    cfg.LANGFUSE_SECRET_KEY = cfg._get_config("LANGFUSE_SECRET_KEY")
-    cfg.LANGFUSE_HOST = cfg._get_config("LANGFUSE_HOST", "https://langfuse.outscal.com")
-    cfg.AWS_ACCESS_KEY_ID = cfg._get_config("AWS_ACCESS_KEY_ID")
-    cfg.AWS_SECRET_ACCESS_KEY = cfg._get_config("AWS_SECRET_ACCESS_KEY")
-    cfg.AWS_REGION = cfg._get_config("AWS_REGION", "ap-south-1")
-    cfg.PAYLOAD_API_BASE_URL = cfg._get_config("PAYLOAD_API_BASE_URL", "https://admin-v2.outscal.com")
-    cfg.PAYLOAD_AUTH_TOKEN = cfg._get_config("PAYLOAD_AUTH_TOKEN")
     cfg.DIRECTION_PROMPT_TAG = cfg._get_config("DIRECTION_PROMPT_TAG", cfg.PROMPT_TAG)
     cfg.ASSETS_PROMPT_TAG = cfg._get_config("ASSETS_PROMPT_TAG", cfg.PROMPT_TAG)
-    cfg.DESIGN_PROMPT_TAG = cfg._get_config("DESIGN_PROMPT_TAG", cfg.PROMPT_TAG)
     cfg.VIDEO_PROMPT_TAG = cfg._get_config("VIDEO_PROMPT_TAG", cfg.PROMPT_TAG)
 
     return cfg._api_config

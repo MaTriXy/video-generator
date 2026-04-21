@@ -1,0 +1,31 @@
+{
+  "direction": {
+    "style": "Risograph"
+  },
+  "code": {
+    "style": "Risograph",
+    "fonts": [
+      {
+        "name": "Karla",
+        "weights": ["200", "300", "400", "500", "600", "700", "800"],
+        "subsets": ["latin", "latin-ext"]
+      },
+      {
+        "name": "Lora",
+        "weights": ["400", "500", "600", "700"],
+        "subsets": ["cyrillic", "cyrillic-ext", "latin", "latin-ext", "math", "symbols", "vietnamese"]
+      },
+      {
+        "name": "Syne",
+        "weights": ["400", "500", "600", "700", "800"],
+        "subsets": ["greek", "latin", "latin-ext"]
+      },
+      {
+        "name": "BricolageGrotesque",
+        "weights": ["200", "300", "400", "500", "600", "700", "800"],
+        "subsets": ["latin", "latin-ext", "vietnamese"]
+      }
+    ],
+    "animation-easing": "Soft, organic ease-out. Gentle deceleration like something settling naturally. Slightly imperfect, not too polished — a little wobbly or hand-animated feel."
+  }
+}

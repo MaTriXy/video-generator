@@ -1,0 +1,31 @@
+{
+  "direction": {
+    "style": "Synthwave"
+  },
+  "code": {
+    "style": "Synthwave",
+    "fonts": [
+      {
+        "name": "Orbitron",
+        "weights": ["400", "500", "600", "700", "800", "900"],
+        "subsets": ["latin"]
+      },
+      {
+        "name": "Audiowide",
+        "weights": ["400"],
+        "subsets": ["latin", "latin-ext"]
+      },
+      {
+        "name": "Rajdhani",
+        "weights": ["300", "400", "500", "600", "700"],
+        "subsets": ["devanagari", "latin", "latin-ext"]
+      },
+      {
+        "name": "PressStart2P",
+        "weights": ["400"],
+        "subsets": ["cyrillic", "cyrillic-ext", "greek", "latin", "latin-ext"]
+      }
+    ],
+    "animation-easing": "Smooth, long ease-in-out. Slow, gliding, dreamy motion. Gentle curves with extended tails, almost like things are floating or cruising."
+  }
+}

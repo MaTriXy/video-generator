@@ -1,5 +1,6 @@
 import sys
 import os
+import asyncio
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -8,7 +9,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from scripts.claude_cli.base_post_process import BasePostProcess
-from scripts.claude_cli.claude_cli_config import ClaudeCliConfig, AssetType
+from scripts.enums import AssetType
 from scripts.controllers.utils.decorators.try_catch import try_catch
 from scripts.logging_config import set_console_logging
 
@@ -23,19 +24,20 @@ class VideoDirectionPostProcessing(BasePostProcess):
             asset_type=AssetType.DIRECTION,
         )
 
-    @try_catch
-    def _extract_script_from_direction(self) -> bool:
+    def _extract_script_from_direction(self) -> Tuple[bool, Optional[str]]:
         source_file = self.claude_cli_config.get_latest_path(AssetType.DIRECTION)
 
         if not self.file_io.exists(source_file):
-            self.logger.error(f"Source file does not exist: {source_file}")
-            return False
+            error_msg = f"Direction source file does not exist: {source_file}"
+            self.logger.error(error_msg)
+            return False, error_msg
 
         direction_data = self.file_io.read_json(source_file)
 
         if not direction_data or 'scenes' not in direction_data:
-            self.logger.error("Invalid direction data: missing 'scenes' array")
-            return False
+            error_msg = "Invalid direction data: missing 'scenes' array"
+            self.logger.error(error_msg)
+            return False, error_msg
 
         script_parts = []
         total_scenes = len(direction_data['scenes'])
@@ -51,8 +53,9 @@ class VideoDirectionPostProcessing(BasePostProcess):
             self.logger.info(f"Scene {scene_idx + 1}/{total_scenes}: Extracted {len(narration)} chars")
 
         if not script_parts:
-            self.logger.error("No audioTranscriptPortion found in any scene")
-            return False
+            error_msg = "No audioTranscriptPortion found in any scene"
+            self.logger.error(error_msg)
+            return False, error_msg
 
         full_script = "\n\n".join(script_parts)
 
@@ -64,22 +67,26 @@ class VideoDirectionPostProcessing(BasePostProcess):
         if success:
             self.logger.info(f"✓ Extracted script from {total_scenes} scenes to: {script_output_path}")
             self.logger.info(f"  Total script length: {len(full_script)} characters")
+            return True, None
 
-        return success
+        error_msg = f"Failed to write script to: {script_output_path}"
+        self.logger.error(error_msg)
+        return False, error_msg
 
-    @try_catch
-    def _add_scene_indices(self) -> bool:
+    def _add_scene_indices(self) -> Tuple[bool, Optional[str]]:
         source_file = self.claude_cli_config.get_latest_path(AssetType.DIRECTION)
 
         if not self.file_io.exists(source_file):
-            self.logger.error(f"Source file does not exist: {source_file}")
-            return False
+            error_msg = f"Direction source file does not exist: {source_file}"
+            self.logger.error(error_msg)
+            return False, error_msg
 
         direction_data = self.file_io.read_json(source_file)
 
         if not direction_data or 'scenes' not in direction_data:
-            self.logger.error("Invalid direction data: missing 'scenes' array")
-            return False
+            error_msg = "Invalid direction data: missing 'scenes' array"
+            self.logger.error(error_msg)
+            return False, error_msg
 
         updated_scenes = []
         for index, scene in enumerate(direction_data['scenes']):
@@ -91,33 +98,33 @@ class VideoDirectionPostProcessing(BasePostProcess):
 
         if success:
             self.logger.info(f"Added sceneIndex to {len(direction_data['scenes'])} scenes")
+            return True, None
 
-        return success
+        error_msg = f"Failed to write scene indices to: {source_file}"
+        self.logger.error(error_msg)
+        return False, error_msg
 
-    @try_catch
-    def process_output(self) -> Tuple[Optional[str], Optional[str]]:
+    @try_catch(return_on_error=(False, "Direction post-processing failed due to an unexpected error"))
+    async def process(self) -> Tuple[bool, Optional[str]]:
         self.logger.info("Processing video direction output")
 
-        if not self._add_scene_indices():
-            self.logger.error("Failed to add scene indices")
-            return None, None
+        success, error_msg = self._add_scene_indices()
+        if not success:
+            self.logger.error(f"Failed to add scene indices: {error_msg}")
+            return False, error_msg
 
-        if not self._extract_script_from_direction():
-            self.logger.error("Failed to extract script from direction")
-            return None, None
+        success, error_msg = self._extract_script_from_direction()
+        if not success:
+            self.logger.error(f"Failed to extract script from direction: {error_msg}")
+            return False, error_msg
 
         file_path, version = self.write_versioned_output()
-        self.logger.info("Video direction output processed successfully")
-        return version, file_path
-
-    @try_catch
-    def process(self) -> Tuple[bool, Optional[str]]:
-        version, file_path = self.process_output()
-
         if not version or not file_path:
-            self.logger.error("Failed to process video direction output")
-            return False, None
+            error_msg = "Failed to write versioned output for direction"
+            self.logger.error(error_msg)
+            return False, error_msg
 
+        self.logger.info("Video direction output processed successfully")
         return True, file_path
 
 
@@ -134,7 +141,7 @@ if __name__ == "__main__":
 
     post_processor = VideoDirectionPostProcessing(topic=args.topic)
 
-    success, file_path = post_processor.run()
+    success, file_path = asyncio.run(post_processor.run())
 
     if success and file_path:
         post_processor.logger.info("Successfully processed video direction")

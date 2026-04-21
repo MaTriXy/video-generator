@@ -1,17 +1,20 @@
 import re
-import logging
 
-logger = logging.getLogger(__name__)
+from scripts.logging_config import get_utility_logger
+
+logger = get_utility_logger("SceneTimestampCalculator")
 
 SEARCH_WINDOW = 100
 
 
 def normalize_word(word: str) -> str:
     normalized = word.lower()
+    normalized = re.sub(r'[-\u2013\u2014]+', '-', normalized)
     return normalized
 
 
 def split_into_parts(word: str) -> list:
+    word = re.sub(r'[-\u2013\u2014]+', '-', word)
     parts = re.split(r'(\W)', word)
     return [p for p in parts if p]
 

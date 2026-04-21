@@ -1,0 +1,229 @@
+import React from "react";
+import { AbsoluteFill, Html5Audio, Series, useCurrentFrame, interpolate } from "remotion";
+
+const EDITOR_CSS = ``;
+
+{{SCENE_IMPORTS}}
+
+export interface ArrowProps {
+  id: string;
+  startX: number; startY: number; endX: number; endY: number;
+  curveX?: number; curveY?: number;
+  progress?: number; color?: string; strokeWidth?: number;
+  dashed?: boolean; arrowLen?: number; arrowWidth?: number;
+}
+
+const Arrow: React.FC<ArrowProps> = ({
+  id, startX, startY, endX, endY, curveX, curveY, progress = 1, color = "#FFFFFF",
+  strokeWidth = 3, dashed = true, arrowLen = 16, arrowWidth = 8,
+}) => {
+  const isCurved = curveX !== undefined && curveY !== undefined;
+  if (isCurved) {
+    const cx = curveX!; const cy = curveY!;
+    const t = progress;
+    const tipX = (1-t)*(1-t)*startX + 2*(1-t)*t*cx + t*t*endX;
+    const tipY = (1-t)*(1-t)*startY + 2*(1-t)*t*cy + t*t*endY;
+    const dt = Math.max(0.001, t - 0.01);
+    const prevX = (1-dt)*(1-dt)*startX + 2*(1-dt)*dt*cx + dt*dt*endX;
+    const prevY = (1-dt)*(1-dt)*startY + 2*(1-dt)*dt*cy + dt*dt*endY;
+    const tdx = tipX - prevX; const tdy = tipY - prevY;
+    const tlen = Math.sqrt(tdx*tdx + tdy*tdy) || 1;
+    const tux = tdx / tlen; const tuy = tdy / tlen;
+    const pathD = `M ${startX} ${startY} Q ${cx} ${cy} ${endX} ${endY}`;
+    const pathLen = 1000;
+    return (
+      <g id={`arrow-${id}`}>
+        <path d={pathD} fill="none" stroke={color} strokeWidth={strokeWidth}
+          strokeDasharray={dashed ? "8 4" : `${pathLen}`}
+          strokeDashoffset={dashed ? 0 : pathLen * (1 - progress)} />
+        <polygon
+          points={`${tipX},${tipY} ${tipX - tux * arrowLen + tuy * arrowWidth},${tipY - tuy * arrowLen - tux * arrowWidth} ${tipX - tux * arrowLen - tuy * arrowWidth},${tipY - tuy * arrowLen + tux * arrowWidth}`}
+          fill={color} opacity={progress} />
+      </g>
+    );
+  }
+  const dx = endX - startX;
+  const dy = endY - startY;
+  const len = Math.sqrt(dx * dx + dy * dy) || 1;
+  const ux = dx / len;
+  const uy = dy / len;
+  const tipX = startX + dx * progress;
+  const tipY = startY + dy * progress;
+  const currentLen = len * progress;
+  const lineEndX = currentLen > arrowLen ? tipX - ux * arrowLen : startX;
+  const lineEndY = currentLen > arrowLen ? tipY - uy * arrowLen : startY;
+  return (
+    <g id={id}>
+      {currentLen > arrowLen && (
+        <line x1={startX} y1={startY} x2={lineEndX} y2={lineEndY}
+          stroke={color} strokeWidth={strokeWidth}
+          strokeDasharray={dashed ? "8 4" : undefined} />
+      )}
+      <polygon
+        points={`${tipX},${tipY} ${tipX - ux * arrowLen + uy * arrowWidth},${tipY - uy * arrowLen - ux * arrowWidth} ${tipX - ux * arrowLen - uy * arrowWidth},${tipY - uy * arrowLen + ux * arrowWidth}`}
+        fill={color} opacity={progress} />
+    </g>
+  );
+};
+
+export interface TextProps {
+  id: string;
+  text: string;
+  width: number;
+  height: number;
+  multiline?: boolean;
+  padding?: number;
+  lineHeight?: number;
+  minSize?: number;
+  maxSize?: number;
+  className?: string;
+  textStyles?: React.CSSProperties;
+  typing?: {
+    startFrame: number;
+    endFrame: number;
+    showCursor?: boolean;
+    cursorChar?: string;
+    cursorBlinkRate?: number;
+  };
+  align?: "left" | "center" | "right" | "justify";
+  sizeGroup?: {
+    texts: string[];
+    pickFontSize?: "min" | "max";
+  };
+}
+
+function measureTextWidth(text: string, fontSize: number, styles: React.CSSProperties = {}): number {
+  const span = document.createElement("span");
+  span.style.position = "absolute";
+  span.style.visibility = "hidden";
+  span.style.whiteSpace = "nowrap";
+  span.style.fontSize = `${fontSize}px`;
+  span.style.fontFamily = (styles.fontFamily as string) || "sans-serif";
+  if (styles.fontWeight) span.style.fontWeight = String(styles.fontWeight);
+  if (styles.fontStyle) span.style.fontStyle = styles.fontStyle;
+  if (styles.letterSpacing) span.style.letterSpacing = String(styles.letterSpacing);
+  span.textContent = text;
+  document.body.appendChild(span);
+  const w = span.getBoundingClientRect().width;
+  document.body.removeChild(span);
+  return w;
+}
+
+function calcFontSize(
+  t: string, usableW: number, usableH: number, isMultiLine: boolean,
+  minSize: number, maxSize: number, lineHeight: number, styles: React.CSSProperties,
+): number {
+  const maxFromHeight = usableH / lineHeight;
+  let fs = Math.min(maxSize, maxFromHeight);
+  const measuredW = measureTextWidth(t, fs, styles);
+  if (isMultiLine && measuredW > usableW) {
+    let lo = minSize, hi = fs;
+    for (let i = 0; i < 20; i++) {
+      const mid = (lo + hi) / 2;
+      const scaledW = measuredW * mid / fs;
+      const lines = Math.ceil(scaledW / usableW);
+      if (lines * mid * lineHeight <= usableH) lo = mid; else hi = mid;
+    }
+    return Math.max(minSize, lo);
+  } else if (measuredW > usableW) {
+    return Math.max(minSize, fs * (usableW / measuredW));
+  }
+  return fs;
+}
+
+const Text: React.FC<TextProps> = ({
+  id, text, width, height, multiline = false, padding = 0,
+  lineHeight = 1.2, minSize = 12, maxSize = 300, className = "", textStyles = {},
+  typing, align = "center", sizeGroup,
+}) => {
+  const frame = useCurrentFrame();
+  const usableW = width - padding * 2;
+  const usableH = height - padding * 2;
+  const isMultiLine = multiline;
+  const txtStyles = {...textStyles, letterSpacing:"1.2px"}
+
+  let fontSize: number;
+  if (sizeGroup && sizeGroup.texts.length > 0) {
+    const pick = sizeGroup.pickFontSize || "min";
+    const sizes = sizeGroup.texts.map(t => calcFontSize(t, usableW, usableH, isMultiLine, minSize, maxSize, lineHeight, txtStyles));
+    fontSize = pick === "min" ? Math.min(...sizes) : Math.max(...sizes);
+  } else {
+    fontSize = calcFontSize(text, usableW, usableH, isMultiLine, minSize, maxSize, lineHeight, txtStyles);
+  }
+
+  // Typing effect
+  let displayText = text;
+  let cursorElement: React.ReactNode = null;
+
+  if (typing) {
+    const { startFrame, endFrame, showCursor = true, cursorChar = "|", cursorBlinkRate = 0.3 } = typing;
+    const typingProgress = interpolate(frame, [startFrame, endFrame], [0, 1], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+    });
+    const charsVisible = Math.floor(typingProgress * text.length);
+    displayText = text.slice(0, charsVisible) || "\u00A0";
+
+    if (showCursor && frame >= startFrame) {
+      const isTypingDone = frame >= endFrame;
+      const cursorOpacity = isTypingDone
+        ? Math.sin(frame * cursorBlinkRate) > 0 ? 1 : 0
+        : 1;
+      cursorElement = (
+        <span style={{ opacity: cursorOpacity, color: txtStyles.color || "#FFFFFF" }}>
+          {cursorChar}
+        </span>
+      );
+    }
+  }
+
+  return (
+    <div id={`text-${id}`} style={{
+        position: "relative", display: "flex", alignItems: isMultiLine ? "flex-start" : "center",
+        justifyContent: align === "justify" ? "flex-start" : align === "right" ? "flex-end" : align === "left" ? "flex-start" : "center",
+        overflow: "visible", width, height,
+      }}>
+      <span className={className} style={{
+        ...txtStyles, fontSize: `${fontSize}px`, lineHeight,
+        whiteSpace: isMultiLine ? textStyles.whiteSpace : "nowrap",
+        textAlign: align === "justify" ? "justify" : align,
+        ...(isMultiLine ? { width: usableW, overflowWrap: "break-word" } : {}),
+      }}>
+        {displayText}{cursorElement}
+      </span>
+    </div>
+  );
+};
+
+function seededRandom(seed: string, n: number): number {
+  const str = seed + ":" + n;
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+  }
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h = Math.imul(h ^ (h >>> 13), 0x45d9f3b);
+  h = (h ^ (h >>> 16)) >>> 0;
+  return h / 0xFFFFFFFF;
+}
+
+const MAPBOX_TOKEN = "{{MAPBOX_TOKEN}}";
+
+interface CompositionProps {
+  audioUrl: string;
+  cssString?: string;
+}
+
+export const MyComposition: React.FC<CompositionProps> = ({ audioUrl, cssString }) => {
+  return (
+    <AbsoluteFill>
+      {EDITOR_CSS && <style id="editor-overrides" dangerouslySetInnerHTML={{ __html: EDITOR_CSS }} />}
+      {cssString && <style dangerouslySetInnerHTML={{ __html: cssString }} />}
+      {audioUrl && <Html5Audio src={audioUrl} volume={1} />}
+      <Series>
+{{SERIES_SEQUENCES}}
+      </Series>
+      <div id="mapbox-css" dangerouslySetInnerHTML={{ __html: '<link href="https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.css" rel="stylesheet" />' }} />
+    </AbsoluteFill>
+  );
+};

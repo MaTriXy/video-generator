@@ -1,0 +1,22 @@
+{
+  "prompts": {
+    "artstyle": [
+      {
+        "prompt": "Course-Creation/Video/Designer/Examples/portrait-infographicshow-artstyle",
+        "video_style": "infographicshow"
+      },
+      {
+        "prompt": "Course-Creation/Video/Designer/Examples/portrait-4g5g-artstyle",
+        "video_style": "4g5g"
+      },
+      {
+        "prompt": "Course-Creation/Video/Designer/Examples/portrait-what-if-artstyle",
+        "video_style": "what-if"
+      },
+      {
+        "prompt": "Course-Creation/Video/Designer/Examples/minimal-blue",
+        "video_style": "minimal-blue"
+      }
+    ]
+  }
+}

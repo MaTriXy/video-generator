@@ -1,0 +1,31 @@
+{
+  "direction": {
+    "style": "Memphis"
+  },
+  "code": {
+    "style": "Memphis",
+    "fonts": [
+      {
+        "name": "Bungee",
+        "weights": ["400"],
+        "subsets": ["latin", "latin-ext", "vietnamese"]
+      },
+      {
+        "name": "Fredoka",
+        "weights": ["300", "400", "500", "600", "700"],
+        "subsets": ["hebrew", "latin", "latin-ext"]
+      },
+      {
+        "name": "Rubik",
+        "weights": ["300", "400", "500", "600", "700", "800", "900"],
+        "subsets": ["arabic", "cyrillic", "cyrillic-ext", "hebrew", "latin", "latin-ext"]
+      },
+      {
+        "name": "Comfortaa",
+        "weights": ["300", "400", "500", "600", "700"],
+        "subsets": ["cyrillic", "cyrillic-ext", "greek", "latin", "latin-ext", "vietnamese"]
+      }
+    ],
+    "animation-easing": "Bouncy and playful. Overshoot easing — things land and bounce back slightly. Elastic or spring curves with exaggerated anticipation and follow-through."
+  }
+}

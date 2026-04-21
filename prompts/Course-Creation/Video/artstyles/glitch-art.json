@@ -1,0 +1,31 @@
+{
+  "direction": {
+    "style": "Glitch Art"
+  },
+  "code": {
+    "style": "Glitch Art",
+    "fonts": [
+      {
+        "name": "ShareTechMono",
+        "weights": ["400"],
+        "subsets": ["latin"]
+      },
+      {
+        "name": "VT323",
+        "weights": ["400"],
+        "subsets": ["latin", "latin-ext", "vietnamese"]
+      },
+      {
+        "name": "FiraCode",
+        "weights": ["300", "400", "500", "600", "700"],
+        "subsets": ["cyrillic", "cyrillic-ext", "greek", "greek-ext", "latin", "latin-ext"]
+      },
+      {
+        "name": "MajorMonoDisplay",
+        "weights": ["400"],
+        "subsets": ["latin", "latin-ext", "vietnamese"]
+      }
+    ],
+    "animation-easing": "Erratic and broken. Mix of linear snaps with random stutters, jump cuts, and intentionally \"wrong\" timing. Steps easing or jittery custom curves."
+  }
+}

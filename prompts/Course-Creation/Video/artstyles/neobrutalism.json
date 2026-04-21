@@ -1,0 +1,31 @@
+{
+  "direction": {
+    "style": "Neobrutalism"
+  },
+  "code": {
+    "style": "Neobrutalism",
+    "fonts": [
+      {
+        "name": "SpaceGrotesk",
+        "weights": ["300", "400", "500", "600", "700"],
+        "subsets": ["latin", "latin-ext", "vietnamese"]
+      },
+      {
+        "name": "DMSans",
+        "weights": ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+        "subsets": ["latin", "latin-ext"]
+      },
+      {
+        "name": "Inter",
+        "weights": ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+        "subsets": ["cyrillic", "cyrillic-ext", "greek", "greek-ext", "latin", "latin-ext", "vietnamese"]
+      },
+      {
+        "name": "Outfit",
+        "weights": ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+        "subsets": ["latin", "latin-ext"]
+      }
+    ],
+    "animation-easing": "Sharp, snappy eases. Cubic-bezier with hard in/out, almost no smooth transition. Think abrupt steps or very aggressive ease-out with near-instant stops."
+  }
+}

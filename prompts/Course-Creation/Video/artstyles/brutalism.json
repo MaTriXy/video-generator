@@ -1,0 +1,31 @@
+{
+  "direction": {
+    "style": "Brutalism"
+  },
+  "code": {
+    "style": "Brutalism",
+    "fonts": [
+      {
+        "name": "RobotoMono",
+        "weights": ["100", "200", "300", "400", "500", "600", "700"],
+        "subsets": ["cyrillic", "cyrillic-ext", "greek", "latin", "latin-ext", "vietnamese"]
+      },
+      {
+        "name": "IBMPlexMono",
+        "weights": ["100", "200", "300", "400", "500", "600", "700"],
+        "subsets": ["cyrillic", "cyrillic-ext", "latin", "latin-ext", "vietnamese"]
+      },
+      {
+        "name": "SpaceMono",
+        "weights": ["400", "700"],
+        "subsets": ["latin", "latin-ext", "vietnamese"]
+      },
+      {
+        "name": "WorkSans",
+        "weights": ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+        "subsets": ["latin", "latin-ext", "vietnamese"]
+      }
+    ],
+    "animation-easing": "Linear or no easing at all. Instant cuts, hard stops. If any easing, it's stiff and mechanical — minimal acceleration/deceleration."
+  }
+}

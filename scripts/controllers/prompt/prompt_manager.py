@@ -6,14 +6,12 @@ to provide a unified interface for fetching and building prompts.
 """
 
 from math import log
-import sys
 import json
 import re
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 from threading import Lock
 
-from scripts.controllers.gen_metadata_controller import GenMetadataController
 from scripts.controllers.prompt.prompt_cache_controller import PromptCacheController
 from scripts.controllers.prompt.prompt_process_controller import PromptProcessController
 from scripts.controllers.utils import SingletonMeta
@@ -69,8 +67,7 @@ class PromptManager(metaclass=SingletonMeta):
             for var in remaining_vars:
                 logger.error(f"  - {{{{ {var} }}}}")
 
-            logger.error("Exiting process due to unresolved template variables")
-            sys.exit(1)
+            raise ValueError(f"Unresolved template variables{context}{name_context}: {remaining_vars}")
 
     @try_catch
     def old_fetch_and_build_prompt(
@@ -129,15 +126,16 @@ class PromptManager(metaclass=SingletonMeta):
         }
 
     
-    def process_sub_prompts(self, prompt_data: Dict[str, Any], tag: str="production",prompt_name: str="") -> Dict[str, Any]:
+    def process_sub_prompts(self, prompt_data: Dict[str, Any], tag: str="production",prompt_name: str="", manifest_controller=None) -> Dict[str, Any]:
         sub_prompt_vars=self._prompt_processor.parse_sub_prompts(prompt_data['prompt'])
         logger.info(f"injecting sub prompt found in prompt_name: {prompt_name}: {sub_prompt_vars}")
         if len(sub_prompt_vars) > 0:
             sub_prompts = self._prompt_processor.get_sub_prompts(
                 prompt_data,
                 sub_prompt_vars,
+                manifest_controller=manifest_controller,
             )
-            logger.info(f"selected sub prompts: {json.dumps(sub_prompts, indent=2)}")
+            logger.info(f"selected sub prompts: {json.dumps(sub_prompts)}")
             prompt_vars={}
             if len(sub_prompts.items()) > 0:
                 for key, value in sub_prompts.items():
@@ -165,11 +163,14 @@ class PromptManager(metaclass=SingletonMeta):
         tag: Optional[str] = "production",
         tools: Optional[List[str]] = None,
         agent_name: str = None,
+        gen_metadata_controller: Optional["GenMetadataController"] = None,
+        manifest_controller=None,
     ) -> Dict[str, Any]:
-        
+
         logger.info(f"Fetching and building prompt: {prompt_name}")
         prompt_data = self._cache_controller.fetch_prompt(prompt_name, tag)
-        GenMetadataController().set_metadata({prompt_name: prompt_data.get("version", 0)})
+        if gen_metadata_controller:
+            gen_metadata_controller.set_metadata({prompt_name: prompt_data.get("version", 0)})
         config = prompt_data.get("config", {})
         agent_tools =[]
         tools_prompt = ""
@@ -190,8 +191,9 @@ class PromptManager(metaclass=SingletonMeta):
             return None, None
         processed_prompt_vars = self.process_sub_prompts(
             prompt_data,
-            tag, 
-            prompt_name
+            tag,
+            prompt_name,
+            manifest_controller=manifest_controller,
         )
         system_prompt = None
         user_prompt = None  

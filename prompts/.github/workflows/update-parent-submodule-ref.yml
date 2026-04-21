@@ -1,0 +1,50 @@
+name: Update Parent Submodule Reference
+
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  update-parent-ref:
+    runs-on:
+      - self-hosted
+    environment: production-video-generator-deployment
+    steps:
+      - name: Update parent repo submodule reference
+        run: |
+          TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+          PARENT_REPO_DIR="${{ vars.REPO_DIR }}"
+          SUBMODULE_PATH="prompts"
+
+          cd "$PARENT_REPO_DIR" || exit 1
+          git fetch origin main production
+
+          # Get the latest submodule commit from remote
+          NEW_SHA=$(git ls-remote https://github.com/outscal/video-generation-prompts.git production | cut -f1)
+
+          for BRANCH in main production; do
+            # Build commit using a temporary index — no checkout, no branch switch
+            TMPINDEX=$(mktemp)
+            GIT_INDEX_FILE="$TMPINDEX" git read-tree "origin/$BRANCH"
+
+            # Check if submodule pointer already matches
+            OLD_SHA=$(GIT_INDEX_FILE="$TMPINDEX" git ls-tree "origin/$BRANCH" "$SUBMODULE_PATH" | awk '{print $3}')
+            if [ "$OLD_SHA" = "$NEW_SHA" ]; then
+              echo "No submodule reference change on $BRANCH, skipping"
+              rm "$TMPINDEX"
+              continue
+            fi
+
+            GIT_INDEX_FILE="$TMPINDEX" git update-index --cacheinfo 160000,"$NEW_SHA","$SUBMODULE_PATH"
+            NEW_TREE=$(GIT_INDEX_FILE="$TMPINDEX" git write-tree)
+            rm "$TMPINDEX"
+
+            NEW_COMMIT=$(git commit-tree "$NEW_TREE" -p "origin/$BRANCH" -m "chore: update prompts submodule reference ($TIMESTAMP)")
+            git push origin "$NEW_COMMIT":refs/heads/"$BRANCH"
+            echo "Updated parent repo submodule reference ($BRANCH)"
+          done
+
+          # Pull latest prompts files into the local working directory
+          cd "$PARENT_REPO_DIR/$SUBMODULE_PATH"
+          git pull origin production

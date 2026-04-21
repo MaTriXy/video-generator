@@ -1,0 +1,158 @@
+{
+    "what-if": {
+        "instructions": "Strict palette adherence. Everything must follow artstyle colors. Use rough, hand-drawn looking shapes with visible outlines. Black and white primarily, red for emphasis. Monochrome grays allowed for gradients, shades, or multi-color assets.",
+        "palette": ["#FFFFFF", "#E5E5E5", "#CCCCCC", "#999999", "#666666", "#333333", "#111111", "#FF0000"],
+        "effects": ["none"],
+        "gradients": {
+            "use": false,
+            "notes": "Flat fills only. Use palette grays for tonal variation instead of gradients."
+        },
+        "stroke": {
+            "style": "thick-rough",
+            "width": "3-5px",
+            "color": "#111111",
+            "notes": "Heavy outlines on all elements. Strokes should feel hand-drawn — slightly uneven weight is fine."
+        },
+        "shading": {
+            "approach": "flat",
+            "notes": "No shading. Use different palette grays for tonal contrast between parts of an asset."
+        },
+        "complexity": {
+            "level": "moderate",
+            "notes": "Sketch-level detail. Assets should look hand-drawn but recognizable. Internal details like panel lines or surface markings are welcome."
+        },
+        "filters": {
+            "allowed": [],
+            "notes": "No SVG filters. Raw shapes and strokes only."
+        }
+    },
+    "4g5g": {
+        "instructions": "Apply neon glow to all elements. Use palette colors for abstract elements. If an asset has an identity color (brand, recognizable object), preserve its identity color instead of palette. Use clean outlined icons with glow effects.",
+        "palette": [
+            "#0D0D0D",
+            "#003D00",
+            "#00CC00",
+            "#7FFF7F",
+            "#00FFFF",
+            "#FF00FF",
+            "#FF007F",
+            "#FFFF00"
+        ],
+        "effects": ["glow", "gradient-fill"],
+        "gradients": {
+            "use": true,
+            "types": ["linear", "radial"],
+            "notes": "Use radial gradients for glow halos behind elements. Use linear gradients for surface sheen on metallic or glass-like objects. Gradient stops should go from a bright palette color to transparent or to #0D0D0D."
+        },
+        "stroke": {
+            "style": "clean-outlined",
+            "width": "1-2px",
+            "color": "palette bright color matching the fill",
+            "notes": "Thin, clean outlines in a matching bright palette color. Strokes can have glow via feGaussianBlur filter."
+        },
+        "shading": {
+            "approach": "gradient",
+            "light_direction": "center-out (radial glow)",
+            "notes": "Neon assets glow from within. Use radial gradients centered on the element: bright core fading to darker edges. This creates the signature neon-lit look."
+        },
+        "complexity": {
+            "level": "moderate",
+            "notes": "Clean shapes with glow effects. Not overly detailed — the glow is the visual richness. Internal structure should be visible but simplified."
+        },
+        "filters": {
+            "allowed": ["feGaussianBlur", "feDropShadow"],
+            "notes": "Use feGaussianBlur for neon glow halos (blur 4-8px, placed behind the main shape). Use feDropShadow for colored glow beneath elements."
+        }
+    },
+    "minimal-blue": {
+        "instructions": "Most relaxed palette. Preserve identity colors for assets that have recognizable colors. Only apply palette colors to abstract elements with no inherent color identity. Use filled shapes with shadows for depth, glow on accents.",
+        "palette": ["#0F172A", "#1E293B", "#1E3A5F", "#3B82F6", "#7DD3FC", "#F97316", "#FDBA74", "#FFFFFF", "#94A3B8"],
+        "effects": ["shadow", "glow", "gradient-fill"],
+        "gradients": {
+            "use": true,
+            "types": ["linear", "radial"],
+            "notes": "Use linear gradients for surface shading: lighter shade on the highlight side, darker on the shadow side. Use radial gradients for soft spotlight effects or volume on rounded objects. 2-3 gradient stops. Gradient pairs: #3B82F6 to #1E3A5F (blue depth), #F97316 to #FDBA74 (warm accent), #1E293B to #0F172A (dark depth)."
+        },
+        "stroke": {
+            "style": "none",
+            "notes": "No outlines on containers or main shapes. Strokes only for thin detail lines (circuit traces, connecting lines, decorative elements) at 1px in #94A3B8."
+        },
+        "shading": {
+            "approach": "gradient",
+            "light_direction": "top-left",
+            "notes": "Light comes from top-left. Highlight on top-left surfaces, shadow on bottom-right. Use linear gradients within shapes to create this. Rounded objects use radial gradients with the bright spot offset toward top-left."
+        },
+        "complexity": {
+            "level": "detailed",
+            "notes": "Polished, illustration-grade assets. Internal details encouraged: panel lines, surface features, small decorative elements. Assets should feel crafted, not clip-art. Aim for 50-100 SVG elements per asset for main subjects."
+        },
+        "filters": {
+            "allowed": ["feGaussianBlur", "feDropShadow"],
+            "notes": "Use feDropShadow (offset 2-4px, blur 4-6px, color #0F172A at 40% opacity) to ground elements. Use feGaussianBlur for soft background shapes or depth-of-field effects on secondary elements."
+        }
+    },
+    
+    "vox": {
+        "instructions": "Data-first minimalism. Backgrounds must be deep dark grey with a dotted grid. Use absolutely sharp corners (0px border radius) for all rectangles. Preservation of exact data identity colors (Pantone hex codes) is mandatory. Textures should be non-existent except for specific signal noise/glitch effects on transitions.",
+        "palette": [
+            "#121212", 
+            "#000000", 
+            "#FFFFFF", 
+            "#F2C94C", 
+            "#2E4F70", 
+            "#44344E", 
+            "#443832", 
+            "#E5E5E5"
+        ],
+        "effects": ["glow", "glitch-overlay"],
+        "gradients": {
+            "use": false,
+            "notes": "No aesthetic gradients on shapes. Elements must be flat, solid blocks of color to represent 'Data'. If a spectrum is needed, use distinct bands of flat color, not a smooth fade."
+        },
+        "stroke": {
+            "style": "clean-solid",
+            "width": "2-3px",
+            "color": "#FFFFFF",
+            "notes": "Use consistent white strokes for hollow data boxes, connecting lines, and brackets. Stroke weight must not vary. No tapered lines; ends should be flat or square."
+        },
+        "shading": {
+            "approach": "flat",
+            "notes": "Strictly 2D flat fills. No shadows, ambient occlusion, or highlights on the assets themselves. Depth is achieved purely through layer separation (Z-space positioning), not lighting effects."
+        },
+        "complexity": {
+            "level": "minimal-geometric",
+            "notes": "Abstract geometry only. Icons should be reduced to their simplest pixel or vector representation. 'Objects' are essentially just rectangular canvases for color data."
+        },
+        "filters": {
+            "allowed": ["feDropShadow", "feColorMatrix", "feTurbulence"],
+            "notes": "Use `feDropShadow` (color #FFFFFF) only for 'active' state highlights. Use `feColorMatrix` and `feTurbulence` strictly for the momentary 'VHS/Analog Glitch' distortion effects on logos or scene transitions."
+        }
+    },
+    "typography-apple": {
+        "instructions": "Hyper-kinetic typographic aesthetic. Frame is dominated by stark, sterile, heavy-weight text. Secondary visual elements must act as punctuation to the text, taking the form of crude, fluid marker-style doodles. Absolute high contrast. The canvas physically scrolls or completely inverts colors (white-to-black/black-to-white) dynamically as it runs out of space.",
+        "palette": ["#FFFFFF", "#000000", "#F2F2F2", "#111111", "#00F553"],
+        "effects": ["kinetic-scaling", "color-inversion", "marker-texture", "stop-motion-paths"],
+        "gradients": {
+            "use": false,
+            "notes": "Absolutely no gradients on data, text, or vector layers. Visual punch relies entirely on flat, unbroken blocks of stark contrasting color."
+        },
+        "stroke": {
+            "style": "marker-doodle",
+            "width": "proportional-heavy (match font stem width)",
+            "color": "highlight neon (#00F553) or stark background inverse",
+            "notes": "Strokes must look organically hand-drawn. Allow minor path irregularities, slightly overlapping path closures, and minor stroke tapering to simulate a human lifting a wet marker."
+        },
+        "shading": {
+            "approach": "flat",
+            "notes": "Strict 2D execution. No shadows, highlights, or 3D extrusions on text or doodles. The visual friction comes from the pairing of perfectly flat computer text with imperfect 2D sketches."
+        },
+        "complexity": {
+            "level": "kinetic-minimalism",
+            "notes": "Assets must be distilled to one-liner sketches, thick underlines, rough arrows, or filled blobs. Do not draw intricate details; rely entirely on scaling motion and bold layout positioning for visual interest."
+        },
+        "filters": {
+            "allowed": ["feTurbulence"],
+            "notes": "Apply a very subtle, localized `feTurbulence` mapping strictly to the vector strokes of the 'doodle' elements to simulate ink bleeding or marker texture. Exclude typography from all filters so the text remains ruthlessly clean."
+        }
+    }
+}

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(**)",
+      "Bash(python -c \"from scripts.utility.prompt_loader import _PROMPTS_FILE; print\\('prompts file:', _PROMPTS_FILE\\); print\\('exists:', _PROMPTS_FILE.exists\\(\\)\\)\")",
+      "Bash(xargs grep *)",
+      "Bash(python -m scripts.cli_pipeline *)",
+      "Bash(python -m scripts.tools_cli *)",
+      "Bash(cd video-tools && python -m scripts.tools_cli *)",
+      "Bash(python -c \"import sys,json; data=json.loads\\(sys.stdin.read\\(\\)\\); [print\\(f'Scene {i}: {d[\\\\\"success\\\\\"]} - {d[\\\\\"message\\\\\"][:100]}'\\) for i,d in enumerate\\(data\\)]\")",
+      "Bash(python *)",
+      "Bash(ls C:\\\\Outscal\\\\video-generator\\\\Outputs\\\\pre-order-traversal-v2\\\\Video\\\\Latest\\\\ *)",
+      "Bash(unset CLAUDECODE)"
+    ]
+  }
+}
